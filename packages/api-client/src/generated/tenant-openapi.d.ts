@@ -116,6 +116,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/companies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getCompany"];
+        put: operations["updateCompany"];
+        post?: never;
+        delete: operations["deleteCompany"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/supplier-parts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createSupplierPart"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/supplier-parts/{supplierPartId}/price-breaks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["upsertPriceBreak"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/stock/summaries": {
         parameters: {
             query?: never;
@@ -484,6 +532,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/manufacturer-parts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createManufacturerPart"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/imports/sessions": {
         parameters: {
             query?: never;
@@ -526,6 +590,70 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["commit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/currencies/rates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listExchangeRates"];
+        put?: never;
+        post: operations["upsertExchangeRate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/companies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["searchCompanies"];
+        put?: never;
+        post: operations["createCompany"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/companies/{id}/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listContacts"];
+        put?: never;
+        post: operations["createContact"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/companies/{id}/addresses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listAddresses"];
+        put?: never;
+        post: operations["createAddress"];
         delete?: never;
         options?: never;
         head?: never;
@@ -836,6 +964,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/parts/{partId}/supplier-parts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listSupplierPartsForPart"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/parts/{partId}/stock-summary": {
         parameters: {
             query?: never;
@@ -844,6 +988,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getPartStockSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/parts/{partId}/manufacturer-parts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listManufacturerPartsForPart"];
         put?: never;
         post?: never;
         delete?: never;
@@ -916,6 +1076,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/companies/{companyId}/supplier-parts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listSupplierPartsForCompany"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/companies/{companyId}/manufacturer-parts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listManufacturerPartsForCompany"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/barcode/image": {
         parameters: {
             query?: never;
@@ -959,6 +1151,22 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/supplier-parts/{supplierPartId}/price-breaks/{priceBreakId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deletePriceBreak"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1023,6 +1231,38 @@ export interface paths {
         put?: never;
         post?: never;
         delete: operations["deleteNote"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/companies/{id}/contacts/{contactId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteContact"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/companies/{id}/addresses/{addressId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteAddress"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1289,6 +1529,104 @@ export interface components {
             createdAt?: string;
             /** Format: date-time */
             updatedAt?: string;
+        };
+        CreateCompanyCommand: {
+            name?: string;
+            code?: string;
+            description?: string;
+            website?: string;
+            email?: string;
+            phone?: string;
+            taxId?: string;
+            defaultCurrency?: string;
+            supplier?: boolean;
+            manufacturer?: boolean;
+            customer?: boolean;
+            internalCompany?: boolean;
+            active?: boolean;
+        };
+        CompanyView: {
+            /** Format: uuid */
+            id?: string;
+            name?: string;
+            code?: string;
+            description?: string;
+            website?: string;
+            email?: string;
+            phone?: string;
+            taxId?: string;
+            defaultCurrency?: string;
+            supplier?: boolean;
+            manufacturer?: boolean;
+            customer?: boolean;
+            internalCompany?: boolean;
+            active?: boolean;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        CreateSupplierPartCommand: {
+            /** Format: uuid */
+            partId?: string;
+            /** Format: uuid */
+            supplierId?: string;
+            /** Format: uuid */
+            manufacturerPartId?: string;
+            sku?: string;
+            description?: string;
+            packQuantity?: number;
+            moq?: number;
+            multiple?: number;
+            /** Format: int32 */
+            leadTimeDays?: number;
+            currency?: string;
+            customBarcode?: string;
+        };
+        SupplierPartView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            partId?: string;
+            partIpn?: string;
+            partName?: string;
+            partUnit?: string;
+            /** Format: uuid */
+            supplierId?: string;
+            supplierName?: string;
+            /** Format: uuid */
+            manufacturerPartId?: string;
+            manufacturerMpn?: string;
+            sku?: string;
+            description?: string;
+            packQuantity?: number;
+            moq?: number;
+            multiple?: number;
+            /** Format: int32 */
+            leadTimeDays?: number;
+            currency?: string;
+            customBarcode?: string;
+            active?: boolean;
+            priceBreaks?: components["schemas"]["SupplierPriceBreakView"][];
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        SupplierPriceBreakView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            supplierPartId?: string;
+            minQuantity?: number;
+            unitPrice?: number;
+            currency?: string;
+            tenantBaseCurrency?: string;
+            convertedPackPriceInBase?: number;
+            convertedInternalUnitPriceInBase?: number;
+        };
+        UpsertPriceBreakCommand: {
+            minQuantity?: number;
+            unitPrice?: number;
+            currency?: string;
         };
         BatchSummariesRequest: {
             partIds?: string[];
@@ -1592,6 +1930,31 @@ export interface components {
             entityId?: string;
             content?: string;
         };
+        CreateManufacturerPartCommand: {
+            /** Format: uuid */
+            partId?: string;
+            /** Format: uuid */
+            manufacturerId?: string;
+            mpn?: string;
+            description?: string;
+            datasheetUrl?: string;
+        };
+        ManufacturerPartView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            partId?: string;
+            partIpn?: string;
+            partName?: string;
+            /** Format: uuid */
+            manufacturerId?: string;
+            manufacturerName?: string;
+            mpn?: string;
+            description?: string;
+            datasheetUrl?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
         ImportSessionView: {
             /** Format: uuid */
             sessionId?: string;
@@ -1641,6 +2004,63 @@ export interface components {
             targetType?: string;
             /** Format: int32 */
             committedRows?: number;
+        };
+        UpsertRatePayload: {
+            targetCurrency?: string;
+            rate?: number;
+        };
+        ExchangeRate: {
+            /** Format: uuid */
+            id?: string;
+            baseCurrency?: string;
+            targetCurrency?: string;
+            rate?: number;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        CreateContactCommand: {
+            name?: string;
+            roleTitle?: string;
+            email?: string;
+            phone?: string;
+            primaryContact?: boolean;
+        };
+        ContactView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            companyId?: string;
+            name?: string;
+            roleTitle?: string;
+            email?: string;
+            phone?: string;
+            primaryContact?: boolean;
+        };
+        CreateAddressCommand: {
+            label?: string;
+            line1?: string;
+            line2?: string;
+            city?: string;
+            stateRegion?: string;
+            postalCode?: string;
+            country?: string;
+            primaryShipping?: boolean;
+            primaryBilling?: boolean;
+        };
+        AddressView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            companyId?: string;
+            label?: string;
+            line1?: string;
+            line2?: string;
+            city?: string;
+            stateRegion?: string;
+            postalCode?: string;
+            country?: string;
+            primaryShipping?: boolean;
+            primaryBilling?: boolean;
         };
         BarcodeScanRequest: {
             barcode?: string;
@@ -1952,6 +2372,24 @@ export interface components {
                 [key: string]: number;
             };
             featureDetails?: components["schemas"]["EffectiveFeature"][];
+        };
+        PageCompanyView: {
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            /** Format: int32 */
+            numberOfElements?: number;
+            first?: boolean;
+            last?: boolean;
+            pageable?: components["schemas"]["PageableObject"];
+            sort?: components["schemas"]["SortObject"];
+            /** Format: int32 */
+            size?: number;
+            content?: components["schemas"]["CompanyView"][];
+            /** Format: int32 */
+            number?: number;
+            empty?: boolean;
         };
         DownloadUrlResponse: {
             /** Format: uuid */
@@ -2320,6 +2758,124 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    getCompany: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CompanyView"];
+                };
+            };
+        };
+    };
+    updateCompany: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCompanyCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CompanyView"];
+                };
+            };
+        };
+    };
+    deleteCompany: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    createSupplierPart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSupplierPartCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SupplierPartView"];
+                };
+            };
+        };
+    };
+    upsertPriceBreak: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                supplierPartId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpsertPriceBreakCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SupplierPriceBreakView"];
+                };
             };
         };
     };
@@ -3155,6 +3711,30 @@ export interface operations {
             };
         };
     };
+    createManufacturerPart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateManufacturerPartCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ManufacturerPartView"];
+                };
+            };
+        };
+    };
     createSession: {
         parameters: {
             query: {
@@ -3232,6 +3812,198 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["CommitResult"];
+                };
+            };
+        };
+    };
+    listExchangeRates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ExchangeRate"][];
+                };
+            };
+        };
+    };
+    upsertExchangeRate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpsertRatePayload"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ExchangeRate"];
+                };
+            };
+        };
+    };
+    searchCompanies: {
+        parameters: {
+            query?: {
+                q?: string;
+                supplier?: boolean;
+                manufacturer?: boolean;
+                customer?: boolean;
+                active?: boolean;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageCompanyView"];
+                };
+            };
+        };
+    };
+    createCompany: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCompanyCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CompanyView"];
+                };
+            };
+        };
+    };
+    listContacts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ContactView"][];
+                };
+            };
+        };
+    };
+    createContact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateContactCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ContactView"];
+                };
+            };
+        };
+    };
+    listAddresses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AddressView"][];
+                };
+            };
+        };
+    };
+    createAddress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAddressCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AddressView"];
                 };
             };
         };
@@ -3678,6 +4450,28 @@ export interface operations {
             };
         };
     };
+    listSupplierPartsForPart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                partId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SupplierPartView"][];
+                };
+            };
+        };
+    };
     getPartStockSummary: {
         parameters: {
             query?: never;
@@ -3696,6 +4490,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["StockSummaryView"];
+                };
+            };
+        };
+    };
+    listManufacturerPartsForPart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                partId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ManufacturerPartView"][];
                 };
             };
         };
@@ -3786,6 +4602,50 @@ export interface operations {
             };
         };
     };
+    listSupplierPartsForCompany: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                companyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SupplierPartView"][];
+                };
+            };
+        };
+    };
+    listManufacturerPartsForCompany: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                companyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ManufacturerPartView"][];
+                };
+            };
+        };
+    };
     generateBarcodeImage: {
         parameters: {
             query: {
@@ -3856,6 +4716,27 @@ export interface operations {
             };
         };
     };
+    deletePriceBreak: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                supplierPartId: string;
+                priceBreakId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     revokeApiToken: {
         parameters: {
             query?: never;
@@ -3923,6 +4804,48 @@ export interface operations {
             header?: never;
             path: {
                 id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteContact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteAddress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                addressId: string;
             };
             cookie?: never;
         };

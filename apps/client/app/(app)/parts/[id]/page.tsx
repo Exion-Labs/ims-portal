@@ -7,10 +7,14 @@ import {
   apiFetch,
   AttachmentView,
   CategoryView,
+  CompanyView,
+  ManufacturerPartView,
   NoteView,
+  PageResponse,
   ParameterTemplateView,
   PartView,
   StockSummaryView,
+  SupplierPartView,
 } from "@ims/api-client";
 import { EmptyState, ErrorState, StatTile, StatusBadge } from "@ims/ui";
 import { useEntitlements } from "@/lib/entitlements";
@@ -29,9 +33,10 @@ import {
   Trash2,
   Unlock,
   X,
+  Building2,
 } from "lucide-react";
 
-type DetailTab = "overview" | "parameters" | "variants" | "notes";
+type DetailTab = "overview" | "parameters" | "suppliers" | "variants" | "notes";
 
 export default function PartDetailPage() {
   const params = useParams<{ id: string }>();
@@ -47,6 +52,9 @@ export default function PartDetailPage() {
   const [notes, setNotes] = useState<NoteView[]>([]);
   const [attachments, setAttachments] = useState<AttachmentView[]>([]);
   const [stockSummary, setStockSummary] = useState<StockSummaryView | null>(null);
+  const [supplierParts, setSupplierParts] = useState<SupplierPartView[]>([]);
+  const [manufacturerParts, setManufacturerParts] = useState<ManufacturerPartView[]>([]);
+  const [companies, setCompanies] = useState<CompanyView[]>([]);
   const [activeTab, setActiveTab] = useState<DetailTab>("overview");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -93,7 +101,7 @@ export default function PartDetailPage() {
     setLoading(true);
     setError(null);
     try {
-      const [p, cats, tpls, vars, revs, nts, atts, summary] = await Promise.all([
+      const [p, cats, tpls, vars, revs, nts, atts, summary, sps, mps, comps] = await Promise.all([
         apiFetch<PartView>(`/api/v1/parts/${partId}`),
         apiFetch<CategoryView[]>("/api/v1/part-categories"),
         apiFetch<ParameterTemplateView[]>("/api/v1/parameter-templates"),
@@ -102,6 +110,15 @@ export default function PartDetailPage() {
         apiFetch<NoteView[]>(`/api/v1/notes?entityType=Part&entityId=${partId}`),
         apiFetch<AttachmentView[]>(`/api/v1/attachments?entityType=Part&entityId=${partId}`),
         apiFetch<StockSummaryView>(`/api/v1/parts/${partId}/stock-summary`).catch(() => null),
+        apiFetch<SupplierPartView[]>(`/api/v1/parts/${partId}/supplier-parts`).catch(() => []),
+        apiFetch<ManufacturerPartView[]>(`/api/v1/parts/${partId}/manufacturer-parts`).catch(() => []),
+        apiFetch<PageResponse<CompanyView>>("/api/v1/companies?size=200").catch(() => ({
+          content: [],
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
+          size: 200,
+        })),
       ]);
       setPart(p);
       setCategories(cats);
@@ -111,6 +128,9 @@ export default function PartDetailPage() {
       setNotes(nts);
       setAttachments(atts);
       setStockSummary(summary);
+      setSupplierParts(sps);
+      setManufacturerParts(mps);
+      setCompanies(comps.content);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load part details");
     } finally {
@@ -463,6 +483,11 @@ export default function PartDetailPage() {
             icon: SlidersHorizontal,
           },
           {
+            id: "suppliers",
+            label: `Suppliers & MPNs (${supplierParts.length + manufacturerParts.length})`,
+            icon: Building2,
+          },
+          {
             id: "variants",
             label: `Variants & Revisions (${variants.length + revisions.length})`,
             icon: GitBranch,
@@ -670,6 +695,96 @@ export default function PartDetailPage() {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2b: Suppliers & Manufacturers */}
+      {activeTab === "suppliers" && (
+        <div className="space-y-6">
+          <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+            <h2 className="text-[15px] font-semibold text-[#18181B]">
+              Supplier SKUs & Tiered Price Breaks ({supplierParts.length})
+            </h2>
+            <p className="text-[12px] text-[#52525B]">
+              Vendor pack quantities convert automatically to internal units ({part.unit}) and
+              tenant base currency.
+            </p>
+            <div className="mt-3 overflow-x-auto rounded-[8px] border border-[#E4E4E7]">
+              <table className="w-full border-collapse text-left text-[13px]">
+                <thead className="bg-[#F7F7F8] text-[12px] text-[#52525B]">
+                  <tr className="border-b border-[#E4E4E7]">
+                    <th className="px-4 py-2 font-semibold">Supplier</th>
+                    <th className="px-4 py-2 font-semibold">Vendor SKU</th>
+                    <th className="px-4 py-2 font-semibold">Pack Conversion</th>
+                    <th className="px-4 py-2 font-semibold">Price Breaks (Original → Base)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E4E4E7]">
+                  {supplierParts.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-4 py-6 text-center text-[#63636B]">
+                        No supplier SKUs linked to this part yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    supplierParts.map((sp) => (
+                      <tr key={sp.id}>
+                        <td className="px-4 py-2.5 font-medium text-[#18181B]">
+                          <Link
+                            href={`/companies/${sp.supplierId}`}
+                            className="text-[#1D4ED8] hover:underline"
+                          >
+                            {sp.supplierName}
+                          </Link>
+                        </td>
+                        <td className="px-4 py-2.5 font-mono font-semibold text-[#18181B]">
+                          {sp.sku}
+                        </td>
+                        <td className="px-4 py-2.5 font-mono text-[12px]">
+                          1 pack = {sp.packQuantity} {part.unit} (MOQ {sp.moq})
+                        </td>
+                        <td className="px-4 py-2.5 font-mono text-[12px]">
+                          {sp.priceBreaks.length === 0
+                            ? "—"
+                            : sp.priceBreaks.map((pb) => (
+                                <div key={pb.id}>
+                                  ≥{pb.minQuantity}: {pb.unitPrice} {pb.currency}/pack →{" "}
+                                  <span className="font-semibold text-[#1D4ED8]">
+                                    {pb.convertedInternalUnitPriceInBase} {pb.tenantBaseCurrency}/
+                                    {part.unit}
+                                  </span>
+                                </div>
+                              ))}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+            <h2 className="text-[15px] font-semibold text-[#18181B]">
+              Approved Manufacturer Part Numbers ({manufacturerParts.length})
+            </h2>
+            <div className="mt-3 divide-y divide-[#E4E4E7] rounded-[8px] border border-[#E4E4E7] text-[13px]">
+              {manufacturerParts.length === 0 ? (
+                <div className="p-6 text-center text-[12px] text-[#63636B]">
+                  No manufacturer MPNs linked yet.
+                </div>
+              ) : (
+                manufacturerParts.map((mp) => (
+                  <div key={mp.id} className="flex items-center justify-between px-4 py-2.5">
+                    <div>
+                      <span className="font-mono font-semibold text-[#1D4ED8]">{mp.mpn}</span>
+                      <span className="ml-2 text-[#52525B]">by {mp.manufacturerName}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       )}

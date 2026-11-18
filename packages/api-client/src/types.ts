@@ -347,3 +347,101 @@ export interface ScanResolutionResult {
   href: string;
   detail: unknown;
 }
+
+export interface ExchangeRateView {
+  id: string;
+  baseCurrency: string;
+  targetCurrency: string;
+  rate: number;
+  updatedAt: string;
+}
+
+export interface CompanyView {
+  id: string;
+  name: string;
+  code: string | null;
+  description: string | null;
+  website: string | null;
+  email: string | null;
+  phone: string | null;
+  taxId: string | null;
+  defaultCurrency: string;
+  supplier: boolean;
+  manufacturer: boolean;
+  customer: boolean;
+  internalCompany: boolean;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ContactView {
+  id: string;
+  companyId: string;
+  name: string;
+  roleTitle: string | null;
+  email: string | null;
+  phone: string | null;
+  primaryContact: boolean;
+}
+
+export interface AddressView {
+  id: string;
+  companyId: string;
+  label: string;
+  line1: string;
+  line2: string | null;
+  city: string | null;
+  stateRegion: string | null;
+  postalCode: string | null;
+  country: string;
+  primaryShipping: boolean;
+  primaryBilling: boolean;
+}
+
+export interface ManufacturerPartView {
+  id: string;
+  partId: string;
+  partIpn: string;
+  partName: string;
+  manufacturerId: string;
+  manufacturerName: string;
+  mpn: string;
+  description: string | null;
+  datasheetUrl: string | null;
+  createdAt: string;
+}
+
+export interface SupplierPriceBreakView {
+  id: string;
+  supplierPartId: string;
+  minQuantity: number;
+  unitPrice: number;
+  currency: string;
+  tenantBaseCurrency: string;
+  convertedPackPriceInBase: number;
+  convertedInternalUnitPriceInBase: number;
+}
+
+export interface SupplierPartView {
+  id: string;
+  partId: string;
+  partIpn: string;
+  partName: string;
+  partUnit: string;
+  supplierId: string;
+  supplierName: string;
+  manufacturerPartId: string | null;
+  manufacturerMpn: string | null;
+  sku: string;
+  description: string | null;
+  packQuantity: number;
+  moq: number;
+  multiple: number;
+  leadTimeDays: number | null;
+  currency: string;
+  customBarcode: string | null;
+  active: boolean;
+  priceBreaks: SupplierPriceBreakView[];
+  createdAt: string;
+}
