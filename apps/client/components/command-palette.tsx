@@ -14,6 +14,13 @@ const QUICK_LINKS: SearchResultItem[] = [
     href: "/",
   },
   {
+    category: "Inventory",
+    id: "nav-parts",
+    title: "Parts Catalog & Categories",
+    subtitle: "Hierarchical ltree categories, parts, variants, revisions, and typed parameters",
+    href: "/parts",
+  },
+  {
     category: "Settings",
     id: "nav-org",
     title: "Organization Settings",

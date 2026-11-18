@@ -68,6 +68,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/parts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getPart"];
+        put: operations["updatePart"];
+        post?: never;
+        delete: operations["deletePart"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/part-categories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getCategory"];
+        put: operations["updateCategory"];
+        post?: never;
+        delete: operations["deleteCategory"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/settings/users/invite": {
         parameters: {
             query?: never;
@@ -110,6 +142,86 @@ export interface paths {
         get: operations["listApiTokens"];
         put?: never;
         post: operations["createApiToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/parts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["searchParts"];
+        put?: never;
+        post: operations["createPart"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/parts/{id}/parameters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listPartParameters"];
+        put?: never;
+        post: operations["upsertPartParameter"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/part-categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listCategories"];
+        put?: never;
+        post: operations["createCategory"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/part-categories/{id}/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["moveCategorySubtree"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/parameter-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listParameterTemplates"];
+        put?: never;
+        post: operations["createParameterTemplate"];
         delete?: never;
         options?: never;
         head?: never;
@@ -436,6 +548,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/parts/{id}/variants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listVariants"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/parts/{id}/revisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listRevisions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/parts/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["exportParts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me": {
         parameters: {
             query?: never;
@@ -495,6 +655,38 @@ export interface paths {
         put?: never;
         post?: never;
         delete: operations["revokeApiToken"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/parts/{id}/parameters/{parameterId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deletePartParameter"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/parameter-templates/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteParameterTemplate"];
         options?: never;
         head?: never;
         patch?: never;
@@ -643,6 +835,111 @@ export interface components {
             settingValue?: string;
             valueType?: string;
         };
+        UpdatePartCommand: {
+            ipn?: string;
+            name?: string;
+            description?: string;
+            /** Format: uuid */
+            categoryId?: string;
+            revision?: string;
+            /** Format: uuid */
+            revisionOfId?: string;
+            /** Format: uuid */
+            variantOfId?: string;
+            unit?: string;
+            minimumStock?: number;
+            active?: boolean;
+            locked?: boolean;
+            assembly?: boolean;
+            component?: boolean;
+            trackable?: boolean;
+            purchaseable?: boolean;
+            salable?: boolean;
+            virtual?: boolean;
+            metadata?: {
+                [key: string]: Record<string, never>;
+            };
+        };
+        PartParameterView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            partId?: string;
+            /** Format: uuid */
+            templateId?: string;
+            templateName?: string;
+            templateUnits?: string;
+            checkbox?: boolean;
+            valueText?: string;
+            /** Format: double */
+            valueNumeric?: number;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        PartView: {
+            /** Format: uuid */
+            id?: string;
+            ipn?: string;
+            name?: string;
+            description?: string;
+            /** Format: uuid */
+            categoryId?: string;
+            categoryName?: string;
+            categoryPathString?: string;
+            revision?: string;
+            /** Format: uuid */
+            revisionOfId?: string;
+            /** Format: uuid */
+            variantOfId?: string;
+            unit?: string;
+            minimumStock?: number;
+            active?: boolean;
+            locked?: boolean;
+            assembly?: boolean;
+            component?: boolean;
+            trackable?: boolean;
+            purchaseable?: boolean;
+            salable?: boolean;
+            virtual?: boolean;
+            metadata?: {
+                [key: string]: Record<string, never>;
+            };
+            parameters?: components["schemas"]["PartParameterView"][];
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        UpdateCategoryCommand: {
+            name?: string;
+            description?: string;
+            structural?: boolean;
+            /** Format: uuid */
+            defaultLocationId?: string;
+            icon?: string;
+        };
+        CategoryView: {
+            /** Format: uuid */
+            id?: string;
+            name?: string;
+            description?: string;
+            /** Format: uuid */
+            parentId?: string;
+            path?: string;
+            pathString?: string;
+            /** Format: int32 */
+            depth?: number;
+            structural?: boolean;
+            /** Format: uuid */
+            defaultLocationId?: string;
+            icon?: string;
+            /** Format: int64 */
+            directPartCount?: number;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
         UserInviteDto: {
             email: string;
             fullName: string;
@@ -667,6 +964,79 @@ export interface components {
             scopes?: string[];
             /** Format: date-time */
             expiresAt?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        CreatePartCommand: {
+            ipn?: string;
+            name?: string;
+            description?: string;
+            /** Format: uuid */
+            categoryId?: string;
+            revision?: string;
+            /** Format: uuid */
+            revisionOfId?: string;
+            /** Format: uuid */
+            variantOfId?: string;
+            unit?: string;
+            minimumStock?: number;
+            active?: boolean;
+            locked?: boolean;
+            assembly?: boolean;
+            component?: boolean;
+            trackable?: boolean;
+            purchaseable?: boolean;
+            salable?: boolean;
+            virtual?: boolean;
+            metadata?: {
+                [key: string]: Record<string, never>;
+            };
+            parameters?: components["schemas"]["InitialParameterInput"][];
+        };
+        InitialParameterInput: {
+            /** Format: uuid */
+            templateId?: string;
+            value?: string;
+        };
+        UpsertPartParameterCommand: {
+            /** Format: uuid */
+            templateId?: string;
+            value?: string;
+        };
+        CreateCategoryCommand: {
+            name?: string;
+            description?: string;
+            /** Format: uuid */
+            parentId?: string;
+            structural?: boolean;
+            /** Format: uuid */
+            defaultLocationId?: string;
+            icon?: string;
+        };
+        MoveCategoryPayload: {
+            /** Format: uuid */
+            newParentId?: string;
+        };
+        CreateParameterTemplateCommand: {
+            name?: string;
+            units?: string;
+            description?: string;
+            choices?: string;
+            checkbox?: boolean;
+            /** Format: uuid */
+            defaultCategoryId?: string;
+        };
+        ParameterTemplateView: {
+            /** Format: uuid */
+            id?: string;
+            name?: string;
+            units?: string;
+            description?: string;
+            choices?: string;
+            checkbox?: boolean;
+            /** Format: uuid */
+            defaultCategoryId?: string;
+            defaultCategoryPath?: string;
             /** Format: date-time */
             createdAt?: string;
         };
@@ -899,12 +1269,12 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
-            pageable?: components["schemas"]["PageableObject"];
-            sort?: components["schemas"]["SortObject"];
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
+            first?: boolean;
+            last?: boolean;
+            sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["AuditEvent"][];
@@ -924,8 +1294,8 @@ export interface components {
             offset?: number;
         };
         SortObject: {
-            unsorted?: boolean;
             sorted?: boolean;
+            unsorted?: boolean;
             empty?: boolean;
         };
         ApiToken: {
@@ -952,6 +1322,24 @@ export interface components {
             title?: string;
             subtitle?: string;
             href?: string;
+        };
+        PagePartView: {
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            /** Format: int32 */
+            numberOfElements?: number;
+            first?: boolean;
+            last?: boolean;
+            sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
+            /** Format: int32 */
+            size?: number;
+            content?: components["schemas"]["PartView"][];
+            /** Format: int32 */
+            number?: number;
+            empty?: boolean;
         };
         EffectiveFeature: {
             featureKey?: string;
@@ -1154,6 +1542,144 @@ export interface operations {
             };
         };
     };
+    getPart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PartView"];
+                };
+            };
+        };
+    };
+    updatePart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePartCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PartView"];
+                };
+            };
+        };
+    };
+    deletePart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CategoryView"];
+                };
+            };
+        };
+    };
+    updateCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCategoryCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CategoryView"];
+                };
+            };
+        };
+    };
+    deleteCategory: {
+        parameters: {
+            query?: {
+                mode?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     inviteUser: {
         parameters: {
             query?: never;
@@ -1262,6 +1788,233 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["CreatedApiTokenResponse"];
+                };
+            };
+        };
+    };
+    searchParts: {
+        parameters: {
+            query?: {
+                q?: string;
+                categoryId?: string;
+                includeSubcategories?: boolean;
+                active?: boolean;
+                assembly?: boolean;
+                component?: boolean;
+                trackable?: boolean;
+                purchaseable?: boolean;
+                salable?: boolean;
+                virtual?: boolean;
+                variantOfId?: string;
+                revisionOfId?: string;
+                paramTemplateId?: string;
+                paramMin?: string;
+                paramMax?: string;
+                paramValueText?: string;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PagePartView"];
+                };
+            };
+        };
+    };
+    createPart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePartCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PartView"];
+                };
+            };
+        };
+    };
+    listPartParameters: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PartParameterView"][];
+                };
+            };
+        };
+    };
+    upsertPartParameter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpsertPartParameterCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PartParameterView"];
+                };
+            };
+        };
+    };
+    listCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CategoryView"][];
+                };
+            };
+        };
+    };
+    createCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCategoryCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CategoryView"];
+                };
+            };
+        };
+    };
+    moveCategorySubtree: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveCategoryPayload"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CategoryView"];
+                };
+            };
+        };
+    };
+    listParameterTemplates: {
+        parameters: {
+            query?: {
+                categoryId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ParameterTemplateView"][];
+                };
+            };
+        };
+    };
+    createParameterTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateParameterTemplateCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ParameterTemplateView"];
                 };
             };
         };
@@ -1768,6 +2521,72 @@ export interface operations {
             };
         };
     };
+    listVariants: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PartView"][];
+                };
+            };
+        };
+    };
+    listRevisions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PartView"][];
+                };
+            };
+        };
+    };
+    exportParts: {
+        parameters: {
+            query?: {
+                format?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
     getMe: {
         parameters: {
             query?: never;
@@ -1839,6 +2658,47 @@ export interface operations {
             header?: never;
             path: {
                 tokenId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deletePartParameter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                parameterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteParameterTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
             };
             cookie?: never;
         };

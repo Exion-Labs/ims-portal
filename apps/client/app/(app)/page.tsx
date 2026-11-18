@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { ImportWizard, StatTile, StatusBadge } from "@ims/ui";
 import { useEntitlements, FeatureGate } from "@/lib/entitlements";
-import { ShieldCheck, Users, KeyRound, History } from "lucide-react";
+import { ShieldCheck, Users, KeyRound, History, Cpu } from "lucide-react";
 
 export default function DashboardPage() {
   const { me, isLoading } = useEntitlements();
@@ -45,6 +45,11 @@ export default function DashboardPage() {
       {/* KPI Tiles */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile
+          label="Parts in Catalog"
+          value={`${me?.usage?.MAX_PARTS ?? 0} / ${me?.limits?.MAX_PARTS ?? "—"}`}
+          hint="Active parts vs plan quota"
+        />
+        <StatTile
           label="Active Users"
           value={`${me?.usage?.MAX_USERS ?? 1} / ${me?.limits?.MAX_USERS ?? "—"}`}
           hint="Seat quota on current plan"
@@ -55,11 +60,6 @@ export default function DashboardPage() {
           hint="Plan features + active overrides"
         />
         <StatTile
-          label="Active API Tokens"
-          value={me?.usage?.ACTIVE_API_TOKENS ?? 0}
-          hint={`Rate limit: ${me?.limits?.API_RATE_PER_MIN ?? 60} req/min`}
-        />
-        <StatTile
           label="Base Currency & Timezone"
           value={`${me?.baseCurrency ?? "USD"} · ${me?.timezone ?? "UTC"}`}
           hint="Tenant accounting configuration"
@@ -67,8 +67,20 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Quick Administration Cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Quick Navigation & Administration Cards */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <Link
+          href="/parts"
+          className="rounded-[12px] border border-[#C7D2FE] bg-[#EEF2FF]/40 p-4 transition-colors hover:border-[#1D4ED8]"
+        >
+          <Cpu className="h-5 w-5 text-[#1D4ED8]" />
+          <div className="mt-3 text-[15px] font-semibold text-[#18181B]">
+            Parts Catalog
+          </div>
+          <p className="mt-1 text-[13px] text-[#52525B]">
+            Hierarchical categories, revisions, variants, and Indriya parameters.
+          </p>
+        </Link>
         <Link
           href="/settings/users"
           className="rounded-[12px] border border-[#E4E4E7] bg-white p-4 transition-colors hover:border-[#1D4ED8]"

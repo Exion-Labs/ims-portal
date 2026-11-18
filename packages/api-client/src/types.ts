@@ -156,3 +156,92 @@ export interface SearchResultItem {
   subtitle: string;
   href: string;
 }
+
+export interface CategoryView {
+  id: string;
+  name: string;
+  description: string | null;
+  parentId: string | null;
+  path: string;
+  pathString: string;
+  depth: number;
+  structural: boolean;
+  defaultLocationId: string | null;
+  icon: string | null;
+  directPartCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ParameterTemplateView {
+  id: string;
+  name: string;
+  units: string | null;
+  description: string | null;
+  choices: string | null;
+  checkbox: boolean;
+  defaultCategoryId: string | null;
+  defaultCategoryPath: string | null;
+  createdAt: string;
+}
+
+export interface PartParameterView {
+  id: string;
+  partId: string;
+  templateId: string;
+  templateName: string;
+  templateUnits: string | null;
+  checkbox: boolean;
+  valueText: string;
+  valueNumeric: number | null;
+  updatedAt: string;
+}
+
+export interface PartView {
+  id: string;
+  ipn: string;
+  name: string;
+  description: string | null;
+  categoryId: string | null;
+  categoryName: string | null;
+  categoryPathString: string | null;
+  revision: string;
+  revisionOfId: string | null;
+  variantOfId: string | null;
+  unit: string;
+  minimumStock: number;
+  active: boolean;
+  locked: boolean;
+  assembly: boolean;
+  component: boolean;
+  trackable: boolean;
+  purchaseable: boolean;
+  salable: boolean;
+  virtual: boolean;
+  metadata: Record<string, unknown>;
+  parameters: PartParameterView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NoteView {
+  id: string;
+  entityType: string;
+  entityId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string | null;
+}
+
+export interface AttachmentView {
+  id: string;
+  entityType: string;
+  entityId: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  status: "PENDING" | "READY";
+  comment: string | null;
+  createdAt: string;
+}

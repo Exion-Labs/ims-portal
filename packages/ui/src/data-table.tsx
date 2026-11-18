@@ -28,6 +28,10 @@ export interface DataTableProps<TData> {
   enableRowSelection?: boolean;
   onSelectedRowsChange?: (rows: TData[]) => void;
   rightActions?: React.ReactNode;
+  pageIndex?: number;
+  pageSize?: number;
+  totalCount?: number;
+  onPageChange?: (pageIndex: number) => void;
 }
 
 export function DataTable<TData>({
@@ -44,6 +48,10 @@ export function DataTable<TData>({
   enableRowSelection = false,
   onSelectedRowsChange,
   rightActions,
+  pageIndex,
+  pageSize = 25,
+  totalCount,
+  onPageChange,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -218,6 +226,40 @@ export function DataTable<TData>({
           </tbody>
         </table>
       </div>
+
+      {onPageChange !== undefined && pageIndex !== undefined && totalCount !== undefined && (
+        <div className="flex items-center justify-between border-t border-[#E4E4E7] px-4 py-2.5 text-[12px] text-[#52525B]">
+          <div>
+            Showing{" "}
+            <span className="font-mono font-medium text-[#18181B]">
+              {totalCount === 0 ? 0 : pageIndex * pageSize + 1}
+            </span>{" "}
+            –{" "}
+            <span className="font-mono font-medium text-[#18181B]">
+              {Math.min((pageIndex + 1) * pageSize, totalCount)}
+            </span>{" "}
+            of <span className="font-mono font-medium text-[#18181B]">{totalCount}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              disabled={pageIndex <= 0}
+              onClick={() => onPageChange(pageIndex - 1)}
+              className="h-7 rounded border border-[#E4E4E7] bg-white px-2.5 text-[12px] font-medium text-[#18181B] hover:bg-[#F7F7F8] disabled:opacity-40"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              disabled={(pageIndex + 1) * pageSize >= totalCount}
+              onClick={() => onPageChange(pageIndex + 1)}
+              className="h-7 rounded border border-[#E4E4E7] bg-white px-2.5 text-[12px] font-medium text-[#18181B] hover:bg-[#F7F7F8] disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
