@@ -56,6 +56,127 @@ export interface RoleView {
   updatedAt: string;
 }
 
+export interface SalesOrderAllocationView {
+  id: string;
+  lineItemId: string;
+  shipmentId: string | null;
+  stockItemId: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  shipped: boolean;
+}
+
+export interface SalesOrderLineView {
+  id: string;
+  salesOrderId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  partUnit: string | null;
+  quantity: number;
+  shipped: number;
+  allocated: number;
+  salePrice: number | null;
+  salePriceCurrency: string | null;
+  reference: string | null;
+  allocations: SalesOrderAllocationView[];
+}
+
+export interface SalesOrderShipmentView {
+  id: string;
+  salesOrderId: string;
+  reference: string;
+  trackingNumber: string | null;
+  invoiceNumber: string | null;
+  carrier: string | null;
+  shipmentDate: string | null;
+  deliveryDate: string | null;
+  notes: string | null;
+  shipped: boolean;
+}
+
+export interface SalesOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  customerReference: string | null;
+  description: string | null;
+  status: string;
+  currency: string;
+  orderDate: string | null;
+  targetDate: string | null;
+  shipmentDate: string | null;
+  notes: string | null;
+  lines: SalesOrderLineView[];
+  shipments: SalesOrderShipmentView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReturnOrderLineView {
+  id: string;
+  returnOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  receivedLocationId: string | null;
+  outcome: string;
+  notes: string | null;
+}
+
+export interface ReturnOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  salesOrderId: string | null;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: ReturnOrderLineView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TransferOrderLineView {
+  id: string;
+  transferOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  received: boolean;
+  notes: string | null;
+}
+
+export interface TransferOrderView {
+  id: string;
+  reference: string;
+  sourceLocationId: string;
+  sourceLocationPath: string;
+  destinationLocationId: string;
+  destinationLocationPath: string;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: TransferOrderLineView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ApiTokenView {
   id: string;
   name: string;
@@ -173,6 +294,127 @@ export interface CategoryView {
   updatedAt: string;
 }
 
+export interface SalesOrderAllocationView {
+  id: string;
+  lineItemId: string;
+  shipmentId: string | null;
+  stockItemId: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  shipped: boolean;
+}
+
+export interface SalesOrderLineView {
+  id: string;
+  salesOrderId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  partUnit: string | null;
+  quantity: number;
+  shipped: number;
+  allocated: number;
+  salePrice: number | null;
+  salePriceCurrency: string | null;
+  reference: string | null;
+  allocations: SalesOrderAllocationView[];
+}
+
+export interface SalesOrderShipmentView {
+  id: string;
+  salesOrderId: string;
+  reference: string;
+  trackingNumber: string | null;
+  invoiceNumber: string | null;
+  carrier: string | null;
+  shipmentDate: string | null;
+  deliveryDate: string | null;
+  notes: string | null;
+  shipped: boolean;
+}
+
+export interface SalesOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  customerReference: string | null;
+  description: string | null;
+  status: string;
+  currency: string;
+  orderDate: string | null;
+  targetDate: string | null;
+  shipmentDate: string | null;
+  notes: string | null;
+  lines: SalesOrderLineView[];
+  shipments: SalesOrderShipmentView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReturnOrderLineView {
+  id: string;
+  returnOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  receivedLocationId: string | null;
+  outcome: string;
+  notes: string | null;
+}
+
+export interface ReturnOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  salesOrderId: string | null;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: ReturnOrderLineView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TransferOrderLineView {
+  id: string;
+  transferOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  received: boolean;
+  notes: string | null;
+}
+
+export interface TransferOrderView {
+  id: string;
+  reference: string;
+  sourceLocationId: string;
+  sourceLocationPath: string;
+  destinationLocationId: string;
+  destinationLocationPath: string;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: TransferOrderLineView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ParameterTemplateView {
   id: string;
   name: string;
@@ -224,6 +466,127 @@ export interface PartView {
   updatedAt: string;
 }
 
+export interface SalesOrderAllocationView {
+  id: string;
+  lineItemId: string;
+  shipmentId: string | null;
+  stockItemId: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  shipped: boolean;
+}
+
+export interface SalesOrderLineView {
+  id: string;
+  salesOrderId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  partUnit: string | null;
+  quantity: number;
+  shipped: number;
+  allocated: number;
+  salePrice: number | null;
+  salePriceCurrency: string | null;
+  reference: string | null;
+  allocations: SalesOrderAllocationView[];
+}
+
+export interface SalesOrderShipmentView {
+  id: string;
+  salesOrderId: string;
+  reference: string;
+  trackingNumber: string | null;
+  invoiceNumber: string | null;
+  carrier: string | null;
+  shipmentDate: string | null;
+  deliveryDate: string | null;
+  notes: string | null;
+  shipped: boolean;
+}
+
+export interface SalesOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  customerReference: string | null;
+  description: string | null;
+  status: string;
+  currency: string;
+  orderDate: string | null;
+  targetDate: string | null;
+  shipmentDate: string | null;
+  notes: string | null;
+  lines: SalesOrderLineView[];
+  shipments: SalesOrderShipmentView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReturnOrderLineView {
+  id: string;
+  returnOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  receivedLocationId: string | null;
+  outcome: string;
+  notes: string | null;
+}
+
+export interface ReturnOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  salesOrderId: string | null;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: ReturnOrderLineView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TransferOrderLineView {
+  id: string;
+  transferOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  received: boolean;
+  notes: string | null;
+}
+
+export interface TransferOrderView {
+  id: string;
+  reference: string;
+  sourceLocationId: string;
+  sourceLocationPath: string;
+  destinationLocationId: string;
+  destinationLocationPath: string;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: TransferOrderLineView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface NoteView {
   id: string;
   entityType: string;
@@ -263,6 +626,127 @@ export interface LocationView {
   updatedAt: string;
 }
 
+export interface SalesOrderAllocationView {
+  id: string;
+  lineItemId: string;
+  shipmentId: string | null;
+  stockItemId: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  shipped: boolean;
+}
+
+export interface SalesOrderLineView {
+  id: string;
+  salesOrderId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  partUnit: string | null;
+  quantity: number;
+  shipped: number;
+  allocated: number;
+  salePrice: number | null;
+  salePriceCurrency: string | null;
+  reference: string | null;
+  allocations: SalesOrderAllocationView[];
+}
+
+export interface SalesOrderShipmentView {
+  id: string;
+  salesOrderId: string;
+  reference: string;
+  trackingNumber: string | null;
+  invoiceNumber: string | null;
+  carrier: string | null;
+  shipmentDate: string | null;
+  deliveryDate: string | null;
+  notes: string | null;
+  shipped: boolean;
+}
+
+export interface SalesOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  customerReference: string | null;
+  description: string | null;
+  status: string;
+  currency: string;
+  orderDate: string | null;
+  targetDate: string | null;
+  shipmentDate: string | null;
+  notes: string | null;
+  lines: SalesOrderLineView[];
+  shipments: SalesOrderShipmentView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReturnOrderLineView {
+  id: string;
+  returnOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  receivedLocationId: string | null;
+  outcome: string;
+  notes: string | null;
+}
+
+export interface ReturnOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  salesOrderId: string | null;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: ReturnOrderLineView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TransferOrderLineView {
+  id: string;
+  transferOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  received: boolean;
+  notes: string | null;
+}
+
+export interface TransferOrderView {
+  id: string;
+  reference: string;
+  sourceLocationId: string;
+  sourceLocationPath: string;
+  destinationLocationId: string;
+  destinationLocationPath: string;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: TransferOrderLineView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface StockSummaryView {
   partId: string;
   inStock: number;
@@ -296,6 +780,127 @@ export interface StockItemView {
   packaging: string | null;
   building: boolean;
   customBarcode: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SalesOrderAllocationView {
+  id: string;
+  lineItemId: string;
+  shipmentId: string | null;
+  stockItemId: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  shipped: boolean;
+}
+
+export interface SalesOrderLineView {
+  id: string;
+  salesOrderId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  partUnit: string | null;
+  quantity: number;
+  shipped: number;
+  allocated: number;
+  salePrice: number | null;
+  salePriceCurrency: string | null;
+  reference: string | null;
+  allocations: SalesOrderAllocationView[];
+}
+
+export interface SalesOrderShipmentView {
+  id: string;
+  salesOrderId: string;
+  reference: string;
+  trackingNumber: string | null;
+  invoiceNumber: string | null;
+  carrier: string | null;
+  shipmentDate: string | null;
+  deliveryDate: string | null;
+  notes: string | null;
+  shipped: boolean;
+}
+
+export interface SalesOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  customerReference: string | null;
+  description: string | null;
+  status: string;
+  currency: string;
+  orderDate: string | null;
+  targetDate: string | null;
+  shipmentDate: string | null;
+  notes: string | null;
+  lines: SalesOrderLineView[];
+  shipments: SalesOrderShipmentView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReturnOrderLineView {
+  id: string;
+  returnOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  receivedLocationId: string | null;
+  outcome: string;
+  notes: string | null;
+}
+
+export interface ReturnOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  salesOrderId: string | null;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: ReturnOrderLineView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TransferOrderLineView {
+  id: string;
+  transferOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  received: boolean;
+  notes: string | null;
+}
+
+export interface TransferOrderView {
+  id: string;
+  reference: string;
+  sourceLocationId: string;
+  sourceLocationPath: string;
+  destinationLocationId: string;
+  destinationLocationPath: string;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: TransferOrderLineView[];
   createdAt: string;
   updatedAt: string;
 }
@@ -371,6 +976,127 @@ export interface CompanyView {
   customer: boolean;
   internalCompany: boolean;
   active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SalesOrderAllocationView {
+  id: string;
+  lineItemId: string;
+  shipmentId: string | null;
+  stockItemId: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  shipped: boolean;
+}
+
+export interface SalesOrderLineView {
+  id: string;
+  salesOrderId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  partUnit: string | null;
+  quantity: number;
+  shipped: number;
+  allocated: number;
+  salePrice: number | null;
+  salePriceCurrency: string | null;
+  reference: string | null;
+  allocations: SalesOrderAllocationView[];
+}
+
+export interface SalesOrderShipmentView {
+  id: string;
+  salesOrderId: string;
+  reference: string;
+  trackingNumber: string | null;
+  invoiceNumber: string | null;
+  carrier: string | null;
+  shipmentDate: string | null;
+  deliveryDate: string | null;
+  notes: string | null;
+  shipped: boolean;
+}
+
+export interface SalesOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  customerReference: string | null;
+  description: string | null;
+  status: string;
+  currency: string;
+  orderDate: string | null;
+  targetDate: string | null;
+  shipmentDate: string | null;
+  notes: string | null;
+  lines: SalesOrderLineView[];
+  shipments: SalesOrderShipmentView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReturnOrderLineView {
+  id: string;
+  returnOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  receivedLocationId: string | null;
+  outcome: string;
+  notes: string | null;
+}
+
+export interface ReturnOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  salesOrderId: string | null;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: ReturnOrderLineView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TransferOrderLineView {
+  id: string;
+  transferOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  received: boolean;
+  notes: string | null;
+}
+
+export interface TransferOrderView {
+  id: string;
+  reference: string;
+  sourceLocationId: string;
+  sourceLocationPath: string;
+  destinationLocationId: string;
+  destinationLocationPath: string;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: TransferOrderLineView[];
   createdAt: string;
   updatedAt: string;
 }
@@ -507,6 +1233,127 @@ export interface PurchaseOrderView {
   updatedAt: string;
 }
 
+export interface SalesOrderAllocationView {
+  id: string;
+  lineItemId: string;
+  shipmentId: string | null;
+  stockItemId: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  shipped: boolean;
+}
+
+export interface SalesOrderLineView {
+  id: string;
+  salesOrderId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  partUnit: string | null;
+  quantity: number;
+  shipped: number;
+  allocated: number;
+  salePrice: number | null;
+  salePriceCurrency: string | null;
+  reference: string | null;
+  allocations: SalesOrderAllocationView[];
+}
+
+export interface SalesOrderShipmentView {
+  id: string;
+  salesOrderId: string;
+  reference: string;
+  trackingNumber: string | null;
+  invoiceNumber: string | null;
+  carrier: string | null;
+  shipmentDate: string | null;
+  deliveryDate: string | null;
+  notes: string | null;
+  shipped: boolean;
+}
+
+export interface SalesOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  customerReference: string | null;
+  description: string | null;
+  status: string;
+  currency: string;
+  orderDate: string | null;
+  targetDate: string | null;
+  shipmentDate: string | null;
+  notes: string | null;
+  lines: SalesOrderLineView[];
+  shipments: SalesOrderShipmentView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReturnOrderLineView {
+  id: string;
+  returnOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  receivedLocationId: string | null;
+  outcome: string;
+  notes: string | null;
+}
+
+export interface ReturnOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  salesOrderId: string | null;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: ReturnOrderLineView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TransferOrderLineView {
+  id: string;
+  transferOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  received: boolean;
+  notes: string | null;
+}
+
+export interface TransferOrderView {
+  id: string;
+  reference: string;
+  sourceLocationId: string;
+  sourceLocationPath: string;
+  destinationLocationId: string;
+  destinationLocationPath: string;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: TransferOrderLineView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ReceiveLineResult {
   purchaseOrderId: string;
   orderStatus: string;
@@ -589,6 +1436,127 @@ export interface BuildOrderView {
   completionDate: string | null;
   notes: string | null;
   lines: BuildLineView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SalesOrderAllocationView {
+  id: string;
+  lineItemId: string;
+  shipmentId: string | null;
+  stockItemId: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  shipped: boolean;
+}
+
+export interface SalesOrderLineView {
+  id: string;
+  salesOrderId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  partUnit: string | null;
+  quantity: number;
+  shipped: number;
+  allocated: number;
+  salePrice: number | null;
+  salePriceCurrency: string | null;
+  reference: string | null;
+  allocations: SalesOrderAllocationView[];
+}
+
+export interface SalesOrderShipmentView {
+  id: string;
+  salesOrderId: string;
+  reference: string;
+  trackingNumber: string | null;
+  invoiceNumber: string | null;
+  carrier: string | null;
+  shipmentDate: string | null;
+  deliveryDate: string | null;
+  notes: string | null;
+  shipped: boolean;
+}
+
+export interface SalesOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  customerReference: string | null;
+  description: string | null;
+  status: string;
+  currency: string;
+  orderDate: string | null;
+  targetDate: string | null;
+  shipmentDate: string | null;
+  notes: string | null;
+  lines: SalesOrderLineView[];
+  shipments: SalesOrderShipmentView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReturnOrderLineView {
+  id: string;
+  returnOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  receivedLocationId: string | null;
+  outcome: string;
+  notes: string | null;
+}
+
+export interface ReturnOrderView {
+  id: string;
+  reference: string;
+  customerId: string;
+  customerName: string;
+  salesOrderId: string | null;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: ReturnOrderLineView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TransferOrderLineView {
+  id: string;
+  transferOrderId: string;
+  stockItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  quantity: number;
+  received: boolean;
+  notes: string | null;
+}
+
+export interface TransferOrderView {
+  id: string;
+  reference: string;
+  sourceLocationId: string;
+  sourceLocationPath: string;
+  destinationLocationId: string;
+  destinationLocationPath: string;
+  status: string;
+  description: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: TransferOrderLineView[];
   createdAt: string;
   updatedAt: string;
 }

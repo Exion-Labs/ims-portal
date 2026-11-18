@@ -49,6 +49,20 @@ const QUICK_LINKS: SearchResultItem[] = [
     href: "/manufacturing",
   },
   {
+    category: "Sales & Outbound",
+    id: "nav-sales",
+    title: "Sales Orders & Shipments",
+    subtitle: "Customer orders, stock allocations, and shipment dispatch",
+    href: "/sales",
+  },
+  {
+    category: "Sales & Outbound",
+    id: "nav-transfers",
+    title: "Transfers & Return Orders (RMA)",
+    subtitle: "Inter-warehouse transfers and customer returns",
+    href: "/transfers",
+  },
+  {
     category: "Settings",
     id: "nav-org",
     title: "Organization Settings",
