@@ -1,0 +1,158 @@
+export type FeatureType = "BOOLEAN" | "LIMIT";
+
+export interface EffectiveFeature {
+  featureKey: string;
+  type: FeatureType;
+  enabled: boolean;
+  limitValue: number | null;
+  source: "CORE" | "PLAN" | "OVERRIDE" | "OVERRIDE_TRIAL";
+  overrideReason: string | null;
+  overrideExpiresAt: string | null;
+  description: string;
+}
+
+export interface MeResponse {
+  userId: string;
+  email: string;
+  fullName: string;
+  tenantId: string;
+  tenantName: string;
+  tenantSlug: string;
+  baseCurrency: string;
+  timezone: string;
+  permissions: string[];
+  planCode: string;
+  planName: string;
+  subscriptionStatus: string;
+  subscriptionEndsAt: string | null;
+  enabledFeatures: string[];
+  limits: Record<string, number>;
+  usage: Record<string, number>;
+  featureDetails: EffectiveFeature[];
+}
+
+export interface RoleSummary {
+  id: string;
+  name: string;
+}
+
+export interface UserWithRolesView {
+  id: string;
+  email: string;
+  fullName: string;
+  status: "ACTIVE" | "INVITED" | "DISABLED";
+  lastLoginAt: string | null;
+  createdAt: string;
+  roles: RoleSummary[];
+}
+
+export interface RoleView {
+  id: string;
+  name: string;
+  description: string;
+  systemRole: boolean;
+  permissions: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ApiTokenView {
+  id: string;
+  name: string;
+  tokenPrefix: string;
+  scopes: string;
+  expiresAt: string | null;
+  lastUsedAt: string | null;
+  revoked: boolean;
+  createdAt: string;
+}
+
+export interface CreatedApiTokenResponse {
+  id: string;
+  name: string;
+  tokenPrefix: string;
+  rawToken: string;
+  scopes: string[];
+  expiresAt: string | null;
+  createdAt: string;
+}
+
+export interface ReferenceSequenceView {
+  id: string;
+  sequenceKey: string;
+  prefix: string;
+  padding: number;
+  nextValue: number;
+}
+
+export interface TenantSettingView {
+  id: string;
+  settingKey: string;
+  settingValue: string;
+  valueType: "STRING" | "INTEGER" | "BOOLEAN" | "JSON";
+}
+
+export interface AuditEventView {
+  id: string;
+  occurredAt: string;
+  actorType: "USER" | "API_TOKEN" | "SYSTEM_JOB" | "PLATFORM_SUPPORT";
+  actorId: string | null;
+  actorName: string | null;
+  supportSessionId: string | null;
+  requestId: string | null;
+  ip: string | null;
+  entityType: string;
+  entityId: string | null;
+  action: string;
+  changes: Record<string, { from: unknown; to: unknown } | unknown>;
+  reason: string | null;
+}
+
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface ImportSessionView {
+  sessionId: string;
+  tenantId: string;
+  targetType: string;
+  fileName: string;
+  detectedColumns: string[];
+  totalRows: number;
+  sampleRows: Record<string, string>[];
+  createdAt: string;
+}
+
+export interface RowValidationError {
+  rowNumber: number;
+  field: string;
+  message: string;
+}
+
+export interface DryRunReport {
+  sessionId: string;
+  targetType: string;
+  totalRows: number;
+  validRows: number;
+  invalidRows: number;
+  errors: RowValidationError[];
+  previewMappedRows: Record<string, string>[];
+}
+
+export interface CommitResult {
+  sessionId: string;
+  targetType: string;
+  committedRows: number;
+}
+
+export interface SearchResultItem {
+  category: string;
+  id: string;
+  title: string;
+  subtitle: string;
+  href: string;
+}

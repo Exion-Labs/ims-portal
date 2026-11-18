@@ -1,0 +1,12 @@
+{
+  "name": "ims-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.6.5",
+  "scripts": {
+    "dev:client": "pnpm --filter @ims/client dev",
+    "dev:platform": "pnpm --filter @ims/platform dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck"
+  }
+}

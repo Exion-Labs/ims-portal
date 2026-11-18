@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+:root {
+  --bg-canvas: #F7F7F8;
+  --bg-surface: #FFFFFF;
+  --border-subtle: #E4E4E7;
+  --text-primary: #18181B;
+  --text-secondary: #52525B;
+  --text-muted: #63636B;
+  --brand-primary: #1D4ED8;
+  --brand-tint: #EEF2FF;
+  --status-success-bg: #DCFCE7;
+  --status-success-fg: #166534;
+  --status-warning-bg: #FEF3C7;
+  --status-warning-fg: #92400E;
+  --status-danger-bg: #FEE2E2;
+  --status-danger-fg: #991B1B;
+}
+
+body {
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
