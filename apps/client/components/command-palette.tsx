@@ -28,6 +28,20 @@ const QUICK_LINKS: SearchResultItem[] = [
     href: "/stock",
   },
   {
+    category: "Purchasing",
+    id: "nav-companies",
+    title: "Companies & Suppliers",
+    subtitle: "Vendors, manufacturers, customers, pack-size SKUs, and exchange rates",
+    href: "/companies",
+  },
+  {
+    category: "Purchasing",
+    id: "nav-purchasing",
+    title: "Purchase Orders & Receiving",
+    subtitle: "Inbound supplier orders, tiered pricing, and warehouse receiving",
+    href: "/purchasing",
+  },
+  {
     category: "Settings",
     id: "nav-org",
     title: "Organization Settings",

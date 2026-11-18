@@ -445,3 +445,70 @@ export interface SupplierPartView {
   priceBreaks: SupplierPriceBreakView[];
   createdAt: string;
 }
+
+export interface PurchaseOrderLineView {
+  id: string;
+  purchaseOrderId: string;
+  supplierPartId: string;
+  supplierSku: string;
+  partId: string;
+  partIpn: string;
+  partName: string;
+  partUnit: string;
+  quantity: number;
+  received: number;
+  remaining: number;
+  packQuantity: number;
+  internalQuantityTotal: number;
+  unitPrice: number;
+  currency: string;
+  lineTotal: number;
+  lineTotalInBase: number;
+  tenantBaseCurrency: string;
+  destinationLocationId: string | null;
+  destinationLocationPath: string | null;
+  targetDate: string | null;
+  reference: string | null;
+  notes: string | null;
+}
+
+export interface PurchaseOrderExtraLineView {
+  id: string;
+  purchaseOrderId: string;
+  reference: string | null;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  currency: string;
+  lineTotal: number;
+}
+
+export interface PurchaseOrderView {
+  id: string;
+  reference: string;
+  description: string | null;
+  supplierId: string;
+  supplierName: string;
+  supplierReference: string | null;
+  status: "PENDING" | "PLACED" | "IN_PROGRESS" | "COMPLETE" | "ON_HOLD" | "CANCELLED";
+  currency: string;
+  tenantBaseCurrency: string;
+  totalAmount: number;
+  totalAmountInBase: number;
+  destinationLocationId: string | null;
+  destinationLocationPath: string | null;
+  issueDate: string | null;
+  targetDate: string | null;
+  completeDate: string | null;
+  notes: string | null;
+  lines: PurchaseOrderLineView[];
+  extraLines: PurchaseOrderExtraLineView[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReceiveLineResult {
+  purchaseOrderId: string;
+  orderStatus: string;
+  createdStockItems: StockItemView[];
+}
