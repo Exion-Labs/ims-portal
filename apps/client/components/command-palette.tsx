@@ -42,6 +42,13 @@ const QUICK_LINKS: SearchResultItem[] = [
     href: "/purchasing",
   },
   {
+    category: "Manufacturing",
+    id: "nav-manufacturing",
+    title: "Manufacturing & Build Orders",
+    subtitle: "BOM assemblies, stock allocation, build outputs, and serialized genealogy",
+    href: "/manufacturing",
+  },
+  {
     category: "Settings",
     id: "nav-org",
     title: "Organization Settings",

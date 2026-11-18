@@ -564,6 +564,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/parts/{partId}/bom": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listBom"];
+        put?: never;
+        post: operations["addBomItem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/parts/{id}/parameters": {
         parameters: {
             query?: never;
@@ -766,6 +782,134 @@ export interface paths {
         get: operations["listAddresses"];
         put?: never;
         post: operations["createAddress"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/builds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["searchBuilds"];
+        put?: never;
+        post: operations["createBuild"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/builds/{id}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["startBuild"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/builds/{id}/outputs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createBuildOutput"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/builds/{id}/complete-output": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["completeBuildOutput"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/builds/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["cancelBuild"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/builds/{id}/auto-allocate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["autoAllocate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/builds/{id}/allocate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["allocateStock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bom-items/{bomItemId}/substitutes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["addSubstitute"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1108,6 +1252,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/parts/{partId}/where-used": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listWhereUsed"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/parts/{partId}/supplier-parts": {
         parameters: {
             query?: never;
@@ -1132,6 +1292,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getPartStockSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/parts/{partId}/max-buildable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getMaxBuildable"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1244,6 +1420,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["listManufacturerPartsForCompany"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/builds/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getBuild"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1423,6 +1615,22 @@ export interface paths {
         put?: never;
         post?: never;
         delete: operations["deleteAddress"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bom-items/{bomItemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteBomItem"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2142,6 +2350,50 @@ export interface components {
             /** Format: date-time */
             createdAt?: string;
         };
+        AddBomItemCommand: {
+            /** Format: uuid */
+            subPartId?: string;
+            quantity?: number;
+            reference?: string;
+            optional?: boolean;
+            consumable?: boolean;
+            allowVariants?: boolean;
+            inherited?: boolean;
+            notes?: string;
+        };
+        BomItemView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            partId?: string;
+            /** Format: uuid */
+            subPartId?: string;
+            subPartIpn?: string;
+            subPartName?: string;
+            subPartUnit?: string;
+            subPartAssembly?: boolean;
+            subPartTrackable?: boolean;
+            quantity?: number;
+            reference?: string;
+            optional?: boolean;
+            consumable?: boolean;
+            allowVariants?: boolean;
+            inherited?: boolean;
+            notes?: string;
+            substitutes?: components["schemas"]["BomSubstituteView"][];
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        BomSubstituteView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            bomItemId?: string;
+            /** Format: uuid */
+            partId?: string;
+            partIpn?: string;
+            partName?: string;
+        };
         UpsertPartParameterCommand: {
             /** Format: uuid */
             templateId?: string;
@@ -2345,6 +2597,115 @@ export interface components {
             primaryShipping?: boolean;
             primaryBilling?: boolean;
         };
+        CreateBuildOrderCommand: {
+            /** Format: uuid */
+            partId?: string;
+            title?: string;
+            quantity?: number;
+            /** Format: uuid */
+            parentBuildId?: string;
+            /** Format: uuid */
+            sourceLocationId?: string;
+            /** Format: uuid */
+            destinationLocationId?: string;
+            /** Format: date */
+            targetDate?: string;
+            notes?: string;
+            createChildBuilds?: boolean;
+        };
+        BuildAllocationView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            buildOrderId?: string;
+            /** Format: uuid */
+            buildLineId?: string;
+            /** Format: uuid */
+            stockItemId?: string;
+            serialNumber?: string;
+            batchCode?: string;
+            /** Format: uuid */
+            installIntoId?: string;
+            quantity?: number;
+            consumed?: boolean;
+        };
+        BuildLineView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            buildOrderId?: string;
+            /** Format: uuid */
+            bomItemId?: string;
+            /** Format: uuid */
+            subPartId?: string;
+            subPartIpn?: string;
+            subPartName?: string;
+            subPartUnit?: string;
+            subPartTrackable?: boolean;
+            quantity?: number;
+            allocated?: number;
+            consumed?: number;
+            reference?: string;
+            allocations?: components["schemas"]["BuildAllocationView"][];
+        };
+        BuildOrderView: {
+            /** Format: uuid */
+            id?: string;
+            reference?: string;
+            title?: string;
+            /** Format: uuid */
+            partId?: string;
+            partIpn?: string;
+            partName?: string;
+            partUnit?: string;
+            partTrackable?: boolean;
+            quantity?: number;
+            completed?: number;
+            /** Format: uuid */
+            parentBuildId?: string;
+            status?: string;
+            /** Format: uuid */
+            sourceLocationId?: string;
+            /** Format: uuid */
+            destinationLocationId?: string;
+            destinationLocationPath?: string;
+            /** Format: date */
+            targetDate?: string;
+            /** Format: date */
+            completionDate?: string;
+            notes?: string;
+            lines?: components["schemas"]["BuildLineView"][];
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        CreateBuildOutputCommand: {
+            quantity?: number;
+            serialNumber?: string;
+            /** Format: uuid */
+            locationId?: string;
+            batchCode?: string;
+        };
+        CompleteBuildOutputCommand: {
+            /** Format: uuid */
+            outputStockItemId?: string;
+            /** Format: uuid */
+            destinationLocationId?: string;
+        };
+        AllocateStockCommand: {
+            /** Format: uuid */
+            buildLineId?: string;
+            /** Format: uuid */
+            stockItemId?: string;
+            quantity?: number;
+            /** Format: uuid */
+            installIntoId?: string;
+        };
+        AddSubstitutePayload: {
+            /** Format: uuid */
+            partId?: string;
+        };
         BarcodeScanRequest: {
             barcode?: string;
         };
@@ -2477,8 +2838,8 @@ export interface components {
             numberOfElements?: number;
             first?: boolean;
             last?: boolean;
-            pageable?: components["schemas"]["PageableObject"];
             sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["StockItemView"][];
@@ -2565,8 +2926,8 @@ export interface components {
             numberOfElements?: number;
             first?: boolean;
             last?: boolean;
-            pageable?: components["schemas"]["PageableObject"];
             sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["AuditEvent"][];
@@ -2608,8 +2969,8 @@ export interface components {
             numberOfElements?: number;
             first?: boolean;
             last?: boolean;
-            pageable?: components["schemas"]["PageableObject"];
             sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["PurchaseOrderView"][];
@@ -2626,8 +2987,8 @@ export interface components {
             numberOfElements?: number;
             first?: boolean;
             last?: boolean;
-            pageable?: components["schemas"]["PageableObject"];
             sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["PartView"][];
@@ -2683,11 +3044,29 @@ export interface components {
             numberOfElements?: number;
             first?: boolean;
             last?: boolean;
-            pageable?: components["schemas"]["PageableObject"];
             sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["CompanyView"][];
+            /** Format: int32 */
+            number?: number;
+            empty?: boolean;
+        };
+        PageBuildOrderView: {
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            /** Format: int32 */
+            numberOfElements?: number;
+            first?: boolean;
+            last?: boolean;
+            sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
+            /** Format: int32 */
+            size?: number;
+            content?: components["schemas"]["BuildOrderView"][];
             /** Format: int32 */
             number?: number;
             empty?: boolean;
@@ -3995,6 +4374,54 @@ export interface operations {
             };
         };
     };
+    listBom: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                partId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BomItemView"][];
+                };
+            };
+        };
+    };
+    addBomItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                partId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddBomItemCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BomItemView"];
+                };
+            };
+        };
+    };
     listPartParameters: {
         parameters: {
             query?: never;
@@ -4503,6 +4930,226 @@ export interface operations {
             };
         };
     };
+    searchBuilds: {
+        parameters: {
+            query?: {
+                q?: string;
+                status?: string;
+                partId?: string;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageBuildOrderView"];
+                };
+            };
+        };
+    };
+    createBuild: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBuildOrderCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BuildOrderView"];
+                };
+            };
+        };
+    };
+    startBuild: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BuildOrderView"];
+                };
+            };
+        };
+    };
+    createBuildOutput: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBuildOutputCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StockItemView"];
+                };
+            };
+        };
+    };
+    completeBuildOutput: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompleteBuildOutputCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BuildOrderView"];
+                };
+            };
+        };
+    };
+    cancelBuild: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BuildOrderView"];
+                };
+            };
+        };
+    };
+    autoAllocate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BuildOrderView"];
+                };
+            };
+        };
+    };
+    allocateStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AllocateStockCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BuildAllocationView"];
+                };
+            };
+        };
+    };
+    addSubstitute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bomItemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddSubstitutePayload"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BomSubstituteView"];
+                };
+            };
+        };
+    };
     resolveScan: {
         parameters: {
             query?: never;
@@ -4989,6 +5636,28 @@ export interface operations {
             };
         };
     };
+    listWhereUsed: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                partId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BomItemView"][];
+                };
+            };
+        };
+    };
     listSupplierPartsForPart: {
         parameters: {
             query?: never;
@@ -5029,6 +5698,30 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["StockSummaryView"];
+                };
+            };
+        };
+    };
+    getMaxBuildable: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                partId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: number;
+                    };
                 };
             };
         };
@@ -5181,6 +5874,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ManufacturerPartView"][];
+                };
+            };
+        };
+    };
+    getBuild: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BuildOrderView"];
                 };
             };
         };
@@ -5408,6 +6123,26 @@ export interface operations {
             path: {
                 id: string;
                 addressId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteBomItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bomItemId: string;
             };
             cookie?: never;
         };

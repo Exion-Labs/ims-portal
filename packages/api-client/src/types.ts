@@ -512,3 +512,83 @@ export interface ReceiveLineResult {
   orderStatus: string;
   createdStockItems: StockItemView[];
 }
+
+export interface BomSubstituteView {
+  id: string;
+  bomItemId: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+}
+
+export interface BomItemView {
+  id: string;
+  partId: string;
+  subPartId: string;
+  subPartIpn: string | null;
+  subPartName: string;
+  subPartUnit: string | null;
+  subPartAssembly: boolean;
+  subPartTrackable: boolean;
+  quantity: number;
+  reference: string | null;
+  optional: boolean;
+  consumable: boolean;
+  allowVariants: boolean;
+  inherited: boolean;
+  notes: string | null;
+  substitutes: BomSubstituteView[];
+  createdAt: string;
+}
+
+export interface BuildAllocationView {
+  id: string;
+  buildOrderId: string;
+  buildLineId: string;
+  stockItemId: string;
+  serialNumber: string | null;
+  batchCode: string | null;
+  installIntoId: string | null;
+  quantity: number;
+  consumed: boolean;
+}
+
+export interface BuildLineView {
+  id: string;
+  buildOrderId: string;
+  bomItemId: string | null;
+  subPartId: string;
+  subPartIpn: string | null;
+  subPartName: string;
+  subPartUnit: string | null;
+  subPartTrackable: boolean;
+  quantity: number;
+  allocated: number;
+  consumed: number;
+  reference: string | null;
+  allocations: BuildAllocationView[];
+}
+
+export interface BuildOrderView {
+  id: string;
+  reference: string;
+  title: string;
+  partId: string;
+  partIpn: string | null;
+  partName: string;
+  partUnit: string | null;
+  partTrackable: boolean;
+  quantity: number;
+  completed: number;
+  parentBuildId: string | null;
+  status: string;
+  sourceLocationId: string | null;
+  destinationLocationId: string | null;
+  destinationLocationPath: string | null;
+  targetDate: string | null;
+  completionDate: string | null;
+  notes: string | null;
+  lines: BuildLineView[];
+  createdAt: string;
+  updatedAt: string;
+}

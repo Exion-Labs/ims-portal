@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
   apiFetch,
   AttachmentView,
+  BomItemView,
   CategoryView,
   CompanyView,
   ManufacturerPartView,
@@ -16,12 +17,13 @@ import {
   StockSummaryView,
   SupplierPartView,
 } from "@ims/api-client";
-import { EmptyState, ErrorState, StatTile, StatusBadge } from "@ims/ui";
+import { EmptyState, ErrorState, ImportWizard, StatTile, StatusBadge } from "@ims/ui";
 import { useEntitlements } from "@/lib/entitlements";
 import {
   ArrowLeft,
   Cpu,
   Edit3,
+  Factory,
   FileText,
   Folder,
   GitBranch,
@@ -36,7 +38,7 @@ import {
   Building2,
 } from "lucide-react";
 
-type DetailTab = "overview" | "parameters" | "suppliers" | "variants" | "notes";
+type DetailTab = "overview" | "parameters" | "bom" | "suppliers" | "variants" | "notes";
 
 export default function PartDetailPage() {
   const params = useParams<{ id: string }>();
@@ -55,6 +57,14 @@ export default function PartDetailPage() {
   const [supplierParts, setSupplierParts] = useState<SupplierPartView[]>([]);
   const [manufacturerParts, setManufacturerParts] = useState<ManufacturerPartView[]>([]);
   const [companies, setCompanies] = useState<CompanyView[]>([]);
+  const [bomItems, setBomItems] = useState<BomItemView[]>([]);
+  const [whereUsed, setWhereUsed] = useState<BomItemView[]>([]);
+  const [maxBuildable, setMaxBuildable] = useState<number | null>(null);
+  const [allParts, setAllParts] = useState<PartView[]>([]);
+  const [bomSubPartId, setBomSubPartId] = useState("");
+  const [bomQuantity, setBomQuantity] = useState("1");
+  const [bomReference, setBomReference] = useState("");
+  const [bomError, setBomError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<DetailTab>("overview");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,7 +111,7 @@ export default function PartDetailPage() {
     setLoading(true);
     setError(null);
     try {
-      const [p, cats, tpls, vars, revs, nts, atts, summary, sps, mps, comps] = await Promise.all([
+      const [p, cats, tpls, vars, revs, nts, atts, summary, sps, mps, comps, bom, wu, mb, partsPage] = await Promise.all([
         apiFetch<PartView>(`/api/v1/parts/${partId}`),
         apiFetch<CategoryView[]>("/api/v1/part-categories"),
         apiFetch<ParameterTemplateView[]>("/api/v1/parameter-templates"),
@@ -113,6 +123,16 @@ export default function PartDetailPage() {
         apiFetch<SupplierPartView[]>(`/api/v1/parts/${partId}/supplier-parts`).catch(() => []),
         apiFetch<ManufacturerPartView[]>(`/api/v1/parts/${partId}/manufacturer-parts`).catch(() => []),
         apiFetch<PageResponse<CompanyView>>("/api/v1/companies?size=200").catch(() => ({
+          content: [],
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
+          size: 200,
+        })),
+        apiFetch<BomItemView[]>(`/api/v1/parts/${partId}/bom`).catch(() => []),
+        apiFetch<BomItemView[]>(`/api/v1/parts/${partId}/where-used`).catch(() => []),
+        apiFetch<{ maxBuildable: number }>(`/api/v1/parts/${partId}/max-buildable`).catch(() => null),
+        apiFetch<PageResponse<PartView>>("/api/v1/parts?size=200").catch(() => ({
           content: [],
           totalElements: 0,
           totalPages: 0,
@@ -131,6 +151,10 @@ export default function PartDetailPage() {
       setSupplierParts(sps);
       setManufacturerParts(mps);
       setCompanies(comps.content);
+      setBomItems(bom);
+      setWhereUsed(wu);
+      setMaxBuildable(mb ? mb.maxBuildable : null);
+      setAllParts(partsPage.content);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load part details");
     } finally {
@@ -483,6 +507,11 @@ export default function PartDetailPage() {
             icon: SlidersHorizontal,
           },
           {
+            id: "bom",
+            label: `BOM (${bomItems.length})`,
+            icon: Factory,
+          },
+          {
             id: "suppliers",
             label: `Suppliers & MPNs (${supplierParts.length + manufacturerParts.length})`,
             icon: Building2,
@@ -785,6 +814,184 @@ export default function PartDetailPage() {
                 ))
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: BOM & Where-Used */}
+      {activeTab === "bom" && (
+        <div className="space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+            <div>
+              <h2 className="text-[15px] font-semibold text-[#18181B]">Bill of Materials</h2>
+              <p className="text-[12px] text-[#52525B]">
+                Define sub-components required to assemble one unit of {part.name}.
+              </p>
+            </div>
+            {maxBuildable !== null && (
+              <div className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[13px] font-semibold text-emerald-800">
+                Max Buildable: <span className="font-mono">{maxBuildable}</span>
+              </div>
+            )}
+          </div>
+
+          {hasPermission("PART:UPDATE") && part.assembly && (
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setBomError(null);
+                try {
+                  await apiFetch(`/api/v1/parts/${partId}/bom`, {
+                    method: "POST",
+                    body: JSON.stringify({
+                      subPartId: bomSubPartId,
+                      quantity: Number(bomQuantity),
+                      reference: bomReference || null,
+                    }),
+                  });
+                  setBomSubPartId("");
+                  setBomQuantity("1");
+                  setBomReference("");
+                  await loadAll();
+                } catch (err) {
+                  setBomError(err instanceof Error ? err.message : "Failed to add BOM item");
+                }
+              }}
+              className="rounded-[12px] border border-[#E4E4E7] bg-white p-4 space-y-3"
+            >
+              <div className="text-[13px] font-semibold text-[#18181B]">Add Component</div>
+              {bomError && <div className="text-[12px] text-red-600">{bomError}</div>}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+                <select
+                  required
+                  value={bomSubPartId}
+                  onChange={(e) => setBomSubPartId(e.target.value)}
+                  className="sm:col-span-2 rounded-lg border border-[#E4E4E7] px-3 py-2 text-[13px]"
+                >
+                  <option value="">Select component part...</option>
+                  {allParts
+                    .filter((ap) => ap.id !== partId)
+                    .map((ap) => (
+                      <option key={ap.id} value={ap.id}>
+                        {ap.ipn ? `${ap.ipn} — ` : ""}
+                        {ap.name}
+                      </option>
+                    ))}
+                </select>
+                <input
+                  type="number"
+                  step="any"
+                  min="0.0001"
+                  required
+                  value={bomQuantity}
+                  onChange={(e) => setBomQuantity(e.target.value)}
+                  placeholder="Qty"
+                  className="rounded-lg border border-[#E4E4E7] px-3 py-2 text-[13px]"
+                />
+                <div className="flex gap-2">
+                  <input
+                    value={bomReference}
+                    onChange={(e) => setBomReference(e.target.value)}
+                    placeholder="Ref (e.g. R1, U2)"
+                    className="flex-1 rounded-lg border border-[#E4E4E7] px-3 py-2 text-[13px]"
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-lg bg-[#1D4ED8] px-4 py-2 text-[13px] font-medium text-white"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+
+          <div className="rounded-[12px] border border-[#E4E4E7] bg-white overflow-hidden">
+            <table className="w-full text-[13px]">
+              <thead className="bg-[#F4F4F5] text-left text-[11px] uppercase text-[#71717A]">
+                <tr>
+                  <th className="px-4 py-2.5">Component</th>
+                  <th className="px-4 py-2.5">Reference</th>
+                  <th className="px-4 py-2.5 text-right">Quantity</th>
+                  <th className="px-4 py-2.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E4E4E7]">
+                {bomItems.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-6 text-center text-[#71717A]">
+                      No BOM items defined.
+                    </td>
+                  </tr>
+                ) : (
+                  bomItems.map((b) => (
+                    <tr key={b.id}>
+                      <td className="px-4 py-2.5">
+                        <Link href={`/parts/${b.subPartId}`} className="font-medium text-[#1D4ED8] hover:underline">
+                          {b.subPartIpn ? `${b.subPartIpn} · ` : ""}
+                          {b.subPartName}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-2.5 font-mono text-[12px] text-[#52525B]">{b.reference ?? "—"}</td>
+                      <td className="px-4 py-2.5 text-right font-mono">
+                        {b.quantity} {b.subPartUnit ?? ""}
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        {hasPermission("PART:UPDATE") && (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              await apiFetch(`/api/v1/bom-items/${b.id}`, { method: "DELETE" });
+                              await loadAll();
+                            }}
+                            className="text-red-600 hover:underline text-[12px]"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {hasPermission("PART:UPDATE") && (
+            <ImportWizard
+              targetType="BOM"
+              targetFields={[
+                { key: "parentIpn", label: "Parent IPN", required: true },
+                { key: "subPartIpn", label: "Component IPN", required: true },
+                { key: "quantity", label: "Quantity", required: true },
+                { key: "reference", label: "Designator Reference", required: false },
+                { key: "optional", label: "Optional (true/false)", required: false },
+                { key: "consumable", label: "Consumable (true/false)", required: false },
+              ]}
+              onComplete={loadAll}
+            />
+          )}
+
+          <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5 space-y-3">
+            <h3 className="text-[14px] font-semibold text-[#18181B]">
+              Where Used ({whereUsed.length})
+            </h3>
+            {whereUsed.length === 0 ? (
+              <p className="text-[13px] text-[#71717A]">Not used in any parent assembly BOM.</p>
+            ) : (
+              <div className="divide-y divide-[#E4E4E7]">
+                {whereUsed.map((wu) => (
+                  <div key={wu.id} className="py-2 flex items-center justify-between text-[13px]">
+                    <Link href={`/parts/${wu.partId}`} className="font-medium text-[#1D4ED8] hover:underline">
+                      Assembly {wu.partId}
+                    </Link>
+                    <span className="font-mono text-[#52525B]">
+                      Qty: {wu.quantity} {wu.reference ? `(${wu.reference})` : ""}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
