@@ -2,6 +2,8 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 
+const PLATFORM_API_BASE = "/platform/api/platform/v1";
+
 interface TenantSummary {
   id: string;
   name: string;
@@ -56,10 +58,10 @@ export default function PlatformConsolePage() {
   const loadAll = useCallback(async () => {
     try {
       const [tRes, pRes, oRes, aRes] = await Promise.all([
-        fetch("/api/platform/v1/tenants"),
-        fetch("/api/platform/v1/plans"),
-        fetch("/api/platform/v1/outbox"),
-        fetch("/api/platform/v1/audit-logs"),
+        fetch(`${PLATFORM_API_BASE}/tenants`),
+        fetch(`${PLATFORM_API_BASE}/plans`),
+        fetch(`${PLATFORM_API_BASE}/outbox`),
+        fetch(`${PLATFORM_API_BASE}/audit-logs`),
       ]);
       if (tRes.status === 401) {
         setAuthed(false);
@@ -82,7 +84,7 @@ export default function PlatformConsolePage() {
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoginError(null);
-    const res = await fetch("/api/platform/v1/auth/login", {
+    const res = await fetch(`${PLATFORM_API_BASE}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -184,7 +186,7 @@ export default function PlatformConsolePage() {
                       <select
                         value={t.planCode}
                         onChange={async (e) => {
-                          await fetch(`/api/platform/v1/tenants/${t.id}/plan`, {
+                          await fetch(`${PLATFORM_API_BASE}/tenants/${t.id}/plan`, {
                             method: "PUT",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ planCode: e.target.value }),
@@ -206,7 +208,7 @@ export default function PlatformConsolePage() {
                       <button
                         onClick={async () => {
                           const next = t.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
-                          await fetch(`/api/platform/v1/tenants/${t.id}/status`, {
+                          await fetch(`${PLATFORM_API_BASE}/tenants/${t.id}/status`, {
                             method: "PATCH",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ status: next }),
@@ -219,7 +221,7 @@ export default function PlatformConsolePage() {
                       </button>
                       <button
                         onClick={async () => {
-                          const res = await fetch(`/api/platform/v1/tenants/${t.id}/usage-snapshots`, { method: "POST" });
+                          const res = await fetch(`${PLATFORM_API_BASE}/tenants/${t.id}/usage-snapshots`, { method: "POST" });
                           const snap = await res.json();
                           setMessage(`Snapshot for ${t.slug}: ${snap.partsCount} parts, ${snap.locationsCount} locations`);
                         }}
@@ -229,7 +231,7 @@ export default function PlatformConsolePage() {
                       </button>
                       <button
                         onClick={async () => {
-                          const res = await fetch(`/api/platform/v1/tenants/${t.id}/support-sessions`, {
+                          const res = await fetch(`${PLATFORM_API_BASE}/tenants/${t.id}/support-sessions`, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ reason: "Platform Console support check" }),
@@ -266,7 +268,7 @@ export default function PlatformConsolePage() {
                         type="checkbox"
                         checked={f.enabled}
                         onChange={async (e) => {
-                          const res = await fetch(`/api/platform/v1/plans/${p.id}/features/${f.featureKey}`, {
+                          const res = await fetch(`${PLATFORM_API_BASE}/plans/${p.id}/features/${f.featureKey}`, {
                             method: "PUT",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ enabled: e.target.checked, limitValue: f.limitValue }),
@@ -300,7 +302,7 @@ export default function PlatformConsolePage() {
                   </div>
                   <button
                     onClick={async () => {
-                      await fetch(`/api/platform/v1/outbox/${ev.id}/retry`, { method: "POST" });
+                      await fetch(`${PLATFORM_API_BASE}/outbox/${ev.id}/retry`, { method: "POST" });
                       await loadAll();
                     }}
                     className="px-3 py-1 rounded bg-blue-600 text-white"
