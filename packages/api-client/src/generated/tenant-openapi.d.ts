@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/api/v1/stock-locations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getLocation"];
+        put: operations["updateLocation"];
+        post?: never;
+        delete: operations["deleteLocation"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/settings/users/{userId}/roles": {
         parameters: {
             query?: never;
@@ -100,6 +116,214 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/stock/summaries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["getBatchStockSummaries"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stock/reconcile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["reconcileStock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stock-locations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listLocations"];
+        put?: never;
+        post: operations["createLocation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stock-locations/{id}/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["moveLocationSubtree"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stock-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["searchStockItems"];
+        put?: never;
+        post: operations["createStock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stock-items/{id}/transfer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["transferStock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stock-items/{id}/test-results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listTestResults"];
+        put?: never;
+        post: operations["recordTestResult"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stock-items/{id}/split": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["splitStock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stock-items/{id}/serialize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["serializeStock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stock-items/{id}/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["removeStock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stock-items/{id}/count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["countStock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stock-items/{id}/add": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["addStock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stock-items/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["mergeStock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/settings/users/invite": {
         parameters: {
             query?: never;
@@ -158,6 +382,22 @@ export interface paths {
         get: operations["searchParts"];
         put?: never;
         post: operations["createPart"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/parts/{partId}/test-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listTestTemplates"];
+        put?: never;
+        post: operations["createTestTemplate"];
         delete?: never;
         options?: never;
         head?: never;
@@ -286,6 +526,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["commit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/barcode/scan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["resolveScan"];
         delete?: never;
         options?: never;
         head?: never;
@@ -452,6 +708,38 @@ export interface paths {
         patch: operations["updateOrg"];
         trace?: never;
     };
+    "/api/v1/stock-items/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getStockItem"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stock-items/{id}/tracking": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listTrackingHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/settings/users": {
         parameters: {
             query?: never;
@@ -548,6 +836,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/parts/{partId}/stock-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getPartStockSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/parts/{id}/variants": {
         parameters: {
             query?: never;
@@ -604,6 +908,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getMe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/barcode/image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["generateBarcodeImage"];
         put?: never;
         post?: never;
         delete?: never;
@@ -728,6 +1048,36 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        UpdateLocationCommand: {
+            name?: string;
+            description?: string;
+            locationType?: string;
+            structural?: boolean;
+            externalLocation?: boolean;
+            customBarcode?: string;
+        };
+        LocationView: {
+            /** Format: uuid */
+            id?: string;
+            name?: string;
+            description?: string;
+            /** Format: uuid */
+            parentId?: string;
+            path?: string;
+            pathString?: string;
+            /** Format: int32 */
+            depth?: number;
+            locationType?: string;
+            structural?: boolean;
+            externalLocation?: boolean;
+            customBarcode?: string;
+            /** Format: int64 */
+            directItemCount?: number;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
         UserRoleUpdateDto: {
             roleIds: string[];
         };
@@ -940,6 +1290,159 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string;
         };
+        BatchSummariesRequest: {
+            partIds?: string[];
+        };
+        StockSummaryView: {
+            /** Format: uuid */
+            partId?: string;
+            inStock?: number;
+            allocatedToBuilds?: number;
+            allocatedToSales?: number;
+            availableStock?: number;
+            onOrder?: number;
+            inProduction?: number;
+        };
+        DriftEntry: {
+            /** Format: uuid */
+            partId?: string;
+            ipn?: string;
+            summaryInStock?: number;
+            actualInStock?: number;
+        };
+        ReconciliationReport: {
+            /** Format: uuid */
+            tenantId?: string;
+            /** Format: int32 */
+            partsChecked?: number;
+            /** Format: int32 */
+            driftsFoundAndCorrected?: number;
+            drifts?: components["schemas"]["DriftEntry"][];
+        };
+        CreateLocationCommand: {
+            name?: string;
+            description?: string;
+            /** Format: uuid */
+            parentId?: string;
+            locationType?: string;
+            structural?: boolean;
+            externalLocation?: boolean;
+            customBarcode?: string;
+        };
+        MoveLocationPayload: {
+            /** Format: uuid */
+            newParentId?: string;
+        };
+        CreateStockCommand: {
+            /** Format: uuid */
+            partId?: string;
+            /** Format: uuid */
+            locationId?: string;
+            quantity?: number;
+            serialNumber?: string;
+            batchCode?: string;
+            status?: string;
+            /** Format: date */
+            expiryDate?: string;
+            purchasePrice?: number;
+            currency?: string;
+            packaging?: string;
+            building?: boolean;
+            customBarcode?: string;
+            notes?: string;
+        };
+        StockItemView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            partId?: string;
+            partIpn?: string;
+            partName?: string;
+            partUnit?: string;
+            partTrackable?: boolean;
+            /** Format: uuid */
+            locationId?: string;
+            locationName?: string;
+            locationPathString?: string;
+            /** Format: uuid */
+            parentItemId?: string;
+            /** Format: uuid */
+            installedInId?: string;
+            /** Format: uuid */
+            customerId?: string;
+            quantity?: number;
+            serialNumber?: string;
+            batchCode?: string;
+            status?: string;
+            /** Format: date */
+            expiryDate?: string;
+            purchasePrice?: number;
+            currency?: string;
+            packaging?: string;
+            building?: boolean;
+            customBarcode?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        TransferStockCommand: {
+            /** Format: uuid */
+            targetLocationId?: string;
+            quantity?: number;
+            notes?: string;
+        };
+        RecordTestResultCommand: {
+            /** Format: uuid */
+            templateId?: string;
+            testName?: string;
+            passed?: boolean;
+            value?: string;
+            notes?: string;
+            /** Format: uuid */
+            attachmentId?: string;
+        };
+        StockItemTestResultView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            stockItemId?: string;
+            /** Format: uuid */
+            templateId?: string;
+            testName?: string;
+            passed?: boolean;
+            value?: string;
+            notes?: string;
+            /** Format: uuid */
+            attachmentId?: string;
+            /** Format: uuid */
+            testedBy?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        SplitStockCommand: {
+            splitQuantity?: number;
+            /** Format: uuid */
+            targetLocationId?: string;
+            batchCode?: string;
+            notes?: string;
+        };
+        SerializeStockCommand: {
+            serialNumbers?: string[];
+            /** Format: uuid */
+            targetLocationId?: string;
+            notes?: string;
+        };
+        StockQuantityOperationCommand: {
+            quantity?: number;
+            notes?: string;
+        };
+        MergeStockCommand: {
+            stockItemIds?: string[];
+            /** Format: uuid */
+            targetLocationId?: string;
+            notes?: string;
+        };
         UserInviteDto: {
             email: string;
             fullName: string;
@@ -997,6 +1500,26 @@ export interface components {
             /** Format: uuid */
             templateId?: string;
             value?: string;
+        };
+        CreateTestTemplateCommand: {
+            testName?: string;
+            description?: string;
+            required?: boolean;
+            requiresValue?: boolean;
+            requiresAttachment?: boolean;
+        };
+        PartTestTemplateView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            partId?: string;
+            testName?: string;
+            description?: string;
+            required?: boolean;
+            requiresValue?: boolean;
+            requiresAttachment?: boolean;
+            /** Format: date-time */
+            createdAt?: string;
         };
         UpsertPartParameterCommand: {
             /** Format: uuid */
@@ -1119,6 +1642,19 @@ export interface components {
             /** Format: int32 */
             committedRows?: number;
         };
+        BarcodeScanRequest: {
+            barcode?: string;
+        };
+        ScanResolutionResult: {
+            matchedType?: string;
+            /** Format: uuid */
+            entityId?: string;
+            code?: string;
+            title?: string;
+            subtitle?: string;
+            href?: string;
+            detail?: Record<string, never>;
+        };
         RecoveryFinishDto: {
             resetToken: string;
             newPassword: string;
@@ -1229,6 +1765,59 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string;
         };
+        PageStockItemView: {
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            /** Format: int32 */
+            numberOfElements?: number;
+            first?: boolean;
+            last?: boolean;
+            pageable?: components["schemas"]["PageableObject"];
+            sort?: components["schemas"]["SortObject"];
+            /** Format: int32 */
+            size?: number;
+            content?: components["schemas"]["StockItemView"][];
+            /** Format: int32 */
+            number?: number;
+            empty?: boolean;
+        };
+        PageableObject: {
+            paged?: boolean;
+            sort?: components["schemas"]["SortObject"];
+            unpaged?: boolean;
+            /** Format: int32 */
+            pageSize?: number;
+            /** Format: int32 */
+            pageNumber?: number;
+            /** Format: int64 */
+            offset?: number;
+        };
+        SortObject: {
+            sorted?: boolean;
+            unsorted?: boolean;
+            empty?: boolean;
+        };
+        StockTrackingView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            stockItemId?: string;
+            /** Format: uuid */
+            partId?: string;
+            trackingType?: string;
+            quantityDelta?: number;
+            quantityAfter?: number;
+            /** Format: uuid */
+            locationId?: string;
+            locationPathString?: string;
+            notes?: string;
+            /** Format: uuid */
+            userId?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
         AuditEvent: {
             /** Format: uuid */
             id?: string;
@@ -1273,29 +1862,13 @@ export interface components {
             numberOfElements?: number;
             first?: boolean;
             last?: boolean;
-            sort?: components["schemas"]["SortObject"];
             pageable?: components["schemas"]["PageableObject"];
+            sort?: components["schemas"]["SortObject"];
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["AuditEvent"][];
             /** Format: int32 */
             number?: number;
-            empty?: boolean;
-        };
-        PageableObject: {
-            paged?: boolean;
-            sort?: components["schemas"]["SortObject"];
-            unpaged?: boolean;
-            /** Format: int32 */
-            pageSize?: number;
-            /** Format: int32 */
-            pageNumber?: number;
-            /** Format: int64 */
-            offset?: number;
-        };
-        SortObject: {
-            sorted?: boolean;
-            unsorted?: boolean;
             empty?: boolean;
         };
         ApiToken: {
@@ -1332,8 +1905,8 @@ export interface components {
             numberOfElements?: number;
             first?: boolean;
             last?: boolean;
-            sort?: components["schemas"]["SortObject"];
             pageable?: components["schemas"]["PageableObject"];
+            sort?: components["schemas"]["SortObject"];
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["PartView"][];
@@ -1400,6 +1973,76 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getLocation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LocationView"];
+                };
+            };
+        };
+    };
+    updateLocation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateLocationCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LocationView"];
+                };
+            };
+        };
+    };
+    deleteLocation: {
+        parameters: {
+            query?: {
+                mode?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     updateUserRoles: {
         parameters: {
             query?: never;
@@ -1680,6 +2323,404 @@ export interface operations {
             };
         };
     };
+    getBatchStockSummaries: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchSummariesRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: components["schemas"]["StockSummaryView"];
+                    };
+                };
+            };
+        };
+    };
+    reconcileStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReconciliationReport"];
+                };
+            };
+        };
+    };
+    listLocations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LocationView"][];
+                };
+            };
+        };
+    };
+    createLocation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLocationCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LocationView"];
+                };
+            };
+        };
+    };
+    moveLocationSubtree: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveLocationPayload"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LocationView"];
+                };
+            };
+        };
+    };
+    searchStockItems: {
+        parameters: {
+            query?: {
+                partId?: string;
+                locationId?: string;
+                includeSublocations?: boolean;
+                status?: string;
+                batchCode?: string;
+                serialNumber?: string;
+                q?: string;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageStockItemView"];
+                };
+            };
+        };
+    };
+    createStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateStockCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StockItemView"];
+                };
+            };
+        };
+    };
+    transferStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransferStockCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StockItemView"];
+                };
+            };
+        };
+    };
+    listTestResults: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StockItemTestResultView"][];
+                };
+            };
+        };
+    };
+    recordTestResult: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordTestResultCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StockItemTestResultView"];
+                };
+            };
+        };
+    };
+    splitStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SplitStockCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StockItemView"];
+                };
+            };
+        };
+    };
+    serializeStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SerializeStockCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StockItemView"][];
+                };
+            };
+        };
+    };
+    removeStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StockQuantityOperationCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StockItemView"];
+                };
+            };
+        };
+    };
+    countStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StockQuantityOperationCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StockItemView"];
+                };
+            };
+        };
+    };
+    addStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StockQuantityOperationCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StockItemView"];
+                };
+            };
+        };
+    };
+    mergeStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergeStockCommand"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StockItemView"];
+                };
+            };
+        };
+    };
     inviteUser: {
         parameters: {
             query?: never;
@@ -1851,6 +2892,54 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PartView"];
+                };
+            };
+        };
+    };
+    listTestTemplates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                partId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PartTestTemplateView"][];
+                };
+            };
+        };
+    };
+    createTestTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                partId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTestTemplateCommand"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PartTestTemplateView"];
                 };
             };
         };
@@ -2147,6 +3236,30 @@ export interface operations {
             };
         };
     };
+    resolveScan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BarcodeScanRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ScanResolutionResult"];
+                };
+            };
+        };
+    };
     finishRecovery: {
         parameters: {
             query?: never;
@@ -2383,6 +3496,50 @@ export interface operations {
             };
         };
     };
+    getStockItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StockItemView"];
+                };
+            };
+        };
+    };
+    listTrackingHistory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StockTrackingView"][];
+                };
+            };
+        };
+    };
     listUsers: {
         parameters: {
             query?: never;
@@ -2521,6 +3678,28 @@ export interface operations {
             };
         };
     };
+    getPartStockSummary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                partId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StockSummaryView"];
+                };
+            };
+        };
+    };
     listVariants: {
         parameters: {
             query?: never;
@@ -2603,6 +3782,31 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MeResponse"];
+                };
+            };
+        };
+    };
+    generateBarcodeImage: {
+        parameters: {
+            query: {
+                code: string;
+                format?: string;
+                width?: number;
+                height?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
                 };
             };
         };

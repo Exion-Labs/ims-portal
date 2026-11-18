@@ -10,6 +10,7 @@ import {
   NoteView,
   ParameterTemplateView,
   PartView,
+  StockSummaryView,
 } from "@ims/api-client";
 import { EmptyState, ErrorState, StatTile, StatusBadge } from "@ims/ui";
 import { useEntitlements } from "@/lib/entitlements";
@@ -45,6 +46,7 @@ export default function PartDetailPage() {
   const [revisions, setRevisions] = useState<PartView[]>([]);
   const [notes, setNotes] = useState<NoteView[]>([]);
   const [attachments, setAttachments] = useState<AttachmentView[]>([]);
+  const [stockSummary, setStockSummary] = useState<StockSummaryView | null>(null);
   const [activeTab, setActiveTab] = useState<DetailTab>("overview");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -91,7 +93,7 @@ export default function PartDetailPage() {
     setLoading(true);
     setError(null);
     try {
-      const [p, cats, tpls, vars, revs, nts, atts] = await Promise.all([
+      const [p, cats, tpls, vars, revs, nts, atts, summary] = await Promise.all([
         apiFetch<PartView>(`/api/v1/parts/${partId}`),
         apiFetch<CategoryView[]>("/api/v1/part-categories"),
         apiFetch<ParameterTemplateView[]>("/api/v1/parameter-templates"),
@@ -99,6 +101,7 @@ export default function PartDetailPage() {
         apiFetch<PartView[]>(`/api/v1/parts/${partId}/revisions`),
         apiFetch<NoteView[]>(`/api/v1/notes?entityType=Part&entityId=${partId}`),
         apiFetch<AttachmentView[]>(`/api/v1/attachments?entityType=Part&entityId=${partId}`),
+        apiFetch<StockSummaryView>(`/api/v1/parts/${partId}/stock-summary`).catch(() => null),
       ]);
       setPart(p);
       setCategories(cats);
@@ -107,6 +110,7 @@ export default function PartDetailPage() {
       setRevisions(revs);
       setNotes(nts);
       setAttachments(atts);
+      setStockSummary(summary);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load part details");
     } finally {
@@ -410,27 +414,42 @@ export default function PartDetailPage() {
       </div>
 
       {/* Summary Strip */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <StatTile
-          label="Category Path"
-          value={part.categoryName ?? "Uncategorized"}
-          hint={part.categoryPathString ?? "No category assigned"}
-        />
-        <StatTile
-          label="Unit & Minimum Stock"
-          value={`${Number(part.minimumStock).toLocaleString()} ${part.unit}`}
-          hint="Low-stock alert threshold"
+          label="In Stock"
+          value={`${Number(stockSummary?.inStock ?? 0).toLocaleString()} ${part.unit}`}
+          hint={`Min: ${Number(part.minimumStock).toLocaleString()} ${part.unit}`}
           mono
         />
         <StatTile
-          label="Typed Parameters"
-          value={part.parameters.length}
-          hint="SI-normalized engineering specs"
+          label="Available"
+          value={`${Number(stockSummary?.availableStock ?? 0).toLocaleString()} ${part.unit}`}
+          hint="Unallocated inventory"
+          mono
         />
         <StatTile
-          label="Variants & Revisions"
-          value={`${variants.length} var · ${revisions.length} rev`}
-          hint="Part family lineage"
+          label="Allocated (Builds)"
+          value={`${Number(stockSummary?.allocatedToBuilds ?? 0).toLocaleString()} ${part.unit}`}
+          hint="Reserved for BOs"
+          mono
+        />
+        <StatTile
+          label="Allocated (Sales)"
+          value={`${Number(stockSummary?.allocatedToSales ?? 0).toLocaleString()} ${part.unit}`}
+          hint="Reserved for SOs"
+          mono
+        />
+        <StatTile
+          label="On Order"
+          value={`${Number(stockSummary?.onOrder ?? 0).toLocaleString()} ${part.unit}`}
+          hint="Inbound PO lines"
+          mono
+        />
+        <StatTile
+          label="In Production"
+          value={`${Number(stockSummary?.inProduction ?? 0).toLocaleString()} ${part.unit}`}
+          hint="Active build outputs"
+          mono
         />
       </div>
 

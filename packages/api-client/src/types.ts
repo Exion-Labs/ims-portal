@@ -245,3 +245,105 @@ export interface AttachmentView {
   comment: string | null;
   createdAt: string;
 }
+
+export interface LocationView {
+  id: string;
+  name: string;
+  description: string | null;
+  parentId: string | null;
+  path: string;
+  pathString: string;
+  depth: number;
+  locationType: string;
+  structural: boolean;
+  externalLocation: boolean;
+  customBarcode: string | null;
+  directItemCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StockSummaryView {
+  partId: string;
+  inStock: number;
+  allocatedToBuilds: number;
+  allocatedToSales: number;
+  availableStock: number;
+  onOrder: number;
+  inProduction: number;
+}
+
+export interface StockItemView {
+  id: string;
+  partId: string;
+  partIpn: string;
+  partName: string;
+  partUnit: string;
+  partTrackable: boolean;
+  locationId: string | null;
+  locationName: string | null;
+  locationPathString: string | null;
+  parentItemId: string | null;
+  installedInId: string | null;
+  customerId: string | null;
+  quantity: number;
+  serialNumber: string | null;
+  batchCode: string | null;
+  status: string;
+  expiryDate: string | null;
+  purchasePrice: number | null;
+  currency: string | null;
+  packaging: string | null;
+  building: boolean;
+  customBarcode: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StockTrackingView {
+  id: string;
+  stockItemId: string;
+  partId: string;
+  trackingType: string;
+  quantityDelta: number;
+  quantityAfter: number;
+  locationId: string | null;
+  locationPathString: string | null;
+  notes: string | null;
+  userId: string | null;
+  createdAt: string;
+}
+
+export interface PartTestTemplateView {
+  id: string;
+  partId: string;
+  testName: string;
+  description: string | null;
+  required: boolean;
+  requiresValue: boolean;
+  requiresAttachment: boolean;
+  createdAt: string;
+}
+
+export interface StockItemTestResultView {
+  id: string;
+  stockItemId: string;
+  templateId: string | null;
+  testName: string;
+  passed: boolean;
+  value: string | null;
+  notes: string | null;
+  attachmentId: string | null;
+  testedBy: string | null;
+  createdAt: string;
+}
+
+export interface ScanResolutionResult {
+  matchedType: "STOCK_ITEM" | "STOCK_LOCATION" | "PART" | "SUPPLIER_PART";
+  entityId: string;
+  code: string;
+  title: string;
+  subtitle: string;
+  href: string;
+  detail: unknown;
+}

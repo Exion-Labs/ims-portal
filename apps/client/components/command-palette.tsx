@@ -21,6 +21,13 @@ const QUICK_LINKS: SearchResultItem[] = [
     href: "/parts",
   },
   {
+    category: "Inventory",
+    id: "nav-stock",
+    title: "Warehouse Locations & Stock Engine",
+    subtitle: "Storage bins, batches, serialized stock, transfers, and barcode scanner",
+    href: "/stock",
+  },
+  {
     category: "Settings",
     id: "nav-org",
     title: "Organization Settings",

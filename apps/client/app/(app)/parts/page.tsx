@@ -10,6 +10,7 @@ import {
   PageResponse,
   ParameterTemplateView,
   PartView,
+  StockSummaryView,
 } from "@ims/api-client";
 import {
   BulkActionBar,
@@ -45,6 +46,7 @@ export default function PartsCatalogPage() {
   const [categories, setCategories] = useState<CategoryView[]>([]);
   const [templates, setTemplates] = useState<ParameterTemplateView[]>([]);
   const [partsPage, setPartsPage] = useState<PageResponse<PartView> | null>(null);
+  const [stockSummaries, setStockSummaries] = useState<Record<string, StockSummaryView>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -151,6 +153,20 @@ export default function PartsCatalogPage() {
 
       const res = await apiFetch<PageResponse<PartView>>(`/api/v1/parts?${params.toString()}`);
       setPartsPage(res);
+      if (res.content.length > 0) {
+        try {
+          const summaries = await apiFetch<Record<string, StockSummaryView>>(
+            "/api/v1/stock/summaries",
+            {
+              method: "POST",
+              body: JSON.stringify({ partIds: res.content.map((p) => p.id) }),
+            }
+          );
+          setStockSummaries(summaries);
+        } catch {
+          setStockSummaries({});
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load parts");
     } finally {
@@ -442,15 +458,31 @@ export default function PartsCatalogPage() {
       },
       {
         accessorKey: "minimumStock",
-        header: () => <div className="text-right">Min Stock</div>,
-        cell: ({ row }) => (
-          <div className="text-right font-mono text-[12px] tabular-nums text-[#18181B]">
-            {Number(row.original.minimumStock).toLocaleString()} {row.original.unit}
-          </div>
-        ),
+        header: () => <div className="text-right">In Stock / Min</div>,
+        cell: ({ row }) => {
+          const p = row.original;
+          const summary = stockSummaries[p.id];
+          const inStock = Number(summary?.inStock ?? 0);
+          const minStock = Number(p.minimumStock ?? 0);
+          const tone =
+            inStock <= 0
+              ? "danger"
+              : minStock > 0 && inStock < minStock
+                ? "warning"
+                : "success";
+          return (
+            <div className="flex items-center justify-end gap-2 font-mono text-[12px] tabular-nums">
+              <StatusBadge
+                label={`${inStock.toLocaleString()} ${p.unit}`}
+                tone={tone}
+              />
+              <span className="text-[#63636B]">/ {minStock.toLocaleString()}</span>
+            </div>
+          );
+        },
       },
     ],
-    []
+    [stockSummaries]
   );
 
   const selectedCount = selectedParts.length;
