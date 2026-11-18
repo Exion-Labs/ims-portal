@@ -52,7 +52,7 @@ type OperationModal =
   | { type: "serialize"; item: StockItemView }
   | { type: "inspect"; item: StockItemView };
 
-export default function StockAndLocationsPage() {
+function StockAndLocationsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialLocId = searchParams.get("locationId");
@@ -1548,5 +1548,13 @@ export default function StockAndLocationsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function StockAndLocationsPage() {
+  return (
+    <React.Suspense fallback={<div className="p-8 text-sm text-muted-foreground">Loading stock...</div>}>
+      <StockAndLocationsPageContent />
+    </React.Suspense>
   );
 }

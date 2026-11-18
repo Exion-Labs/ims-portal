@@ -38,7 +38,7 @@ import {
   X,
 } from "lucide-react";
 
-export default function PartsCatalogPage() {
+function PartsCatalogPageContent() {
   const searchParams = useSearchParams();
   const initialCatId = searchParams.get("categoryId");
   const { me, hasPermission, refetch } = useEntitlements();
@@ -1382,5 +1382,13 @@ export default function PartsCatalogPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function PartsCatalogPage() {
+  return (
+    <React.Suspense fallback={<div className="p-8 text-sm text-muted-foreground">Loading parts...</div>}>
+      <PartsCatalogPageContent />
+    </React.Suspense>
   );
 }

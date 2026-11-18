@@ -64,6 +64,13 @@ const QUICK_LINKS: SearchResultItem[] = [
   },
   {
     category: "Settings",
+    id: "nav-integrations",
+    title: "Reports, Webhooks & Real-Time SSE",
+    subtitle: "Custom PDF templates, HMAC webhooks, and live SSE event streams",
+    href: "/settings/integrations",
+  },
+  {
+    category: "Settings",
     id: "nav-org",
     title: "Organization Settings",
     subtitle: "Name, base currency, timezone, and preferences",
