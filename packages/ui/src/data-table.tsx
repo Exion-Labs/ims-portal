@@ -10,7 +10,15 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, ArrowUpDown, Download, SlidersHorizontal } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  SlidersHorizontal,
+} from "lucide-react";
 import { cn } from "./utils";
 import { EmptyState } from "./primitives";
 
@@ -245,17 +253,17 @@ export function DataTable<TData>({
               type="button"
               disabled={pageIndex <= 0}
               onClick={() => onPageChange(pageIndex - 1)}
-              className="h-7 rounded border border-[#E4E4E7] bg-white px-2.5 text-[12px] font-medium text-[#18181B] hover:bg-[#F7F7F8] disabled:opacity-40"
+              className="inline-flex h-7 items-center gap-1 rounded bg-white px-2.5 text-[12px] font-medium text-[#18181B] hover:bg-[#F7F7F8] disabled:opacity-40"
             >
-              Previous
+              <ChevronLeft className="h-3.5 w-3.5" />
             </button>
             <button
               type="button"
               disabled={(pageIndex + 1) * pageSize >= totalCount}
               onClick={() => onPageChange(pageIndex + 1)}
-              className="h-7 rounded border border-[#E4E4E7] bg-white px-2.5 text-[12px] font-medium text-[#18181B] hover:bg-[#F7F7F8] disabled:opacity-40"
+              className="inline-flex h-7 items-center gap-1 rounded bg-white px-2.5 text-[12px] font-medium text-[#18181B] hover:bg-[#F7F7F8] disabled:opacity-40"
             >
-              Next
+              <ChevronRight className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>

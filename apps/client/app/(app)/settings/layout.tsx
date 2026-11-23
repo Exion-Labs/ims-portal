@@ -3,32 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Building,
-  CreditCard,
-  FileCode2,
-  Hash,
-  History,
-  KeyRound,
-  Shield,
-  Users,
-} from "lucide-react";
+import { SETTINGS_NAV } from "@/lib/constants";
 import { useEntitlements } from "@/lib/entitlements";
-
-const SETTINGS_NAV = [
-  { label: "Organization", href: "/settings/organization", icon: Building },
-  { label: "Users & Invitations", href: "/settings/users", icon: Users },
-  { label: "Roles & Permissions", href: "/settings/roles", icon: Shield },
-  {
-    label: "API Tokens",
-    href: "/settings/api-tokens",
-    icon: KeyRound,
-    feature: "API_ACCESS",
-  },
-  { label: "Reference Formats", href: "/settings/sequences", icon: Hash },
-  { label: "Audit Log", href: "/settings/audit-log", icon: History },
-  { label: "Plan & Features", href: "/settings/plan", icon: CreditCard },
-];
 
 export default function SettingsLayout({
   children,

@@ -24,6 +24,7 @@ import {
   StatusBadge,
 } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
+import { ListToolbar, ListToolbarMenuItem } from "@/components/list-toolbar";
 import {
   ArrowRightLeft,
   Boxes,
@@ -39,7 +40,6 @@ import {
   Plus,
   QrCode,
   RefreshCw,
-  Search,
   Trash2,
   X,
 } from "lucide-react";
@@ -562,78 +562,6 @@ function StockAndLocationsPageContent() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-[24px] font-semibold tracking-tight text-[#18181B]">
-            Warehouse Locations & Stock Engine
-          </h1>
-          <p className="mt-0.5 text-[14px] text-[#52525B]">
-            Hierarchical <code className="font-mono text-[12px]">ltree</code> warehouse bins,
-            pessimistic row-locked stock mutations, batched summary deltas, and barcode resolution.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <FeatureGate feature="BARCODES">
-            <button
-              type="button"
-              onClick={() => {
-                setScanInput("");
-                setScanResult(null);
-                setScanError(null);
-                setShowScanner(true);
-              }}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
-            >
-              <QrCode className="h-4 w-4 text-[#1D4ED8]" />
-              <span>Scan Barcode</span>
-            </button>
-          </FeatureGate>
-
-          <button
-            type="button"
-            onClick={handleReconcile}
-            disabled={reconciling}
-            className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
-          >
-            <RefreshCw className={`h-4 w-4 text-[#166534] ${reconciling ? "animate-spin" : ""}`} />
-            <span>{reconciling ? "Reconciling…" : "Verify & Reconcile"}</span>
-          </button>
-
-          <FeatureGate feature="IMPORT_EXPORT">
-            <button
-              type="button"
-              onClick={() => setShowImporter((v) => !v)}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
-            >
-              <FileSpreadsheet className="h-4 w-4 text-[#1D4ED8]" />
-              <span>{showImporter ? "Hide Importer" : "Import Stock"}</span>
-            </button>
-          </FeatureGate>
-
-          {hasPermission("STOCK:CREATE") && (
-            <button
-              type="button"
-              onClick={() => {
-                setCreateStockError(null);
-                setCreateStockForm((prev) => ({
-                  ...prev,
-                  partId: parts[0]?.id ?? "",
-                  locationId:
-                    selectedLocation && !selectedLocation.structural ? selectedLocation.id : "",
-                }));
-                setShowCreateStock(true);
-              }}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#1D4ED8] px-3.5 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
-            >
-              <Plus className="h-4 w-4" />
-              <span>New Stock Item</span>
-            </button>
-          )}
-        </div>
-      </div>
-
       {reconcileBanner && (
         <div className="flex items-center justify-between rounded-[10px] border border-[#BBF7D0] bg-[#DCFCE7]/70 px-4 py-2.5 text-[13px] text-[#166534]">
           <span className="flex items-center gap-2 font-medium">
@@ -840,38 +768,87 @@ function StockAndLocationsPageContent() {
 
         {/* Right Pane: Stock Filters + DataTable */}
         <div className="space-y-4 lg:col-span-9">
-          <div className="flex flex-wrap items-center gap-3 rounded-[12px] border border-[#E4E4E7] bg-white p-4">
-            <div className="relative min-w-[240px] flex-1">
-              <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-[#63636B]" />
-              <input
-                type="text"
-                value={searchQuery}
+          <ListToolbar
+            searchQuery={searchQuery}
+            onSearchChange={(val) => {
+              setSearchQuery(val);
+              setPageIndex(0);
+            }}
+            searchPlaceholder="Search batch code, serial number, or custom barcode…"
+            filters={
+              <select
+                value={statusFilter}
                 onChange={(e) => {
-                  setSearchQuery(e.target.value);
+                  setStatusFilter(e.target.value);
                   setPageIndex(0);
                 }}
-                placeholder="Search batch code, serial number, or custom barcode…"
-                className="h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] pr-3 pl-9 text-[13px] focus:border-[#1D4ED8] focus:bg-white focus:outline-hidden"
-              />
-            </div>
-
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPageIndex(0);
-              }}
-              className="h-9 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
-            >
-              <option value="">All Statuses</option>
-              <option value="OK">OK</option>
-              <option value="ATTENTION">ATTENTION</option>
-              <option value="QUARANTINED">QUARANTINED</option>
-              <option value="IN_TRANSIT">IN_TRANSIT</option>
-              <option value="DAMAGED">DAMAGED</option>
-              <option value="RETURNED">RETURNED</option>
-            </select>
-          </div>
+                className="h-9 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+              >
+                <option value="">All Statuses</option>
+                <option value="OK">OK</option>
+                <option value="ATTENTION">ATTENTION</option>
+                <option value="QUARANTINED">QUARANTINED</option>
+                <option value="IN_TRANSIT">IN_TRANSIT</option>
+                <option value="DAMAGED">DAMAGED</option>
+                <option value="RETURNED">RETURNED</option>
+              </select>
+            }
+            menuItems={(() => {
+              const items: ListToolbarMenuItem[] = [];
+              if (hasFeature("IMPORT_EXPORT")) {
+                items.push({
+                  key: "import",
+                  label: showImporter ? "Hide Importer" : "Import Stock",
+                  icon: <FileSpreadsheet className="h-4 w-4 text-[#1D4ED8]" />,
+                  onClick: () => setShowImporter((v) => !v),
+                });
+              }
+              if (hasFeature("BARCODES")) {
+                items.push({
+                  key: "scan",
+                  label: "Scan Barcode",
+                  icon: <QrCode className="h-4 w-4 text-[#1D4ED8]" />,
+                  onClick: () => {
+                    setScanInput("");
+                    setScanResult(null);
+                    setScanError(null);
+                    setShowScanner(true);
+                  },
+                });
+              }
+              items.push({
+                key: "reconcile",
+                label: reconciling ? "Reconciling…" : "Verify & Reconcile",
+                icon: (
+                  <RefreshCw
+                    className={`h-4 w-4 text-[#166534] ${reconciling ? "animate-spin" : ""}`}
+                  />
+                ),
+                onClick: handleReconcile,
+                disabled: reconciling,
+              });
+              return items;
+            })()}
+            primaryAction={
+              hasPermission("STOCK:CREATE")
+                ? {
+                    label: "New Stock Item",
+                    onClick: () => {
+                      setCreateStockError(null);
+                      setCreateStockForm((prev) => ({
+                        ...prev,
+                        partId: parts[0]?.id ?? "",
+                        locationId:
+                          selectedLocation && !selectedLocation.structural
+                            ? selectedLocation.id
+                            : "",
+                      }));
+                      setShowCreateStock(true);
+                    },
+                  }
+                : undefined
+            }
+          />
 
           {error ? (
             <ErrorState message={error} onRetry={loadStock} />

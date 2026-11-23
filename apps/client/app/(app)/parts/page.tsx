@@ -8,7 +8,6 @@ import {
   apiFetch,
   CategoryView,
   PageResponse,
-  ParameterTemplateView,
   PartView,
   StockSummaryView,
 } from "@ims/api-client";
@@ -22,6 +21,7 @@ import {
   StatusBadge,
 } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
+import { ListToolbar } from "@/components/list-toolbar";
 import {
   ArrowRightLeft,
   Download,
@@ -29,11 +29,7 @@ import {
   FileSpreadsheet,
   Folder,
   FolderPlus,
-  Filter,
-  Lock,
   Plus,
-  Search,
-  SlidersHorizontal,
   Trash2,
   X,
 } from "lucide-react";
@@ -41,10 +37,9 @@ import {
 function PartsCatalogPageContent() {
   const searchParams = useSearchParams();
   const initialCatId = searchParams.get("categoryId");
-  const { me, hasPermission, refetch } = useEntitlements();
+  const { me, hasFeature, hasPermission, refetch } = useEntitlements();
 
   const [categories, setCategories] = useState<CategoryView[]>([]);
-  const [templates, setTemplates] = useState<ParameterTemplateView[]>([]);
   const [partsPage, setPartsPage] = useState<PageResponse<PartView> | null>(null);
   const [stockSummaries, setStockSummaries] = useState<Record<string, StockSummaryView>>({});
   const [loading, setLoading] = useState(true);
@@ -54,18 +49,9 @@ function PartsCatalogPageContent() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(initialCatId);
   const [includeSubcategories, setIncludeSubcategories] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [flagAssembly, setFlagAssembly] = useState<boolean | null>(null);
-  const [flagComponent, setFlagComponent] = useState<boolean | null>(null);
-  const [flagTrackable, setFlagTrackable] = useState<boolean | null>(null);
-  const [flagPurchaseable, setFlagPurchaseable] = useState<boolean | null>(null);
-  const [flagSalable, setFlagSalable] = useState<boolean | null>(null);
-  const [flagVirtual, setFlagVirtual] = useState<boolean | null>(null);
-
-  // Parameter Range Filters
-  const [paramTemplateId, setParamTemplateId] = useState<string>("");
-  const [paramMin, setParamMin] = useState<string>("");
-  const [paramMax, setParamMax] = useState<string>("");
-  const [paramValueText, setParamValueText] = useState<string>("");
+  const [quickFilter, setQuickFilter] = useState<
+    "all" | "salable" | "purchaseable" | "trackable" | "low_stock"
+  >("all");
 
   const [pageIndex, setPageIndex] = useState(0);
   const [selectedParts, setSelectedParts] = useState<PartView[]>([]);
@@ -76,23 +62,18 @@ function PartsCatalogPageContent() {
   const [showCategoryModal, setShowCategoryModal] = useState<
     null | { mode: "create" | "edit" | "move"; category?: CategoryView }
   >(null);
-  const [showTemplatesModal, setShowTemplatesModal] = useState(false);
 
-  // Part form state
+  // Item form state (simplified for small business, defaults to purchaseable + salable)
   const [partForm, setPartForm] = useState({
     ipn: "",
     name: "",
     description: "",
     categoryId: "",
-    revision: "A",
     unit: "pcs",
     minimumStock: "0",
-    assembly: false,
-    component: true,
-    trackable: false,
     purchaseable: true,
-    salable: false,
-    virtual: false,
+    salable: true,
+    trackable: false,
   });
   const [partFormError, setPartFormError] = useState<string | null>(null);
   const [submittingPart, setSubmittingPart] = useState(false);
@@ -101,28 +82,14 @@ function PartsCatalogPageContent() {
   const [catName, setCatName] = useState("");
   const [catDesc, setCatDesc] = useState("");
   const [catParentId, setCatParentId] = useState("");
-  const [catStructural, setCatStructural] = useState(false);
   const [catFormError, setCatFormError] = useState<string | null>(null);
-
-  // Parameter Template form state
-  const [tplName, setTplName] = useState("");
-  const [tplUnits, setTplUnits] = useState("");
-  const [tplDesc, setTplDesc] = useState("");
-  const [tplChoices, setTplChoices] = useState("");
-  const [tplCheckbox, setTplCheckbox] = useState(false);
-  const [tplCategoryId, setTplCategoryId] = useState("");
-  const [tplError, setTplError] = useState<string | null>(null);
 
   const loadMetadata = useCallback(async () => {
     try {
-      const [cats, tpls] = await Promise.all([
-        apiFetch<CategoryView[]>("/api/v1/part-categories"),
-        apiFetch<ParameterTemplateView[]>("/api/v1/parameter-templates"),
-      ]);
+      const cats = await apiFetch<CategoryView[]>("/api/v1/part-categories");
       setCategories(cats);
-      setTemplates(tpls);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load catalog metadata");
+      setError(err instanceof Error ? err.message : "Failed to load categories");
     }
   }, []);
 
@@ -138,18 +105,9 @@ function PartsCatalogPageContent() {
         params.set("categoryId", selectedCategoryId);
         params.set("includeSubcategories", String(includeSubcategories));
       }
-      if (flagAssembly !== null) params.set("assembly", String(flagAssembly));
-      if (flagComponent !== null) params.set("component", String(flagComponent));
-      if (flagTrackable !== null) params.set("trackable", String(flagTrackable));
-      if (flagPurchaseable !== null) params.set("purchaseable", String(flagPurchaseable));
-      if (flagSalable !== null) params.set("salable", String(flagSalable));
-      if (flagVirtual !== null) params.set("virtual", String(flagVirtual));
-      if (paramTemplateId) {
-        params.set("paramTemplateId", paramTemplateId);
-        if (paramMin.trim()) params.set("paramMin", paramMin.trim());
-        if (paramMax.trim()) params.set("paramMax", paramMax.trim());
-        if (paramValueText.trim()) params.set("paramValueText", paramValueText.trim());
-      }
+      if (quickFilter === "salable") params.set("salable", "true");
+      if (quickFilter === "purchaseable") params.set("purchaseable", "true");
+      if (quickFilter === "trackable") params.set("trackable", "true");
 
       const res = await apiFetch<PageResponse<PartView>>(`/api/v1/parts?${params.toString()}`);
       setPartsPage(res);
@@ -168,26 +126,11 @@ function PartsCatalogPageContent() {
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load parts");
+      setError(err instanceof Error ? err.message : "Failed to load items");
     } finally {
       setLoading(false);
     }
-  }, [
-    pageIndex,
-    searchQuery,
-    selectedCategoryId,
-    includeSubcategories,
-    flagAssembly,
-    flagComponent,
-    flagTrackable,
-    flagPurchaseable,
-    flagSalable,
-    flagVirtual,
-    paramTemplateId,
-    paramMin,
-    paramMax,
-    paramValueText,
-  ]);
+  }, [pageIndex, searchQuery, selectedCategoryId, includeSubcategories, quickFilter]);
 
   useEffect(() => {
     loadMetadata();
@@ -202,10 +145,24 @@ function PartsCatalogPageContent() {
     [categories, selectedCategoryId]
   );
 
-  const selectedTemplate = useMemo(
-    () => templates.find((t) => t.id === paramTemplateId) ?? null,
-    [templates, paramTemplateId]
-  );
+  const lowStockCount = useMemo(() => {
+    const items = partsPage?.content ?? [];
+    return items.filter((p) => {
+      const inStock = Number(stockSummaries[p.id]?.inStock ?? 0);
+      const minStock = Number(p.minimumStock ?? 0);
+      return inStock <= 0 || (minStock > 0 && inStock < minStock);
+    }).length;
+  }, [partsPage, stockSummaries]);
+
+  const displayedParts = useMemo(() => {
+    const items = partsPage?.content ?? [];
+    if (quickFilter !== "low_stock") return items;
+    return items.filter((p) => {
+      const inStock = Number(stockSummaries[p.id]?.inStock ?? 0);
+      const minStock = Number(p.minimumStock ?? 0);
+      return inStock <= 0 || (minStock > 0 && inStock < minStock);
+    });
+  }, [partsPage, quickFilter, stockSummaries]);
 
   async function handleCreatePart(e: React.FormEvent) {
     e.preventDefault();
@@ -219,15 +176,15 @@ function PartsCatalogPageContent() {
           name: partForm.name,
           description: partForm.description || null,
           categoryId: partForm.categoryId || null,
-          revision: partForm.revision || "A",
+          revision: "A",
           unit: partForm.unit || "pcs",
           minimumStock: Number(partForm.minimumStock || 0),
-          assembly: partForm.assembly,
-          component: partForm.component,
+          assembly: false,
+          component: true,
           trackable: partForm.trackable,
           purchaseable: partForm.purchaseable,
           salable: partForm.salable,
-          virtual: partForm.virtual,
+          virtual: false,
         }),
       });
       setShowCreatePart(false);
@@ -236,20 +193,16 @@ function PartsCatalogPageContent() {
         name: "",
         description: "",
         categoryId: selectedCategory && !selectedCategory.structural ? selectedCategory.id : "",
-        revision: "A",
         unit: "pcs",
         minimumStock: "0",
-        assembly: false,
-        component: true,
-        trackable: false,
         purchaseable: true,
-        salable: false,
-        virtual: false,
+        salable: true,
+        trackable: false,
       });
       await Promise.all([loadParts(), loadMetadata()]);
       refetch();
     } catch (err) {
-      setPartFormError(err instanceof Error ? err.message : "Failed to create part");
+      setPartFormError(err instanceof Error ? err.message : "Failed to create item");
     } finally {
       setSubmittingPart(false);
     }
@@ -267,7 +220,7 @@ function PartsCatalogPageContent() {
             name: catName,
             description: catDesc || null,
             parentId: catParentId || null,
-            structural: catStructural,
+            structural: false,
           }),
         });
       } else if (showCategoryModal.mode === "edit" && showCategoryModal.category) {
@@ -276,7 +229,7 @@ function PartsCatalogPageContent() {
           body: JSON.stringify({
             name: catName,
             description: catDesc || null,
-            structural: catStructural,
+            structural: showCategoryModal.category.structural,
           }),
         });
       } else if (showCategoryModal.mode === "move" && showCategoryModal.category) {
@@ -311,72 +264,23 @@ function PartsCatalogPageContent() {
     }
   }
 
-  async function handleCreateTemplate(e: React.FormEvent) {
-    e.preventDefault();
-    setTplError(null);
-    try {
-      await apiFetch<ParameterTemplateView>("/api/v1/parameter-templates", {
-        method: "POST",
-        body: JSON.stringify({
-          name: tplName,
-          units: tplUnits || null,
-          description: tplDesc || null,
-          choices: tplChoices || null,
-          checkbox: tplCheckbox,
-          defaultCategoryId: tplCategoryId || null,
-        }),
-      });
-      setTplName("");
-      setTplUnits("");
-      setTplDesc("");
-      setTplChoices("");
-      setTplCheckbox(false);
-      setTplCategoryId("");
-      await loadMetadata();
-    } catch (err) {
-      setTplError(err instanceof Error ? err.message : "Failed to create parameter template");
-    }
-  }
-
-  async function handleDeleteTemplate(id: string) {
-    try {
-      await apiFetch<void>(`/api/v1/parameter-templates/${id}`, { method: "DELETE" });
-      if (paramTemplateId === id) {
-        setParamTemplateId("");
-      }
-      await loadMetadata();
-    } catch (err) {
-      setTplError(err instanceof Error ? err.message : "Failed to delete template");
-    }
-  }
-
   const columns = useMemo<ColumnDef<PartView, unknown>[]>(
     () => [
       {
         accessorKey: "ipn",
-        header: "IPN / Rev",
+        header: "Code",
         cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <Link
-              href={`/parts/${row.original.id}`}
-              className="font-mono text-[13px] font-medium text-[#1D4ED8] hover:underline"
-            >
-              {row.original.ipn}
-            </Link>
-            <span className="rounded border border-[#E4E4E7] bg-[#F4F4F5] px-1.5 py-0.5 font-mono text-[11px] text-[#52525B]">
-              Rev {row.original.revision}
-            </span>
-            {row.original.locked && (
-              <span title="Locked">
-                <Lock className="h-3.5 w-3.5 text-[#92400E]" />
-              </span>
-            )}
-          </div>
+          <Link
+            href={`/parts/${row.original.id}`}
+            className="font-mono text-[13px] font-medium text-[#1D4ED8] hover:underline"
+          >
+            {row.original.ipn}
+          </Link>
         ),
       },
       {
         accessorKey: "name",
-        header: "Part Name",
+        header: "Item Name",
         cell: ({ row }) => (
           <div>
             <div className="flex items-center gap-2">
@@ -386,9 +290,6 @@ function PartsCatalogPageContent() {
               >
                 {row.original.name}
               </Link>
-              {row.original.variantOfId && (
-                <StatusBadge label="Variant" tone="violet" showDot={false} />
-              )}
               {!row.original.active && (
                 <StatusBadge label="Inactive" tone="neutral" showDot={false} />
               )}
@@ -415,68 +316,36 @@ function PartsCatalogPageContent() {
           ),
       },
       {
-        id: "flags",
-        header: "Engineering Flags",
+        id: "usage",
+        header: "Type",
         cell: ({ row }) => {
           const p = row.original;
           return (
             <div className="flex flex-wrap gap-1">
-              {p.assembly && <StatusBadge label="ASM" tone="primary" showDot={false} />}
-              {p.component && <StatusBadge label="CMP" tone="neutral" showDot={false} />}
-              {p.trackable && <StatusBadge label="TRK" tone="violet" showDot={false} />}
-              {p.purchaseable && <StatusBadge label="PUR" tone="success" showDot={false} />}
-              {p.salable && <StatusBadge label="SAL" tone="warning" showDot={false} />}
-              {p.virtual && <StatusBadge label="VRT" tone="danger" showDot={false} />}
+              {p.purchaseable && <StatusBadge label="Buy" tone="success" showDot={false} />}
+              {p.salable && <StatusBadge label="Sell" tone="primary" showDot={false} />}
+              {p.trackable && <StatusBadge label="Serial" tone="violet" showDot={false} />}
             </div>
           );
         },
       },
       {
-        id: "parameters",
-        header: "Parameters",
-        cell: ({ row }) => {
-          const params = row.original.parameters ?? [];
-          if (params.length === 0) {
-            return <span className="text-[12px] text-[#63636B]">—</span>;
-          }
-          return (
-            <div className="flex flex-wrap gap-1">
-              {params.slice(0, 3).map((pp) => (
-                <span
-                  key={pp.id}
-                  className="rounded border border-[#E4E4E7] bg-[#F7F7F8] px-1.5 py-0.5 font-mono text-[11px] text-[#18181B]"
-                >
-                  {pp.templateName}: {pp.valueText}
-                </span>
-              ))}
-              {params.length > 3 && (
-                <span className="text-[11px] text-[#63636B]">+{params.length - 3}</span>
-              )}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "minimumStock",
-        header: () => <div className="text-right">In Stock / Min</div>,
+        id: "inStock",
+        header: () => <div className="text-right">Quantity</div>,
         cell: ({ row }) => {
           const p = row.original;
           const summary = stockSummaries[p.id];
           const inStock = Number(summary?.inStock ?? 0);
           const minStock = Number(p.minimumStock ?? 0);
-          const tone =
+          const textColor =
             inStock <= 0
-              ? "danger"
+              ? "text-[#991B1B]"
               : minStock > 0 && inStock < minStock
-                ? "warning"
-                : "success";
+                ? "text-[#92400E]"
+                : "text-[#166534]";
           return (
-            <div className="flex items-center justify-end gap-2 font-mono text-[12px] tabular-nums">
-              <StatusBadge
-                label={`${inStock.toLocaleString()} ${p.unit}`}
-                tone={tone}
-              />
-              <span className="text-[#63636B]">/ {minStock.toLocaleString()}</span>
+            <div className={`text-right font-mono text-[13px] font-medium tabular-nums ${textColor}`}>
+              {inStock.toLocaleString()} {p.unit}
             </div>
           );
         },
@@ -488,139 +357,69 @@ function PartsCatalogPageContent() {
   const selectedCount = selectedParts.length;
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-[24px] font-semibold tracking-tight text-[#18181B]">
-            Parts Catalog
-          </h1>
-          <p className="mt-0.5 text-[14px] text-[#52525B]">
-            Hierarchical <code className="font-mono text-[12px]">ltree</code> categories, revisions,
-            variants, and unit-normalized engineering parameters.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowTemplatesModal(true)}
-            className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
-          >
-            <SlidersHorizontal className="h-4 w-4 text-[#1D4ED8]" />
-            <span>Parameter Templates ({templates.length})</span>
-          </button>
-
-          <FeatureGate feature="IMPORT_EXPORT">
-            <button
-              type="button"
-              onClick={() => setShowImporter((v) => !v)}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
-            >
-              <FileSpreadsheet className="h-4 w-4 text-[#1D4ED8]" />
-              <span>{showImporter ? "Hide Importer" : "Import CSV / XLSX"}</span>
-            </button>
-
-            <a
-              href="/api/v1/parts/export?format=csv"
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
-            >
-              <Download className="h-4 w-4 text-[#52525B]" />
-              <span>Export CSV</span>
-            </a>
-          </FeatureGate>
-
-          {hasPermission("PART:CREATE") && (
-            <button
-              type="button"
-              onClick={() => {
-                setPartFormError(null);
-                setPartForm((prev) => ({
-                  ...prev,
-                  categoryId:
-                    selectedCategory && !selectedCategory.structural ? selectedCategory.id : "",
-                }));
-                setShowCreatePart(true);
-              }}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#1D4ED8] px-3.5 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
-            >
-              <Plus className="h-4 w-4" />
-              <span>New Part</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* KPI Tiles */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile
-          label="Catalog Parts"
-          value={`${partsPage?.totalElements ?? me?.usage?.MAX_PARTS ?? 0} / ${me?.limits?.MAX_PARTS ?? "—"}`}
-          hint="Active parts vs plan quota"
-        />
-        <StatTile
-          label="Category Nodes"
-          value={categories.length}
-          hint={`${categories.filter((c) => c.structural).length} structural · ${categories.filter((c) => !c.structural).length} assignable`}
-        />
-        <StatTile
-          label="Parameter Templates"
-          value={templates.length}
-          hint="JSR-385 Indriya unit-normalized"
-        />
-        <StatTile
-          label="Active Scope"
-          value={selectedCategory ? selectedCategory.name : "All Categories"}
-          hint={selectedCategory ? selectedCategory.pathString : "Showing entire catalog"}
-        />
-      </div>
-
-      {/* Optional Import Wizard Drawer */}
+    <div className="space-y-4">
+      {/* Modal: Import Wizard */}
       {showImporter && (
-        <div className="space-y-2">
-          <ImportWizard
-            targetType="PART"
-            targetFields={[
-              { key: "ipn", label: "Internal Part Number (IPN)", required: true },
-              { key: "name", label: "Part Name", required: true },
-              { key: "revision", label: "Revision (default A)", required: false },
-              { key: "description", label: "Description", required: false },
-              { key: "category", label: "Category Name / Path", required: false },
-              { key: "unit", label: "Unit of Measure (pcs, m, g)", required: false },
-              { key: "minimumStock", label: "Minimum Stock", required: false },
-              { key: "assembly", label: "Assembly (true/false)", required: false },
-              { key: "component", label: "Component (true/false)", required: false },
-              { key: "trackable", label: "Trackable (true/false)", required: false },
-              { key: "purchaseable", label: "Purchaseable (true/false)", required: false },
-              { key: "salable", label: "Salable (true/false)", required: false },
-              { key: "virtual", label: "Virtual (true/false)", required: false },
-            ]}
-          />
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => {
-                setShowImporter(false);
-                loadParts();
-                refetch();
-              }}
-              className="rounded-[8px] border border-[#E4E4E7] bg-white px-3 py-1.5 text-[12px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
-            >
-              Done & Refresh Table
-            </button>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setShowImporter(false)}
+        >
+          <div
+            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+              <h2 className="text-[16px] font-semibold text-[#18181B]">Import Items (CSV / XLSX)</h2>
+              <button
+                type="button"
+                onClick={() => setShowImporter(false)}
+                aria-label="Close importer"
+                className="rounded p-1 text-[#63636B] hover:bg-[#F7F7F8]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <ImportWizard
+              targetType="PART"
+              targetFields={[
+                { key: "ipn", label: "SKU / Item Code", required: true },
+                { key: "name", label: "Item Name", required: true },
+                { key: "description", label: "Description", required: false },
+                { key: "category", label: "Category Name / Path", required: false },
+                { key: "unit", label: "Unit of Measure (pcs, box, kg)", required: false },
+                { key: "minimumStock", label: "Minimum Stock Alert", required: false },
+                { key: "purchaseable", label: "Can be Purchased (true/false)", required: false },
+                { key: "salable", label: "Can be Sold (true/false)", required: false },
+              ]}
+            />
+
+            <div className="mt-4 flex justify-end border-t border-[#E4E4E7] pt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowImporter(false);
+                  loadParts();
+                  refetch();
+                }}
+                className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
+              >
+                Done & Refresh Table
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Split-Pane Layout: Left Category Tree + Right Parts DataTable */}
+      {/* Split-Pane Layout: Left Category Tree + Right Items DataTable */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        {/* Left Pane: Category Tree */}
+        {/* Left Pane: Category Tree (backed by PostgreSQL ltree) */}
         <div className="lg:col-span-3">
           <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-4">
             <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
               <div>
                 <div className="text-[14px] font-semibold text-[#18181B]">Categories</div>
-                <div className="text-[11px] text-[#63636B]">PostgreSQL ltree hierarchy</div>
+                <div className="text-[11px] text-[#63636B]">Filter items by folder</div>
               </div>
               {hasPermission("PART:CREATE") && (
                 <button
@@ -629,7 +428,6 @@ function PartsCatalogPageContent() {
                     setCatName("");
                     setCatDesc("");
                     setCatParentId(selectedCategoryId ?? "");
-                    setCatStructural(false);
                     setCatFormError(null);
                     setShowCategoryModal({ mode: "create" });
                   }}
@@ -653,7 +451,7 @@ function PartsCatalogPageContent() {
                 }}
                 className="rounded border-[#E4E4E7]"
               />
-              <span>Include descendant subcategories</span>
+              <span>Include subcategories</span>
             </label>
 
             {/* Tree Navigation */}
@@ -675,7 +473,7 @@ function PartsCatalogPageContent() {
                   <span>All Categories</span>
                 </span>
                 <span className="font-mono text-[11px] text-[#63636B]">
-                  {categories.length}
+                  {me?.usage?.MAX_PARTS ?? partsPage?.totalElements ?? 0}
                 </span>
               </button>
 
@@ -698,17 +496,8 @@ function PartsCatalogPageContent() {
                       }`}
                     >
                       <span className="flex min-w-0 items-center gap-1.5 truncate">
-                        <Folder
-                          className={`h-3.5 w-3.5 shrink-0 ${
-                            cat.structural ? "text-[#92400E]" : "text-[#1D4ED8]"
-                          }`}
-                        />
+                        <Folder className="h-3.5 w-3.5 shrink-0 text-[#1D4ED8]" />
                         <span className="truncate">{cat.name}</span>
-                        {cat.structural && (
-                          <span className="rounded bg-[#FEF3C7] px-1 py-0.2 text-[10px] font-medium text-[#92400E]">
-                            Struct
-                          </span>
-                        )}
                       </span>
                       <span className="ml-1 font-mono text-[11px] text-[#63636B]">
                         {cat.directPartCount}
@@ -725,23 +514,22 @@ function PartsCatalogPageContent() {
                 <div className="text-[12px] font-medium text-[#18181B]">
                   {selectedCategory.pathString}
                 </div>
-                <div className="font-mono text-[11px] text-[#63636B]">
-                  ltree: {selectedCategory.path}
-                </div>
+                {selectedCategory.description && (
+                  <div className="text-[11px] text-[#63636B]">{selectedCategory.description}</div>
+                )}
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   <button
                     type="button"
                     onClick={() => {
                       setCatName(selectedCategory.name);
                       setCatDesc(selectedCategory.description ?? "");
-                      setCatStructural(selectedCategory.structural);
                       setCatFormError(null);
                       setShowCategoryModal({ mode: "edit", category: selectedCategory });
                     }}
                     className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] bg-white px-2 text-[11px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
                   >
                     <Edit3 className="h-3 w-3" />
-                    <span>Edit</span>
+                    <span>Rename</span>
                   </button>
                   <button
                     type="button"
@@ -753,7 +541,7 @@ function PartsCatalogPageContent() {
                     className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] bg-white px-2 text-[11px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
                   >
                     <ArrowRightLeft className="h-3 w-3" />
-                    <span>Move Subtree</span>
+                    <span>Move</span>
                   </button>
                   <button
                     type="button"
@@ -769,42 +557,33 @@ function PartsCatalogPageContent() {
           </div>
         </div>
 
-        {/* Right Pane: Filters + Parts DataTable */}
+        {/* Right Pane: Search & Filters + Items DataTable */}
         <div className="space-y-4 lg:col-span-9">
-          {/* Search + Boolean Flag Chips + Parameter Range Filter Card */}
-          <div className="space-y-3 rounded-[12px] border border-[#E4E4E7] bg-white p-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="relative min-w-[240px] flex-1">
-                <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-[#63636B]" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setPageIndex(0);
-                  }}
-                  placeholder="Filter by IPN, name, or description…"
-                  className="h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] pr-3 pl-9 text-[13px] text-[#18181B] placeholder:text-[#63636B] focus:border-[#1D4ED8] focus:bg-white focus:outline-hidden"
-                />
-              </div>
-
-              {/* Boolean Flag Chips */}
+          <ListToolbar
+            searchQuery={searchQuery}
+            onSearchChange={(val) => {
+              setSearchQuery(val);
+              setPageIndex(0);
+            }}
+            searchPlaceholder="Search by SKU, item name, or description…"
+            filters={
               <div className="flex flex-wrap items-center gap-1.5">
-                {[
-                  { label: "Assembly", val: flagAssembly, set: setFlagAssembly },
-                  { label: "Component", val: flagComponent, set: setFlagComponent },
-                  { label: "Trackable", val: flagTrackable, set: setFlagTrackable },
-                  { label: "Purchaseable", val: flagPurchaseable, set: setFlagPurchaseable },
-                  { label: "Salable", val: flagSalable, set: setFlagSalable },
-                  { label: "Virtual", val: flagVirtual, set: setFlagVirtual },
-                ].map((chip) => {
-                  const active = chip.val === true;
+                {(
+                  [
+                    { id: "all", label: "All Items" },
+                    { id: "salable", label: "For Sale" },
+                    { id: "purchaseable", label: "Purchased" },
+                    { id: "trackable", label: "Serial Tracked" },
+                    { id: "low_stock", label: "Low / Out of Stock" },
+                  ] as const
+                ).map((tab) => {
+                  const active = quickFilter === tab.id;
                   return (
                     <button
-                      key={chip.label}
+                      key={tab.id}
                       type="button"
                       onClick={() => {
-                        chip.set(active ? null : true);
+                        setQuickFilter(tab.id);
                         setPageIndex(0);
                       }}
                       className={`h-8 rounded-full border px-3 text-[12px] font-medium transition-colors ${
@@ -813,117 +592,57 @@ function PartsCatalogPageContent() {
                           : "border-[#E4E4E7] bg-white text-[#52525B] hover:bg-[#F7F7F8]"
                       }`}
                     >
-                      {chip.label}
+                      {tab.label}
                     </button>
                   );
                 })}
               </div>
-            </div>
+            }
+            menuItems={
+              hasFeature("IMPORT_EXPORT")
+                ? [
+                    {
+                      key: "import",
+                      label: showImporter ? "Hide Importer" : "Import CSV / XLSX",
+                      icon: <FileSpreadsheet className="h-4 w-4 text-[#1D4ED8]" />,
+                      onClick: () => setShowImporter((v) => !v),
+                    },
+                    {
+                      key: "export",
+                      label: "Export CSV",
+                      icon: <Download className="h-4 w-4 text-[#52525B]" />,
+                      href: "/api/v1/parts/export?format=csv",
+                    },
+                  ]
+                : []
+            }
+            primaryAction={
+              hasPermission("PART:CREATE")
+                ? {
+                    label: "New Item",
+                    onClick: () => {
+                      setPartFormError(null);
+                      setPartForm((prev) => ({
+                        ...prev,
+                        categoryId:
+                          selectedCategory && !selectedCategory.structural
+                            ? selectedCategory.id
+                            : "",
+                      }));
+                      setShowCreatePart(true);
+                    },
+                  }
+                : undefined
+            }
+          />
 
-            {/* Typed Parameter Range Filter Row */}
-            <div className="flex flex-wrap items-center gap-2 border-t border-[#E4E4E7] pt-3">
-              <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#52525B]">
-                <Filter className="h-3.5 w-3.5 text-[#1D4ED8]" />
-                <span>Parameter Range Filter:</span>
-              </span>
-
-              <select
-                value={paramTemplateId}
-                onChange={(e) => {
-                  setParamTemplateId(e.target.value);
-                  setParamMin("");
-                  setParamMax("");
-                  setParamValueText("");
-                  setPageIndex(0);
-                }}
-                aria-label="Parameter template filter"
-                className="h-8 rounded-[8px] border border-[#E4E4E7] bg-white px-2.5 text-[12px] text-[#18181B]"
-              >
-                <option value="">Any parameter…</option>
-                {templates.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name} {t.units ? `(${t.units})` : t.checkbox ? "(Boolean)" : ""}
-                  </option>
-                ))}
-              </select>
-
-              {selectedTemplate && !selectedTemplate.checkbox && (
-                <>
-                  <input
-                    type="text"
-                    value={paramMin}
-                    onChange={(e) => {
-                      setParamMin(e.target.value);
-                      setPageIndex(0);
-                    }}
-                    placeholder={
-                      selectedTemplate.units
-                        ? `Min (e.g. 1${selectedTemplate.units})`
-                        : "Min numeric"
-                    }
-                    className="h-8 w-36 rounded-[8px] border border-[#E4E4E7] px-2.5 font-mono text-[12px]"
-                  />
-                  <span className="text-[12px] text-[#63636B]">to</span>
-                  <input
-                    type="text"
-                    value={paramMax}
-                    onChange={(e) => {
-                      setParamMax(e.target.value);
-                      setPageIndex(0);
-                    }}
-                    placeholder={
-                      selectedTemplate.units
-                        ? `Max (e.g. 10${selectedTemplate.units})`
-                        : "Max numeric"
-                    }
-                    className="h-8 w-36 rounded-[8px] border border-[#E4E4E7] px-2.5 font-mono text-[12px]"
-                  />
-                </>
-              )}
-
-              {selectedTemplate && (
-                <input
-                  type="text"
-                  value={paramValueText}
-                  onChange={(e) => {
-                    setParamValueText(e.target.value);
-                    setPageIndex(0);
-                  }}
-                  placeholder={selectedTemplate.checkbox ? "true / false" : "Text match…"}
-                  className="h-8 w-32 rounded-[8px] border border-[#E4E4E7] px-2.5 text-[12px]"
-                />
-              )}
-
-              {paramTemplateId && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setParamTemplateId("");
-                    setParamMin("");
-                    setParamMax("");
-                    setParamValueText("");
-                    setPageIndex(0);
-                  }}
-                  className="inline-flex h-8 items-center gap-1 rounded-[8px] px-2 text-[12px] text-[#63636B] hover:bg-[#F7F7F8]"
-                >
-                  <X className="h-3.5 w-3.5" />
-                  <span>Clear</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Parts Table */}
+          {/* Items Table */}
           {error ? (
             <ErrorState message={error} onRetry={loadParts} />
-          ) : !loading && (partsPage?.content.length ?? 0) === 0 ? (
+          ) : !loading && displayedParts.length === 0 ? (
             <EmptyState
-              title="No parts match the current filter"
-              description={
-                selectedCategory?.structural
-                  ? `Category "${selectedCategory.name}" is marked structural and only holds child categories.`
-                  : "Create your first part or import a CSV/XLSX catalog to populate this view."
-              }
+              title="No items found"
+              description="Add your first item or import a CSV/XLSX catalog to get started."
               action={
                 hasPermission("PART:CREATE") && (
                   <button
@@ -932,7 +651,7 @@ function PartsCatalogPageContent() {
                     className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
                   >
                     <Plus className="h-4 w-4" />
-                    <span>Create Part</span>
+                    <span>New Item</span>
                   </button>
                 )
               }
@@ -940,13 +659,15 @@ function PartsCatalogPageContent() {
           ) : (
             <DataTable
               columns={columns}
-              data={partsPage?.content ?? []}
+              data={displayedParts}
               isLoading={loading}
               enableRowSelection
               onSelectedRowsChange={setSelectedParts}
               pageIndex={pageIndex}
               pageSize={25}
-              totalCount={partsPage?.totalElements}
+              totalCount={
+                quickFilter === "low_stock" ? displayedParts.length : partsPage?.totalElements
+              }
               onPageChange={setPageIndex}
             />
           )}
@@ -969,12 +690,12 @@ function PartsCatalogPageContent() {
         </a>
       </BulkActionBar>
 
-      {/* Modal: Create Part */}
+      {/* Modal: Create Item */}
       {showCreatePart && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-xl rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
+          <div className="w-full max-w-lg rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
-              <h2 className="text-[16px] font-semibold text-[#18181B]">Create New Part</h2>
+              <h2 className="text-[16px] font-semibold text-[#18181B]">Add New Item</h2>
               <button
                 type="button"
                 onClick={() => setShowCreatePart(false)}
@@ -991,29 +712,56 @@ function PartsCatalogPageContent() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="block text-[12px] font-medium text-[#18181B]">
-                    IPN (Part Number) *
+                    SKU / Item Code *
                   </label>
                   <input
                     type="text"
                     required
                     value={partForm.ipn}
                     onChange={(e) => setPartForm({ ...partForm, ipn: e.target.value })}
-                    placeholder="CAP-0402-10U"
+                    placeholder="ITEM-001"
                     className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">Revision</label>
-                  <input
-                    type="text"
-                    value={partForm.revision}
-                    onChange={(e) => setPartForm({ ...partForm, revision: e.target.value })}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
-                  />
+                  <label className="block text-[12px] font-medium text-[#18181B]">
+                    Category
+                  </label>
+                  <select
+                    value={partForm.categoryId}
+                    onChange={(e) => setPartForm({ ...partForm, categoryId: e.target.value })}
+                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                  >
+                    <option value="">Uncategorized</option>
+                    {categories
+                      .filter((c) => !c.structural)
+                      .map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.pathString}
+                        </option>
+                      ))}
+                  </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-[12px] font-medium text-[#18181B]">
+                  Item Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={partForm.name}
+                  onChange={(e) => setPartForm({ ...partForm, name: e.target.value })}
+                  placeholder="e.g. Wireless Barcode Scanner"
+                  className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="block text-[12px] font-medium text-[#18181B]">
                     Unit of Measure
@@ -1022,65 +770,18 @@ function PartsCatalogPageContent() {
                     type="text"
                     value={partForm.unit}
                     onChange={(e) => setPartForm({ ...partForm, unit: e.target.value })}
-                    placeholder="pcs"
+                    placeholder="pcs, box, kg, L"
                     className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="block text-[12px] font-medium text-[#18181B]">
-                    Part Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={partForm.name}
-                    onChange={(e) => setPartForm({ ...partForm, name: e.target.value })}
-                    placeholder="MLCC Capacitor 10uF 16V X5R"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
-                    Category (Non-structural)
-                  </label>
-                  <select
-                    value={partForm.categoryId}
-                    onChange={(e) => setPartForm({ ...partForm, categoryId: e.target.value })}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
-                  >
-                    <option value="">Uncategorized</option>
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id} disabled={c.structural}>
-                        {c.pathString} {c.structural ? "(Structural - no direct parts)" : ""}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
-                    Description
-                  </label>
-                  <input
-                    type="text"
-                    value={partForm.description}
-                    onChange={(e) => setPartForm({ ...partForm, description: e.target.value })}
-                    placeholder="Optional engineering specification"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
-                    Minimum Stock Threshold
+                    Low Stock Alert Threshold
                   </label>
                   <input
                     type="number"
                     step="any"
+                    min="0"
                     value={partForm.minimumStock}
                     onChange={(e) => setPartForm({ ...partForm, minimumStock: e.target.value })}
                     className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
@@ -1088,43 +789,53 @@ function PartsCatalogPageContent() {
                 </div>
               </div>
 
-              {/* Engineering Flags */}
+              <div>
+                <label className="block text-[12px] font-medium text-[#18181B]">
+                  Description (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={partForm.description}
+                  onChange={(e) => setPartForm({ ...partForm, description: e.target.value })}
+                  placeholder="Short notes or product details"
+                  className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+                />
+              </div>
+
+              {/* Simplified Business Options */}
               <div>
                 <div className="mb-1.5 text-[12px] font-medium text-[#18181B]">
-                  Engineering Classification Flags
+                  Item Options
                 </div>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                  {[
-                    { key: "assembly", label: "Assembly (has BOM)" },
-                    { key: "component", label: "Component (used in BOM)" },
-                    { key: "trackable", label: "Trackable (serialized)" },
-                    { key: "purchaseable", label: "Purchaseable (from vendor)" },
-                    { key: "salable", label: "Salable (customer order)" },
-                    { key: "virtual", label: "Virtual (non-physical)" },
-                  ].map((f) => (
-                    <label
-                      key={f.key}
-                      className="flex items-center gap-2 rounded-[8px] border border-[#E4E4E7] px-2.5 py-1.5 text-[12px]"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={Boolean(partForm[f.key as keyof typeof partForm])}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          if (f.key === "virtual" && checked) {
-                            setPartForm({
-                              ...partForm,
-                              virtual: true,
-                              purchaseable: false,
-                            });
-                          } else {
-                            setPartForm({ ...partForm, [f.key]: checked });
-                          }
-                        }}
-                      />
-                      <span>{f.label}</span>
-                    </label>
-                  ))}
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  <label className="flex items-center gap-2 rounded-[8px] border border-[#E4E4E7] px-3 py-2 text-[12px]">
+                    <input
+                      type="checkbox"
+                      checked={partForm.purchaseable}
+                      onChange={(e) =>
+                        setPartForm({ ...partForm, purchaseable: e.target.checked })
+                      }
+                    />
+                    <span>We buy this</span>
+                  </label>
+                  <label className="flex items-center gap-2 rounded-[8px] border border-[#E4E4E7] px-3 py-2 text-[12px]">
+                    <input
+                      type="checkbox"
+                      checked={partForm.salable}
+                      onChange={(e) => setPartForm({ ...partForm, salable: e.target.checked })}
+                    />
+                    <span>We sell this</span>
+                  </label>
+                  <label className="flex items-center gap-2 rounded-[8px] border border-[#E4E4E7] px-3 py-2 text-[12px]">
+                    <input
+                      type="checkbox"
+                      checked={partForm.trackable}
+                      onChange={(e) =>
+                        setPartForm({ ...partForm, trackable: e.target.checked })
+                      }
+                    />
+                    <span>Track serial numbers</span>
+                  </label>
                 </div>
               </div>
 
@@ -1141,7 +852,7 @@ function PartsCatalogPageContent() {
                   disabled={submittingPart}
                   className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white hover:bg-[#1E40AF] disabled:opacity-50"
                 >
-                  {submittingPart ? "Creating…" : "Create Part"}
+                  {submittingPart ? "Saving…" : "Save Item"}
                 </button>
               </div>
             </form>
@@ -1156,10 +867,10 @@ function PartsCatalogPageContent() {
             <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
               <h2 className="text-[16px] font-semibold text-[#18181B]">
                 {showCategoryModal.mode === "create"
-                  ? "New Part Category"
+                  ? "New Category"
                   : showCategoryModal.mode === "edit"
-                    ? `Edit Category · ${showCategoryModal.category?.name}`
-                    : `Move Subtree · ${showCategoryModal.category?.name}`}
+                    ? `Rename Category · ${showCategoryModal.category?.name}`
+                    : `Move Category · ${showCategoryModal.category?.name}`}
               </h2>
               <button
                 type="button"
@@ -1188,32 +899,22 @@ function PartsCatalogPageContent() {
                       required
                       value={catName}
                       onChange={(e) => setCatName(e.target.value)}
-                      placeholder="Passives"
+                      placeholder="e.g. Beverages, Electronics, Packaging"
                       className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
                     />
                   </div>
                   <div>
                     <label className="block text-[12px] font-medium text-[#18181B]">
-                      Description
+                      Description (Optional)
                     </label>
                     <input
                       type="text"
                       value={catDesc}
                       onChange={(e) => setCatDesc(e.target.value)}
+                      placeholder="Optional notes about this category"
                       className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
                     />
                   </div>
-                  <label className="flex items-center gap-2 rounded-[8px] border border-[#E4E4E7] p-2.5 text-[12px]">
-                    <input
-                      type="checkbox"
-                      checked={catStructural}
-                      onChange={(e) => setCatStructural(e.target.checked)}
-                    />
-                    <span>
-                      <strong>Structural category</strong> (organizes subcategories only; rejects
-                      direct part assignment)
-                    </span>
-                  </label>
                 </>
               )}
 
@@ -1227,7 +928,7 @@ function PartsCatalogPageContent() {
                     onChange={(e) => setCatParentId(e.target.value)}
                     className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
                   >
-                    <option value="">(Root level)</option>
+                    <option value="">(Top-level category)</option>
                     {categories
                       .filter((c) => c.id !== showCategoryModal.category?.id)
                       .map((c) => (
@@ -1258,136 +959,15 @@ function PartsCatalogPageContent() {
           </div>
         </div>
       )}
-
-      {/* Modal: Parameter Templates Manager */}
-      {showTemplatesModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-2xl rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
-              <div>
-                <h2 className="text-[16px] font-semibold text-[#18181B]">
-                  Typed Parameter Templates (Indriya JSR-385)
-                </h2>
-                <p className="text-[12px] text-[#52525B]">
-                  Define physical units (e.g., <code className="font-mono">F</code>,{" "}
-                  <code className="font-mono">Ohm</code>, <code className="font-mono">V</code>,{" "}
-                  <code className="font-mono">A</code>, <code className="font-mono">Hz</code>,{" "}
-                  <code className="font-mono">mm</code>) for SI-normalized range queries.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowTemplatesModal(false)}
-                className="rounded p-1 text-[#63636B] hover:bg-[#F7F7F8]"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            {tplError && (
-              <div className="mt-3 rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-3 py-2 text-[12px] text-[#991B1B]">
-                {tplError}
-              </div>
-            )}
-
-            {hasPermission("PART:CREATE") && (
-              <form
-                onSubmit={handleCreateTemplate}
-                className="mt-4 grid grid-cols-1 gap-2.5 rounded-[10px] border border-[#E4E4E7] bg-[#F7F7F8] p-3 sm:grid-cols-6"
-              >
-                <input
-                  type="text"
-                  required
-                  value={tplName}
-                  onChange={(e) => setTplName(e.target.value)}
-                  placeholder="Name (e.g. Capacitance)"
-                  className="h-9 rounded-[8px] border border-[#E4E4E7] bg-white px-2.5 text-[12px] sm:col-span-2"
-                />
-                <input
-                  type="text"
-                  value={tplUnits}
-                  onChange={(e) => setTplUnits(e.target.value)}
-                  placeholder="Unit (F, Ohm, V, mA)"
-                  disabled={tplCheckbox}
-                  className="h-9 rounded-[8px] border border-[#E4E4E7] bg-white px-2.5 font-mono text-[12px]"
-                />
-                <input
-                  type="text"
-                  value={tplChoices}
-                  onChange={(e) => setTplChoices(e.target.value)}
-                  placeholder="Choices (0402,0603)"
-                  disabled={tplCheckbox}
-                  className="h-9 rounded-[8px] border border-[#E4E4E7] bg-white px-2.5 text-[12px]"
-                />
-                <label className="flex items-center gap-1.5 px-1 text-[12px]">
-                  <input
-                    type="checkbox"
-                    checked={tplCheckbox}
-                    onChange={(e) => setTplCheckbox(e.target.checked)}
-                  />
-                  <span>Checkbox</span>
-                </label>
-                <button
-                  type="submit"
-                  className="h-9 rounded-[8px] bg-[#1D4ED8] px-3 text-[12px] font-medium text-white hover:bg-[#1E40AF]"
-                >
-                  + Add
-                </button>
-              </form>
-            )}
-
-            <div className="mt-4 max-h-72 overflow-y-auto rounded-[8px] border border-[#E4E4E7]">
-              <table className="w-full border-collapse text-left text-[12px]">
-                <thead className="bg-[#F7F7F8] text-[#52525B]">
-                  <tr className="border-b border-[#E4E4E7]">
-                    <th className="px-3 py-2 font-semibold">Template Name</th>
-                    <th className="px-3 py-2 font-semibold">Unit / Type</th>
-                    <th className="px-3 py-2 font-semibold">Allowed Choices</th>
-                    <th className="px-3 py-2 text-right font-semibold">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#E4E4E7]">
-                  {templates.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="px-3 py-6 text-center text-[#63636B]">
-                        No parameter templates defined yet.
-                      </td>
-                    </tr>
-                  ) : (
-                    templates.map((t) => (
-                      <tr key={t.id}>
-                        <td className="px-3 py-2 font-medium text-[#18181B]">{t.name}</td>
-                        <td className="px-3 py-2 font-mono text-[#1D4ED8]">
-                          {t.checkbox ? "Boolean" : t.units || "Text / Number"}
-                        </td>
-                        <td className="px-3 py-2 text-[#52525B]">{t.choices || "—"}</td>
-                        <td className="px-3 py-2 text-right">
-                          {hasPermission("PART:DELETE") && (
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteTemplate(t.id)}
-                              className="text-[#991B1B] hover:underline"
-                            >
-                              Delete
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
 export default function PartsCatalogPage() {
   return (
-    <React.Suspense fallback={<div className="p-8 text-sm text-muted-foreground">Loading parts...</div>}>
+    <React.Suspense
+      fallback={<div className="p-8 text-sm text-muted-foreground">Loading catalog...</div>}
+    >
       <PartsCatalogPageContent />
     </React.Suspense>
   );

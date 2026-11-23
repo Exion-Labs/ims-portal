@@ -13,7 +13,8 @@ import {
 } from "@ims/api-client";
 import { DataTable, EmptyState, ErrorState, StatTile, StatusBadge } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
-import { Plus, Search, ShoppingCart, X } from "lucide-react";
+import { ListToolbar } from "@/components/list-toolbar";
+import { Plus, ShoppingCart, X } from "lucide-react";
 
 const STATUS_TONE: Record<string, "neutral" | "primary" | "warning" | "success" | "danger"> = {
   PENDING: "neutral",
@@ -182,37 +183,6 @@ export default function PurchaseOrdersPage() {
   return (
     <FeatureGate feature="PURCHASING" fallback="not-in-plan">
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="text-[24px] font-semibold tracking-tight text-[#18181B]">
-              Purchase Orders & Receiving
-            </h1>
-            <p className="mt-0.5 text-[14px] text-[#52525B]">
-              Create supplier orders, auto-price from tiered breaks, and receive inbound deliveries
-              into warehouse bins.
-            </p>
-          </div>
-
-          {hasPermission("ORDER:CREATE") && (
-            <button
-              type="button"
-              onClick={() => {
-                setFormError(null);
-                setForm((prev) => ({
-                  ...prev,
-                  supplierId: suppliers[0]?.id ?? "",
-                  currency: suppliers[0]?.defaultCurrency ?? me?.baseCurrency ?? "USD",
-                }));
-                setShowCreate(true);
-              }}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#1D4ED8] px-3.5 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
-            >
-              <Plus className="h-4 w-4" />
-              <span>New Purchase Order</span>
-            </button>
-          )}
-        </div>
-
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatTile
             label="Total Purchase Orders"
@@ -240,38 +210,48 @@ export default function PurchaseOrdersPage() {
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 rounded-[12px] border border-[#E4E4E7] bg-white p-4">
-          <div className="relative min-w-[240px] flex-1">
-            <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-[#63636B]" />
-            <input
-              type="text"
-              value={searchQuery}
+        <ListToolbar
+          searchQuery={searchQuery}
+          onSearchChange={(val) => {
+            setSearchQuery(val);
+            setPageIndex(0);
+          }}
+          searchPlaceholder="Search PO reference, description, or vendor reference…"
+          filters={
+            <select
+              value={statusFilter}
               onChange={(e) => {
-                setSearchQuery(e.target.value);
+                setStatusFilter(e.target.value);
                 setPageIndex(0);
               }}
-              placeholder="Search PO reference, description, or vendor reference…"
-              className="h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] pr-3 pl-9 text-[13px]"
-            />
-          </div>
-
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              setPageIndex(0);
-            }}
-            className="h-9 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
-          >
-            <option value="">All Statuses</option>
-            <option value="PENDING">PENDING</option>
-            <option value="PLACED">PLACED</option>
-            <option value="IN_PROGRESS">IN_PROGRESS</option>
-            <option value="COMPLETE">COMPLETE</option>
-            <option value="ON_HOLD">ON_HOLD</option>
-            <option value="CANCELLED">CANCELLED</option>
-          </select>
-        </div>
+              className="h-9 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+            >
+              <option value="">All Statuses</option>
+              <option value="PENDING">PENDING</option>
+              <option value="PLACED">PLACED</option>
+              <option value="IN_PROGRESS">IN_PROGRESS</option>
+              <option value="COMPLETE">COMPLETE</option>
+              <option value="ON_HOLD">ON_HOLD</option>
+              <option value="CANCELLED">CANCELLED</option>
+            </select>
+          }
+          primaryAction={
+            hasPermission("ORDER:CREATE")
+              ? {
+                  label: "New Purchase Order",
+                  onClick: () => {
+                    setFormError(null);
+                    setForm((prev) => ({
+                      ...prev,
+                      supplierId: suppliers[0]?.id ?? "",
+                      currency: suppliers[0]?.defaultCurrency ?? me?.baseCurrency ?? "USD",
+                    }));
+                    setShowCreate(true);
+                  },
+                }
+              : undefined
+          }
+        />
 
         {error ? (
           <ErrorState message={error} onRetry={loadData} />

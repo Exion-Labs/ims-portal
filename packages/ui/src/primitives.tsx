@@ -69,18 +69,20 @@ export function StatTile({
           : "text-[#18181B]";
 
   return (
-    <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-4">
-      <div className="text-[12px] font-medium text-[#52525B]">{label}</div>
-      <div
+    <div
+      title={hint}
+      className="flex items-center justify-between gap-3 rounded-[8px] border border-[#E4E4E7] bg-white px-3 py-2"
+    >
+      <span className="truncate text-[12px] font-medium text-[#52525B]">{label}</span>
+      <span
         className={cn(
-          "mt-1 text-[22px] font-semibold tracking-tight tabular-nums",
+          "max-w-[60%] shrink-0 truncate text-[14px] font-semibold tracking-tight tabular-nums",
           valueColor,
-          mono && "font-mono text-[18px]"
+          mono && "font-mono text-[13px]"
         )}
       >
         {value}
-      </div>
-      {hint && <div className="mt-1 text-[12px] text-[#63636B]">{hint}</div>}
+      </span>
     </div>
   );
 }

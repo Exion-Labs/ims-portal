@@ -1,134 +1,148 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Boxes,
-  Building2,
-  Cpu,
-  Factory,
-  LayoutDashboard,
+  ChevronDown,
   LogOut,
-  Package,
-  QrCode,
+  PanelLeftClose,
+  PanelLeftOpen,
   Search,
   Settings,
-  ShoppingCart,
-  Truck,
+  User,
 } from "lucide-react";
 import { StatusBadge } from "@ims/ui";
+import { NAV_GROUPS, SETTINGS_NAV } from "@/lib/constants";
 import { useEntitlements } from "@/lib/entitlements";
 import { CommandPalette } from "./command-palette";
-
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  feature?: string;
-  permission?: string;
-}
-
-interface NavGroup {
-  group: string;
-  items: NavItem[];
-}
-
-const NAV_GROUPS: NavGroup[] = [
-  {
-    group: "Overview",
-    items: [{ label: "Dashboard", href: "/", icon: LayoutDashboard }],
-  },
-  {
-    group: "Inventory",
-    items: [
-      { label: "Parts Catalog", href: "/parts", icon: Cpu, feature: "PARTS" },
-      { label: "Stock & Locations", href: "/stock", icon: Boxes, feature: "STOCK" },
-    ],
-  },
-  {
-    group: "Purchasing",
-    items: [
-      { label: "Companies & Suppliers", href: "/companies", icon: Building2, feature: "COMPANIES" },
-      { label: "Purchase Orders", href: "/purchasing", icon: ShoppingCart, feature: "PURCHASING" },
-    ],
-  },
-  {
-    group: "Manufacturing",
-    items: [
-      { label: "Build Orders & BOM", href: "/manufacturing", icon: Factory, feature: "MANUFACTURING" },
-    ],
-  },
-  {
-    group: "Sales & Outbound",
-    items: [
-      { label: "Sales Orders", href: "/sales", icon: Package, feature: "SALES" },
-      { label: "Transfers", href: "/transfers", icon: Truck, feature: "TRANSFERS" },
-    ],
-  },
-  {
-    group: "Admin",
-    items: [
-      {
-        label: "Tenant Settings",
-        href: "/settings/organization",
-        icon: Settings,
-        permission: "ADMIN:VIEW",
-      },
-    ],
-  },
-];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { me, hasFeature, hasPermission } = useEntitlements();
   const [cmdOpen, setCmdOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    if (userMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [userMenuOpen]);
+
+  const userInitial = (me?.fullName || me?.email || "U").trim().charAt(0).toUpperCase();
+
+  const currentMenuLabel = (() => {
+    if (pathname === "/") {
+      return "Dashboard";
+    }
+    if (pathname.startsWith("/settings")) {
+      const settingMatch = SETTINGS_NAV.find((item) => pathname.startsWith(item.href));
+      return settingMatch ? `Tenant Settings · ${settingMatch.label}` : "Tenant Settings";
+    }
+    for (const group of NAV_GROUPS) {
+      const match = group.items.find(
+        (item) => item.href !== "/" && pathname.startsWith(item.href)
+      );
+      if (match) return match.label;
+    }
+    return pathname;
+  })();
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
   }
 
-  const trialFeatures =
-    me?.featureDetails.filter((f) => f.source === "OVERRIDE_TRIAL" && f.enabled) ?? [];
-
   return (
     <div className="flex min-h-screen bg-[#F7F7F8] text-[#18181B]">
       {/* Left Sidebar */}
-      <aside className="flex w-64 shrink-0 flex-col border-r border-[#E4E4E7] bg-white">
+      <aside
+        className={`flex shrink-0 flex-col border-r border-[#E4E4E7] bg-white transition-all duration-200 ${
+          sidebarCollapsed ? "w-16" : "w-64"
+        }`}
+      >
         {/* Tenant Header */}
-        <div className="border-b border-[#E4E4E7] px-4 py-3.5">
-          <div className="flex items-center justify-between">
-            <span className="truncate text-[14px] font-semibold text-[#18181B]">
-              {me?.tenantName ?? "Loading tenant…"}
-            </span>
-            {me?.planName && <StatusBadge label={me.planName} tone="primary" showDot={false} />}
-          </div>
-          <div className="mt-0.5 flex items-center gap-1.5 font-mono text-[11px] text-[#63636B]">
-            <span>{me?.tenantSlug ?? "—"}</span>
-            <span>·</span>
-            <span>{me?.baseCurrency ?? "USD"}</span>
+        <div
+          className={`border-b border-[#E4E4E7] ${
+            sidebarCollapsed ? "px-2.5 py-3.5" : "px-4 py-3.5"
+          }`}
+        >
+          <div
+            className={`flex items-center ${
+              sidebarCollapsed ? "justify-center" : "justify-between gap-2"
+            }`}
+          >
+            {!sidebarCollapsed && (
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-1.5">
+                  <span className="truncate text-[14px] font-semibold text-[#18181B]">
+                    {me?.tenantName ?? "Loading tenant…"}
+                  </span>
+                  {me?.planName && (
+                    <StatusBadge label={me.planName} tone="primary" showDot={false} />
+                  )}
+                </div>
+                <div className="mt-0.5 flex items-center gap-1.5 font-mono text-[11px] text-[#63636B]">
+                  <span className="truncate">{me?.tenantSlug ?? "—"}</span>
+                  <span>·</span>
+                  <span>{me?.baseCurrency ?? "USD"}</span>
+                </div>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setSidebarCollapsed((prev) => !prev)}
+              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[#63636B] transition-colors hover:bg-[#F7F7F8] hover:text-[#18181B]"
+            >
+              {sidebarCollapsed ? (
+                <PanelLeftOpen className="h-4 w-4" />
+              ) : (
+                <PanelLeftClose className="h-4 w-4" />
+              )}
+            </button>
           </div>
 
           {/* ⌘K Command Palette Trigger */}
           <button
             type="button"
             onClick={() => setCmdOpen(true)}
-            className="mt-3 flex h-9 w-full items-center justify-between rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] px-3 text-[12px] text-[#63636B] hover:border-[#1D4ED8]/50 hover:text-[#18181B]"
+            title="Quick jump (⌘K)"
+            className={`mt-3 flex h-9 w-full items-center rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] text-[12px] text-[#63636B] hover:border-[#1D4ED8]/50 hover:text-[#18181B] ${
+              sidebarCollapsed ? "justify-center px-0" : "justify-between px-3"
+            }`}
           >
             <span className="flex items-center gap-2">
-              <Search className="h-3.5 w-3.5" />
-              <span>Quick jump…</span>
+              <Search className="h-3.5 w-3.5 shrink-0" />
+              {!sidebarCollapsed && <span>Quick jump…</span>}
             </span>
-            <kbd className="rounded border border-[#E4E4E7] bg-white px-1.5 py-0.5 font-mono text-[10px]">
-              ⌘K
-            </kbd>
+            {!sidebarCollapsed && (
+              <kbd className="rounded border border-[#E4E4E7] bg-white px-1.5 py-0.5 font-mono text-[10px]">
+                ⌘K
+              </kbd>
+            )}
           </button>
         </div>
 
         {/* Feature-Aware Navigation */}
-        <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-4">
+        <nav
+          className={`flex-1 overflow-y-auto py-4 ${
+            sidebarCollapsed ? "space-y-2 px-2" : "space-y-4 px-3"
+          }`}
+        >
           {NAV_GROUPS.map((group) => {
             const visibleItems = group.items.filter((item) => {
               if (item.feature && !hasFeature(item.feature)) return false;
@@ -139,9 +153,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
             return (
               <div key={group.group}>
-                <div className="px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-wider text-[#63636B]">
-                  {group.group}
-                </div>
+                {!sidebarCollapsed ? (
+                  <div className="px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-wider text-[#63636B]">
+                    {group.group}
+                  </div>
+                ) : (
+                  <div className="my-1 border-t border-[#F4F4F5]" />
+                )}
                 <div className="space-y-0.5">
                   {visibleItems.map((item) => {
                     const Icon = item.icon;
@@ -158,17 +176,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       <Link
                         key={item.href}
                         href={item.href}
-                        className={`flex h-9 items-center justify-between rounded-[8px] px-2.5 text-[13px] font-medium transition-colors ${
+                        title={sidebarCollapsed ? item.label : undefined}
+                        className={`flex h-9 items-center rounded-[8px] text-[13px] font-medium transition-colors ${
+                          sidebarCollapsed
+                            ? "justify-center px-0"
+                            : "justify-between px-2.5"
+                        } ${
                           active
                             ? "bg-[#EEF2FF] text-[#1D4ED8]"
                             : "text-[#52525B] hover:bg-[#F7F7F8] hover:text-[#18181B]"
                         }`}
                       >
                         <span className="flex items-center gap-2.5">
-                          <Icon className="h-4 w-4" />
-                          <span>{item.label}</span>
+                          <Icon className="h-4 w-4 shrink-0" />
+                          {!sidebarCollapsed && <span>{item.label}</span>}
                         </span>
-                        {isTrialOverride && (
+                        {!sidebarCollapsed && isTrialOverride && (
                           <StatusBadge label="Trial" tone="violet" showDot={false} />
                         )}
                       </Link>
@@ -179,71 +202,105 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-
-        {/* Plan Card */}
-        <div className="mx-3 mb-3 rounded-[10px] border border-[#E4E4E7] bg-[#F7F7F8] p-3">
-          <div className="flex items-center justify-between text-[12px]">
-            <span className="font-semibold text-[#18181B]">
-              {me?.planName ?? "Plan"} Plan
-            </span>
-            <Link
-              href="/settings/plan"
-              className="text-[12px] font-medium text-[#1D4ED8] hover:underline"
-            >
-              Plan & usage
-            </Link>
-          </div>
-          {trialFeatures.length > 0 ? (
-            <div className="mt-1 text-[11px] text-[#6D28D9]">
-              {trialFeatures.length} active trial override(s)
-            </div>
-          ) : (
-            <div className="mt-1 text-[11px] text-[#63636B]">
-              Users: {me?.usage?.MAX_USERS ?? 1} / {me?.limits?.MAX_USERS ?? "—"}
-            </div>
-          )}
-        </div>
-
-        {/* User Footer */}
-        <div className="flex items-center justify-between border-t border-[#E4E4E7] px-4 py-3">
-          <div className="min-w-0">
-            <div className="truncate text-[13px] font-medium text-[#18181B]">
-              {me?.fullName ?? "User"}
-            </div>
-            <div className="truncate text-[11px] text-[#63636B]">{me?.email ?? ""}</div>
-          </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            aria-label="Sign out"
-            className="rounded-[8px] p-2 text-[#52525B] hover:bg-[#F7F7F8] hover:text-[#991B1B]"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
-        </div>
       </aside>
 
       {/* Main Content Area */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top Bar */}
         <header className="flex h-14 items-center justify-between border-b border-[#E4E4E7] bg-white px-6">
-          <div className="flex items-center gap-2 text-[13px] text-[#52525B]">
-            <span className="font-medium text-[#18181B]">{me?.tenantName ?? "IMS"}</span>
-            <span>/</span>
-            <span className="font-mono text-[12px] text-[#63636B]">{pathname}</span>
+          <div className="text-[14px] font-semibold text-[#18181B]">
+            {currentMenuLabel}
           </div>
 
           <div className="flex items-center gap-2.5">
-            {hasFeature("BARCODES") && (
+
+            <div ref={userMenuRef} className="relative">
               <button
                 type="button"
-                onClick={() => setCmdOpen(true)}
-                className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
+                onClick={() => setUserMenuOpen((prev) => !prev)}
+                aria-expanded={userMenuOpen}
+                aria-haspopup="menu"
+                className="flex items-center gap-2.5 rounded-[10px] px-2.5 py-1.5 transition-colors hover:bg-[#F7F7F8]"
               >
-                <QrCode className="h-4 w-4 text-[#1D4ED8]" />
-                <span>Scan</span>
+                <div className="min-w-0 text-right">
+                  <div className="truncate text-[13px] font-semibold text-[#18181B]">
+                    {me?.fullName ?? "User"}
+                  </div>
+                  <div className="truncate text-[11px] text-[#63636B]">
+                    {me?.tenantName ?? me?.email ?? ""}
+                  </div>
+                </div>
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#EEF2FF] text-[13px] font-semibold text-[#1D4ED8]">
+                  {userInitial}
+                </div>
+                <ChevronDown
+                  className={`h-4 w-4 text-[#63636B] transition-transform duration-150 ${
+                    userMenuOpen ? "rotate-180" : ""
+                  }`}
+                />
               </button>
-            )}
+
+              {userMenuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full z-50 mt-2 w-72 rounded-[14px] border border-[#E4E4E7] bg-white p-2 shadow-lg"
+                >
+                  {/* Profile Header */}
+                  <div className="flex items-center gap-3 px-3 py-2.5">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#EEF2FF] text-[14px] font-semibold text-[#1D4ED8]">
+                      {userInitial}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-[14px] font-semibold text-[#18181B]">
+                        {me?.fullName ?? "User"}
+                      </div>
+                      <div className="truncate text-[12px] text-[#63636B]">
+                        {me?.email ?? ""}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="my-1.5 border-t border-[#E4E4E7]" />
+
+                  {/* Menu Items */}
+                  <div className="space-y-0.5">
+                    <Link
+                      href="/settings/users"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-3 rounded-[8px] px-3 py-2 text-[13px] font-medium text-[#18181B] transition-colors hover:bg-[#F7F7F8]"
+                    >
+                      <User className="h-4 w-4 text-[#63636B]" />
+                      <span>Personal information</span>
+                    </Link>
+                    {hasPermission("ADMIN:VIEW") && (
+                      <Link
+                        href="/settings/organization"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 rounded-[8px] px-3 py-2 text-[13px] font-medium text-[#18181B] transition-colors hover:bg-[#F7F7F8]"
+                      >
+                        <Settings className="h-4 w-4 text-[#63636B]" />
+                        <span>Tenant Settings</span>
+                      </Link>
+                    )}
+                  </div>
+
+                  <div className="my-1.5 border-t border-[#E4E4E7]" />
+
+                  {/* Log out */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="flex w-full items-center gap-3 rounded-[8px] px-3 py-2 text-[13px] font-medium text-[#DC2626] transition-colors hover:bg-[#FEF2F2]"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Log out</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 

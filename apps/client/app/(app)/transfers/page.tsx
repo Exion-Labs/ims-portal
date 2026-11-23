@@ -12,7 +12,8 @@ import {
 } from "@ims/api-client";
 import { EmptyState, ErrorState, StatusBadge } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
-import { ArrowLeftRight, Plus, RotateCcw, Truck, X } from "lucide-react";
+import { ListToolbar } from "@/components/list-toolbar";
+import { ArrowLeftRight, RotateCcw, X } from "lucide-react";
 
 const STATUS_TONE: Record<string, "neutral" | "primary" | "warning" | "success" | "danger"> = {
   PENDING: "neutral",
@@ -146,58 +147,58 @@ export default function TransfersAndReturnsPage() {
   return (
     <FeatureGate feature="TRANSFERS">
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-              <Truck className="w-6 h-6 text-primary" />
-              Transfers &amp; Return Orders (RMA)
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Inter-warehouse stock transfers and customer return merchandise authorizations.
-            </p>
-          </div>
-          {hasPermission("ORDER:CREATE") && (
-            <div className="flex gap-2">
+        <ListToolbar
+          filters={
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => setShowCreateTransfer(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
+                type="button"
+                onClick={() => setTab("transfers")}
+                className={`inline-flex h-9 items-center gap-1.5 rounded-[8px] border px-3 text-[13px] font-medium transition-colors ${
+                  tab === "transfers"
+                    ? "border-[#1D4ED8] bg-[#EEF2FF] text-[#1D4ED8]"
+                    : "border-[#E4E4E7] bg-white text-[#52525B] hover:bg-[#F7F7F8]"
+                }`}
               >
-                <Plus className="w-4 h-4" /> New Transfer
+                <ArrowLeftRight className="h-4 w-4" />
+                <span>Transfer Orders ({transfers.length})</span>
               </button>
               {hasFeature("RETURNS") && (
                 <button
-                  onClick={() => setShowCreateReturn(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium hover:bg-muted"
+                  type="button"
+                  onClick={() => setTab("returns")}
+                  className={`inline-flex h-9 items-center gap-1.5 rounded-[8px] border px-3 text-[13px] font-medium transition-colors ${
+                    tab === "returns"
+                      ? "border-[#1D4ED8] bg-[#EEF2FF] text-[#1D4ED8]"
+                      : "border-[#E4E4E7] bg-white text-[#52525B] hover:bg-[#F7F7F8]"
+                  }`}
                 >
-                  <RotateCcw className="w-4 h-4" /> New RMA
+                  <RotateCcw className="h-4 w-4" />
+                  <span>Return Orders ({returns.length})</span>
                 </button>
               )}
             </div>
-          )}
-        </div>
-
-        <div className="flex gap-2 border-b">
-          <button
-            onClick={() => setTab("transfers")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 ${
-              tab === "transfers" ? "border-primary text-primary" : "border-transparent text-muted-foreground"
-            }`}
-          >
-            <ArrowLeftRight className="w-4 h-4 inline mr-1.5" />
-            Transfer Orders ({transfers.length})
-          </button>
-          {hasFeature("RETURNS") && (
-            <button
-              onClick={() => setTab("returns")}
-              className={`px-4 py-2 text-sm font-medium border-b-2 ${
-                tab === "returns" ? "border-primary text-primary" : "border-transparent text-muted-foreground"
-              }`}
-            >
-              <RotateCcw className="w-4 h-4 inline mr-1.5" />
-              Return Orders ({returns.length})
-            </button>
-          )}
-        </div>
+          }
+          secondaryAction={
+            hasPermission("ORDER:CREATE") && hasFeature("RETURNS") ? (
+              <button
+                type="button"
+                onClick={() => setShowCreateReturn(true)}
+                className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
+              >
+                <RotateCcw className="h-4 w-4 text-[#52525B]" />
+                <span>New RMA</span>
+              </button>
+            ) : undefined
+          }
+          primaryAction={
+            hasPermission("ORDER:CREATE")
+              ? {
+                  label: "New Transfer",
+                  onClick: () => setShowCreateTransfer(true),
+                }
+              : undefined
+          }
+        />
 
         {actionError && <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{actionError}</div>}
 

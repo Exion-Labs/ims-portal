@@ -13,7 +13,8 @@ import {
 } from "@ims/api-client";
 import { DataTable, EmptyState, ErrorState, StatTile, StatusBadge } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
-import { Factory, Plus, Search, X } from "lucide-react";
+import { ListToolbar } from "@/components/list-toolbar";
+import { X } from "lucide-react";
 
 const STATUS_TONE: Record<string, "neutral" | "primary" | "warning" | "success" | "danger"> = {
   PENDING: "neutral",
@@ -172,60 +173,44 @@ export default function ManufacturingPage() {
   return (
     <FeatureGate feature="MANUFACTURING">
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-              <Factory className="w-6 h-6 text-primary" />
-              Manufacturing &amp; Build Orders
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Schedule assembly builds, allocate BOM stock, and record serialized genealogy.
-            </p>
-          </div>
-          {hasPermission("BUILD:CREATE") && (
-            <button
-              onClick={() => setShowCreate(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90"
-            >
-              <Plus className="w-4 h-4" /> New Build Order
-            </button>
-          )}
-        </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatTile label="Total Build Orders" value={buildPage?.totalElements ?? 0} />
           <StatTile label="Pending (Page)" value={pendingCount} />
           <StatTile label="In Production (Page)" value={inProdCount} />
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[220px] max-w-md">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={searchQuery}
+        <ListToolbar
+          searchQuery={searchQuery}
+          onSearchChange={(val) => {
+            setSearchQuery(val);
+            setPageIndex(0);
+          }}
+          searchPlaceholder="Search BO reference, title, or assembly..."
+          filters={
+            <select
+              value={statusFilter}
               onChange={(e) => {
-                setSearchQuery(e.target.value);
+                setStatusFilter(e.target.value);
                 setPageIndex(0);
               }}
-              placeholder="Search BO reference, title, or assembly..."
-              className="w-full pl-9 pr-3 py-2 text-sm border rounded-lg bg-background"
-            />
-          </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              setPageIndex(0);
-            }}
-            className="px-3 py-2 text-sm border rounded-lg bg-background"
-          >
-            <option value="">All Statuses</option>
-            <option value="PENDING">PENDING</option>
-            <option value="PRODUCTION">PRODUCTION</option>
-            <option value="COMPLETE">COMPLETE</option>
-            <option value="CANCELLED">CANCELLED</option>
-          </select>
-        </div>
+              className="h-9 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+            >
+              <option value="">All Statuses</option>
+              <option value="PENDING">PENDING</option>
+              <option value="PRODUCTION">PRODUCTION</option>
+              <option value="COMPLETE">COMPLETE</option>
+              <option value="CANCELLED">CANCELLED</option>
+            </select>
+          }
+          primaryAction={
+            hasPermission("BUILD:CREATE")
+              ? {
+                  label: "New Build Order",
+                  onClick: () => setShowCreate(true),
+                }
+              : undefined
+          }
+        />
 
         {error ? (
           <ErrorState message={error} onRetry={loadData} />

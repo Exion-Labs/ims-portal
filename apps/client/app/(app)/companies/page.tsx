@@ -18,13 +18,13 @@ import {
   StatusBadge,
 } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
+import { ListToolbar, ListToolbarMenuItem } from "@/components/list-toolbar";
 import {
   Building2,
   Coins,
   FileSpreadsheet,
   Globe,
   Plus,
-  Search,
   X,
 } from "lucide-react";
 
@@ -210,51 +210,6 @@ export default function CompaniesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-[24px] font-semibold tracking-tight text-[#18181B]">
-            Companies, Suppliers & Multi-Currency Catalog
-          </h1>
-          <p className="mt-0.5 text-[14px] text-[#52525B]">
-            Manage vendors, manufacturers, customers, pack-size SKU conversions, and foreign
-            currency price breaks.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowRatesModal(true)}
-            className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
-          >
-            <Coins className="h-4 w-4 text-[#1D4ED8]" />
-            <span>Exchange Rates ({rates.length})</span>
-          </button>
-
-          <FeatureGate feature="IMPORT_EXPORT">
-            <button
-              type="button"
-              onClick={() => setShowImporter((v) => !v)}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
-            >
-              <FileSpreadsheet className="h-4 w-4 text-[#1D4ED8]" />
-              <span>{showImporter ? "Hide Importer" : "Import Supplier SKUs"}</span>
-            </button>
-          </FeatureGate>
-
-          {hasPermission("COMPANY:CREATE") && (
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(true)}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#1D4ED8] px-3.5 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
-            >
-              <Plus className="h-4 w-4" />
-              <span>New Company</span>
-            </button>
-          )}
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile
           label="Total Companies"
@@ -294,48 +249,68 @@ export default function CompaniesPage() {
       )}
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center gap-3 rounded-[12px] border border-[#E4E4E7] bg-white p-4">
-        <div className="relative min-w-[240px] flex-1">
-          <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-[#63636B]" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPageIndex(0);
-            }}
-            placeholder="Search company name or code…"
-            className="h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] pr-3 pl-9 text-[13px] focus:border-[#1D4ED8] focus:bg-white focus:outline-hidden"
-          />
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          {[
-            { label: "Suppliers", val: filterSupplier, set: setFilterSupplier },
-            { label: "Manufacturers", val: filterManufacturer, set: setFilterManufacturer },
-            { label: "Customers", val: filterCustomer, set: setFilterCustomer },
-          ].map((chip) => {
-            const active = chip.val === true;
-            return (
-              <button
-                key={chip.label}
-                type="button"
-                onClick={() => {
-                  chip.set(active ? null : true);
-                  setPageIndex(0);
-                }}
-                className={`h-8 rounded-full border px-3 text-[12px] font-medium ${
-                  active
-                    ? "border-[#1D4ED8] bg-[#EEF2FF] text-[#1D4ED8]"
-                    : "border-[#E4E4E7] bg-white text-[#52525B]"
-                }`}
-              >
-                {chip.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <ListToolbar
+        searchQuery={searchQuery}
+        onSearchChange={(val) => {
+          setSearchQuery(val);
+          setPageIndex(0);
+        }}
+        searchPlaceholder="Search company name or code…"
+        filters={
+          <div className="flex items-center gap-1.5">
+            {[
+              { label: "Suppliers", val: filterSupplier, set: setFilterSupplier },
+              { label: "Manufacturers", val: filterManufacturer, set: setFilterManufacturer },
+              { label: "Customers", val: filterCustomer, set: setFilterCustomer },
+            ].map((chip) => {
+              const active = chip.val === true;
+              return (
+                <button
+                  key={chip.label}
+                  type="button"
+                  onClick={() => {
+                    chip.set(active ? null : true);
+                    setPageIndex(0);
+                  }}
+                  className={`h-8 rounded-full border px-3 text-[12px] font-medium ${
+                    active
+                      ? "border-[#1D4ED8] bg-[#EEF2FF] text-[#1D4ED8]"
+                      : "border-[#E4E4E7] bg-white text-[#52525B]"
+                  }`}
+                >
+                  {chip.label}
+                </button>
+              );
+            })}
+          </div>
+        }
+        menuItems={(() => {
+          const items: ListToolbarMenuItem[] = [];
+          if (hasFeature("IMPORT_EXPORT")) {
+            items.push({
+              key: "import",
+              label: showImporter ? "Hide Importer" : "Import Supplier SKUs",
+              icon: <FileSpreadsheet className="h-4 w-4 text-[#1D4ED8]" />,
+              onClick: () => setShowImporter((v) => !v),
+            });
+          }
+          items.push({
+            key: "rates",
+            label: `Exchange Rates (${rates.length})`,
+            icon: <Coins className="h-4 w-4 text-[#1D4ED8]" />,
+            onClick: () => setShowRatesModal(true),
+          });
+          return items;
+        })()}
+        primaryAction={
+          hasPermission("COMPANY:CREATE")
+            ? {
+                label: "New Company",
+                onClick: () => setShowCreateModal(true),
+              }
+            : undefined
+        }
+      />
 
       {error ? (
         <ErrorState message={error} onRetry={loadCompanies} />
