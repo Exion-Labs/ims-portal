@@ -56,9 +56,9 @@ export function ListToolbar({
   }, [menuOpen]);
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-[12px] border border-[#E4E4E7] bg-white p-4">
+    <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-[#E4E4E7] bg-white p-3">
       {onSearchChange !== undefined && (
-        <div className="relative min-w-[240px] flex-1">
+        <div className="relative min-w-[140px] flex-1 basis-36">
           <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-[#63636B]" />
           <input
             type="text"
@@ -73,7 +73,7 @@ export function ListToolbar({
       {filters}
 
       {(menuItems.length > 0 || secondaryAction || primaryAction) && (
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           {menuItems.length > 0 && (
             <div ref={menuRef} className="relative">
               <button
@@ -133,7 +133,7 @@ export function ListToolbar({
             <button
               type="button"
               onClick={primaryAction.onClick}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#1D4ED8] px-3.5 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[8px] bg-[#1D4ED8] px-3.5 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
             >
               {primaryAction.icon ?? <Plus className="h-4 w-4" />}
               <span>{primaryAction.label}</span>
