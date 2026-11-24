@@ -188,3 +188,57 @@ export function BulkActionBar({
     </div>
   );
 }
+
+export function Card({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`rounded-[12px] border border-[#E4E4E7] bg-white p-5 ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+export function Modal({
+  open,
+  onClose,
+  title,
+  maxWidthClass = "max-w-lg",
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  maxWidthClass?: string;
+  children: React.ReactNode;
+}) {
+  if (!open) return null;
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+    >
+      <div
+        className={`max-h-[90vh] w-full ${maxWidthClass} overflow-y-auto rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl`}
+      >
+        <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+          <h2 className="text-[16px] font-semibold text-[#18181B]">{title}</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close modal"
+            className="rounded p-1 text-[#63636B] hover:bg-[#F7F7F8]"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="mt-4">{children}</div>
+      </div>
+    </div>
+  );
+}

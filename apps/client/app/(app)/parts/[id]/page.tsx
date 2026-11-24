@@ -19,7 +19,7 @@ import {
   StockTrackingView,
   SupplierPartView,
 } from "@ims/api-client";
-import { EmptyState, ErrorState, StatTile, StatusBadge } from "@ims/ui";
+import { Card, EmptyState, ErrorState, Modal, StatTile, StatusBadge } from "@ims/ui";
 import { useEntitlements } from "@/lib/entitlements";
 import { useEditMode } from "@/lib/edit-mode";
 import { EditModeHint } from "@/components/edit-mode-hint";
@@ -664,7 +664,7 @@ export default function PartDetailPage() {
       {activeTab === "overview" && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Pricing & Margin */}
-          <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+          <Card>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <DollarSign className="h-4 w-4 text-[#1D4ED8]" />
@@ -704,7 +704,7 @@ export default function PartDetailPage() {
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] p-3">
+              <div className="ims-subcard">
                 <div className="text-[11px] font-medium uppercase tracking-wide text-[#63636B]">
                   Cost Price
                 </div>
@@ -712,7 +712,7 @@ export default function PartDetailPage() {
                   {costPrice !== null ? `${currency} ${costPrice.toFixed(2)}` : "Not set"}
                 </div>
               </div>
-              <div className="rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] p-3">
+              <div className="ims-subcard">
                 <div className="text-[11px] font-medium uppercase tracking-wide text-[#63636B]">
                   Selling Price
                 </div>
@@ -720,7 +720,7 @@ export default function PartDetailPage() {
                   {sellingPrice !== null ? `${currency} ${sellingPrice.toFixed(2)}` : "Not set"}
                 </div>
               </div>
-              <div className="rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] p-3">
+              <div className="ims-subcard">
                 <div className="text-[11px] font-medium uppercase tracking-wide text-[#63636B]">
                   Gross Margin
                 </div>
@@ -728,7 +728,7 @@ export default function PartDetailPage() {
                   {grossMarginPct !== null ? `${grossMarginPct.toFixed(1)}%` : "—"}
                 </div>
               </div>
-              <div className="rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] p-3">
+              <div className="ims-subcard">
                 <div className="text-[11px] font-medium uppercase tracking-wide text-[#63636B]">
                   Tax Rate
                 </div>
@@ -737,10 +737,10 @@ export default function PartDetailPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* Barcode & Label */}
-          <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+          <Card>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <QrCode className="h-4 w-4 text-[#1D4ED8]" />
@@ -755,7 +755,7 @@ export default function PartDetailPage() {
                 <span>Print Label</span>
               </button>
             </div>
-            <div className="mt-4 flex flex-wrap items-center gap-4 rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] p-4">
+            <div className="ims-subcard mt-4 flex flex-wrap items-center gap-4 p-4">
               {hasFeature("BARCODES") ? (
                 <img
                   src={`/api/v1/barcode/image?code=${encodeURIComponent(barcodeValue)}&format=CODE_128&width=220&height=70`}
@@ -779,10 +779,10 @@ export default function PartDetailPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* Item Settings & Capabilities */}
-          <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+          <Card>
             <h2 className="text-[15px] font-semibold text-[#18181B]">Item Settings</h2>
             <div className="mt-4 grid grid-cols-2 gap-3 text-[13px]">
               {[
@@ -804,10 +804,10 @@ export default function PartDetailPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
 
           {/* Stock by Location Snapshot */}
-          <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+          <Card>
             <div className="flex items-center justify-between">
               <h2 className="text-[15px] font-semibold text-[#18181B]">Stock by Location</h2>
               <button
@@ -837,7 +837,7 @@ export default function PartDetailPage() {
                 ))}
               </dl>
             )}
-          </div>
+          </Card>
         </div>
       )}
 
@@ -1538,349 +1538,288 @@ export default function PartDetailPage() {
       )}
 
       {/* Modal: Quick Stock Operation */}
-      {stockOp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
-              <h2 className="text-[16px] font-semibold text-[#18181B]">
-                {stockOp.type === "add"
-                  ? "Increase Stock"
-                  : stockOp.type === "remove"
-                    ? "Remove Stock"
-                    : stockOp.type === "count"
-                      ? "Stock Count"
-                      : "Move Stock"}
-              </h2>
-              <button
-                type="button"
-                onClick={() => setStockOp(null)}
-                className="rounded p-1 text-[#63636B] hover:bg-[#F7F7F8]"
+      <Modal
+        open={Boolean(stockOp)}
+        onClose={() => setStockOp(null)}
+        maxWidthClass="max-w-md"
+        title={
+          stockOp?.type === "add"
+            ? "Increase Stock"
+            : stockOp?.type === "remove"
+              ? "Remove Stock"
+              : stockOp?.type === "count"
+                ? "Stock Count"
+                : "Move Stock"
+        }
+      >
+        <form onSubmit={handleRunStockOp} className="space-y-3">
+          {opError && <div className="ims-alert-error">{opError}</div>}
+
+          {stockOp?.type === "transfer" && (
+            <div>
+              <label className="ims-label">Destination Location *</label>
+              <select
+                required
+                value={opLocationId}
+                onChange={(e) => setOpLocationId(e.target.value)}
+                className="ims-select mt-1"
               >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleRunStockOp} className="mt-4 space-y-3">
-              {opError && (
-                <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-3 py-2 text-[12px] text-[#991B1B]">
-                  {opError}
-                </div>
-              )}
-
-              {stockOp.type === "transfer" && (
-                <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
-                    Destination Location *
-                  </label>
-                  <select
-                    required
-                    value={opLocationId}
-                    onChange={(e) => setOpLocationId(e.target.value)}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
-                  >
-                    <option value="">Select location…</option>
-                    {locations
-                      .filter((l) => !l.structural)
-                      .map((l) => (
-                        <option key={l.id} value={l.id}>
-                          {l.pathString}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-[12px] font-medium text-[#18181B]">
-                  Quantity ({part.unit}) *
-                </label>
-                <input
-                  type="number"
-                  step="any"
-                  min="0.0001"
-                  required
-                  value={opQty}
-                  onChange={(e) => setOpQty(e.target.value)}
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[12px] font-medium text-[#18181B]">Reason / Notes</label>
-                <input
-                  type="text"
-                  value={opNotes}
-                  onChange={(e) => setOpNotes(e.target.value)}
-                  placeholder="e.g. Walk-in sale, damaged, restock…"
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 border-t border-[#E4E4E7] pt-4">
-                <button
-                  type="button"
-                  onClick={() => setStockOp(null)}
-                  className="h-9 rounded-[8px] border border-[#E4E4E7] px-4 text-[13px]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={opSaving}
-                  className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white disabled:opacity-50"
-                >
-                  {opSaving ? "Saving…" : "Confirm"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal: Create Variant */}
-      {showVariantModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
-              <h2 className="text-[16px] font-semibold text-[#18181B]">Create Product Variant</h2>
-              <button
-                type="button"
-                onClick={() => setShowVariantModal(false)}
-                className="rounded p-1 text-[#63636B] hover:bg-[#F7F7F8]"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateVariant} className="mt-4 space-y-3">
-              {variantError && (
-                <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-3 py-2 text-[12px] text-[#991B1B]">
-                  {variantError}
-                </div>
-              )}
-              <div>
-                <label className="block text-[12px] font-medium text-[#18181B]">Variant SKU *</label>
-                <input
-                  type="text"
-                  required
-                  value={variantSku}
-                  onChange={(e) => setVariantSku(e.target.value)}
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
-                />
-              </div>
-              <div>
-                <label className="block text-[12px] font-medium text-[#18181B]">Variant Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={variantName}
-                  onChange={(e) => setVariantName(e.target.value)}
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 border-t border-[#E4E4E7] pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowVariantModal(false)}
-                  className="h-9 rounded-[8px] border border-[#E4E4E7] px-4 text-[13px]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white"
-                >
-                  Create
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal: Edit Item */}
-      {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
-              <h2 className="text-[16px] font-semibold text-[#18181B]">Edit Item · {part.ipn}</h2>
-              <button
-                type="button"
-                onClick={() => setShowEditModal(false)}
-                className="rounded p-1 text-[#63636B] hover:bg-[#F7F7F8]"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveEdit} className="mt-4 space-y-3">
-              {editError && (
-                <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-3 py-2 text-[12px] text-[#991B1B]">
-                  {editError}
-                </div>
-              )}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">SKU / Item Code *</label>
-                  <input
-                    type="text"
-                    required
-                    value={editForm.ipn}
-                    onChange={(e) => setEditForm({ ...editForm, ipn: e.target.value })}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">Barcode</label>
-                  <input
-                    type="text"
-                    value={editForm.barcode}
-                    onChange={(e) => setEditForm({ ...editForm, barcode: e.target.value })}
-                    placeholder="Defaults to SKU"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-[12px] font-medium text-[#18181B]">Item Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={editForm.name}
-                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
-                />
-              </div>
-              <div>
-                <label className="block text-[12px] font-medium text-[#18181B]">Description</label>
-                <input
-                  type="text"
-                  value={editForm.description}
-                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
-                />
-              </div>
-              <div>
-                <label className="block text-[12px] font-medium text-[#18181B]">Category</label>
-                <select
-                  value={editForm.categoryId}
-                  onChange={(e) => setEditForm({ ...editForm, categoryId: e.target.value })}
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
-                >
-                  <option value="">Uncategorized</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id} disabled={c.structural}>
-                      {c.pathString} {c.structural ? "(Folder)" : ""}
+                <option value="">Select location…</option>
+                {locations
+                  .filter((l) => !l.structural)
+                  .map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.pathString}
                     </option>
                   ))}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">Unit</label>
-                  <input
-                    type="text"
-                    value={editForm.unit}
-                    onChange={(e) => setEditForm({ ...editForm, unit: e.target.value })}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">Reorder Point</label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={editForm.minimumStock}
-                    onChange={(e) => setEditForm({ ...editForm, minimumStock: e.target.value })}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
-                  />
-                </div>
-              </div>
+              </select>
+            </div>
+          )}
 
-              <div className="grid grid-cols-4 gap-2">
-                <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">Currency</label>
-                  <input
-                    type="text"
-                    value={editForm.currency}
-                    onChange={(e) => setEditForm({ ...editForm, currency: e.target.value.toUpperCase() })}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-2.5 font-mono text-[13px]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">Cost Price</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editForm.costPrice}
-                    onChange={(e) => setEditForm({ ...editForm, costPrice: e.target.value })}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-2.5 font-mono text-[13px]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">Selling Price</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editForm.sellingPrice}
-                    onChange={(e) => setEditForm({ ...editForm, sellingPrice: e.target.value })}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-2.5 font-mono text-[13px]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">Tax %</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editForm.taxRate}
-                    onChange={(e) => setEditForm({ ...editForm, taxRate: e.target.value })}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-2.5 font-mono text-[13px]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] p-3 text-[12px]">
-                {[
-                  { key: "active", label: "Active" },
-                  { key: "salable", label: "For Sale" },
-                  { key: "purchaseable", label: "Purchased from Suppliers" },
-                  { key: "trackable", label: "Track Serial Numbers" },
-                  { key: "assembly", label: "Kit / Bundle" },
-                  { key: "virtual", label: "Non-Physical Service" },
-                ].map((opt) => (
-                  <label key={opt.key} className="flex items-center gap-2 text-[#18181B]">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(editForm[opt.key as keyof typeof editForm])}
-                      onChange={(e) =>
-                        setEditForm({ ...editForm, [opt.key]: e.target.checked })
-                      }
-                    />
-                    <span>{opt.label}</span>
-                  </label>
-                ))}
-              </div>
-
-              <div className="flex justify-end gap-2 border-t border-[#E4E4E7] pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  className="h-9 rounded-[8px] border border-[#E4E4E7] px-4 text-[13px]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
+          <div>
+            <label className="ims-label">Quantity ({part.unit}) *</label>
+            <input
+              type="number"
+              step="any"
+              min="0.0001"
+              required
+              value={opQty}
+              onChange={(e) => setOpQty(e.target.value)}
+              className="ims-input mt-1 font-mono"
+            />
           </div>
-        </div>
-      )}
+
+          <div>
+            <label className="ims-label">Reason / Notes</label>
+            <input
+              type="text"
+              value={opNotes}
+              onChange={(e) => setOpNotes(e.target.value)}
+              placeholder="e.g. Walk-in sale, damaged, restock…"
+              className="ims-input mt-1"
+            />
+          </div>
+
+          <div className="ims-modal-footer">
+            <button type="button" onClick={() => setStockOp(null)} className="ims-btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" disabled={opSaving} className="ims-btn-primary">
+              {opSaving ? "Saving…" : "Confirm"}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal: Create Variant */}
+      <Modal
+        open={showVariantModal}
+        onClose={() => setShowVariantModal(false)}
+        maxWidthClass="max-w-md"
+        title="Create Product Variant"
+      >
+        <form onSubmit={handleCreateVariant} className="space-y-3">
+          {variantError && <div className="ims-alert-error">{variantError}</div>}
+          <div>
+            <label className="ims-label">Variant SKU *</label>
+            <input
+              type="text"
+              required
+              value={variantSku}
+              onChange={(e) => setVariantSku(e.target.value)}
+              className="ims-input mt-1 font-mono"
+            />
+          </div>
+          <div>
+            <label className="ims-label">Variant Name *</label>
+            <input
+              type="text"
+              required
+              value={variantName}
+              onChange={(e) => setVariantName(e.target.value)}
+              className="ims-input mt-1"
+            />
+          </div>
+
+          <div className="ims-modal-footer">
+            <button
+              type="button"
+              onClick={() => setShowVariantModal(false)}
+              className="ims-btn-secondary"
+            >
+              Cancel
+            </button>
+            <button type="submit" className="ims-btn-primary">
+              Create
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal: Edit Item */}
+      <Modal
+        open={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title={`Edit Item · ${part.ipn}`}
+      >
+        <form onSubmit={handleSaveEdit} className="space-y-3">
+          {editError && <div className="ims-alert-error">{editError}</div>}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="ims-label">SKU / Item Code *</label>
+              <input
+                type="text"
+                required
+                value={editForm.ipn}
+                onChange={(e) => setEditForm({ ...editForm, ipn: e.target.value })}
+                className="ims-input mt-1 font-mono"
+              />
+            </div>
+            <div>
+              <label className="ims-label">Barcode</label>
+              <input
+                type="text"
+                value={editForm.barcode}
+                onChange={(e) => setEditForm({ ...editForm, barcode: e.target.value })}
+                placeholder="Defaults to SKU"
+                className="ims-input mt-1 font-mono"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="ims-label">Item Name *</label>
+            <input
+              type="text"
+              required
+              value={editForm.name}
+              onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+              className="ims-input mt-1"
+            />
+          </div>
+          <div>
+            <label className="ims-label">Description</label>
+            <input
+              type="text"
+              value={editForm.description}
+              onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+              className="ims-input mt-1"
+            />
+          </div>
+          <div>
+            <label className="ims-label">Category</label>
+            <select
+              value={editForm.categoryId}
+              onChange={(e) => setEditForm({ ...editForm, categoryId: e.target.value })}
+              className="ims-select mt-1"
+            >
+              <option value="">Uncategorized</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id} disabled={c.structural}>
+                  {c.pathString} {c.structural ? "(Folder)" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="ims-label">Unit</label>
+              <input
+                type="text"
+                value={editForm.unit}
+                onChange={(e) => setEditForm({ ...editForm, unit: e.target.value })}
+                className="ims-input mt-1 font-mono"
+              />
+            </div>
+            <div>
+              <label className="ims-label">Reorder Point</label>
+              <input
+                type="number"
+                step="any"
+                value={editForm.minimumStock}
+                onChange={(e) => setEditForm({ ...editForm, minimumStock: e.target.value })}
+                className="ims-input mt-1 font-mono"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-4 gap-2">
+            <div>
+              <label className="ims-label">Currency</label>
+              <input
+                type="text"
+                value={editForm.currency}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, currency: e.target.value.toUpperCase() })
+                }
+                className="ims-input mt-1 px-2.5 font-mono"
+              />
+            </div>
+            <div>
+              <label className="ims-label">Cost Price</label>
+              <input
+                type="number"
+                step="0.01"
+                value={editForm.costPrice}
+                onChange={(e) => setEditForm({ ...editForm, costPrice: e.target.value })}
+                className="ims-input mt-1 px-2.5 font-mono"
+              />
+            </div>
+            <div>
+              <label className="ims-label">Selling Price</label>
+              <input
+                type="number"
+                step="0.01"
+                value={editForm.sellingPrice}
+                onChange={(e) => setEditForm({ ...editForm, sellingPrice: e.target.value })}
+                className="ims-input mt-1 px-2.5 font-mono"
+              />
+            </div>
+            <div>
+              <label className="ims-label">Tax %</label>
+              <input
+                type="number"
+                step="0.01"
+                value={editForm.taxRate}
+                onChange={(e) => setEditForm({ ...editForm, taxRate: e.target.value })}
+                className="ims-input mt-1 px-2.5 font-mono"
+              />
+            </div>
+          </div>
+
+          <div className="ims-subcard grid grid-cols-2 gap-2 text-[12px]">
+            {[
+              { key: "active", label: "Active" },
+              { key: "salable", label: "For Sale" },
+              { key: "purchaseable", label: "Purchased from Suppliers" },
+              { key: "trackable", label: "Track Serial Numbers" },
+              { key: "assembly", label: "Kit / Bundle" },
+              { key: "virtual", label: "Non-Physical Service" },
+            ].map((opt) => (
+              <label key={opt.key} className="flex items-center gap-2 text-[#18181B]">
+                <input
+                  type="checkbox"
+                  checked={Boolean(editForm[opt.key as keyof typeof editForm])}
+                  onChange={(e) => setEditForm({ ...editForm, [opt.key]: e.target.checked })}
+                />
+                <span>{opt.label}</span>
+              </label>
+            ))}
+          </div>
+
+          <div className="ims-modal-footer">
+            <button
+              type="button"
+              onClick={() => setShowEditModal(false)}
+              className="ims-btn-secondary"
+            >
+              Cancel
+            </button>
+            <button type="submit" className="ims-btn-primary">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
