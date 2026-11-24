@@ -56,6 +56,8 @@ function StockAndLocationsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialLocId = searchParams.get("locationId");
+  const initialAddStock = searchParams.get("addStock") === "true";
+  const initialPartId = searchParams.get("partId") ?? "";
   const { me, hasPermission, hasFeature, refetch } = useEntitlements();
 
   const [locations, setLocations] = useState<LocationView[]>([]);
@@ -78,14 +80,14 @@ function StockAndLocationsPageContent() {
   const [reconcileBanner, setReconcileBanner] = useState<string | null>(null);
 
   // Create Stock Modal
-  const [showCreateStock, setShowCreateStock] = useState(false);
+  const [showCreateStock, setShowCreateStock] = useState(initialAddStock);
   const [createStockForm, setCreateStockForm] = useState({
-    partId: "",
+    partId: initialPartId,
     locationId: "",
-    quantity: "100",
+    quantity: "",
     serialNumber: "",
     batchCode: "",
-    status: "OK",
+    status: "",
     customBarcode: "",
     notes: "",
   });
@@ -578,30 +580,6 @@ function StockAndLocationsPageContent() {
         </div>
       )}
 
-      {/* KPI Tiles */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile
-          label="Active Stock Lots / Serials"
-          value={stockPage?.totalElements ?? 0}
-          hint="Filtered batches & serialized items"
-        />
-        <StatTile
-          label="Warehouse Locations"
-          value={`${locations.length} / ${me?.limits?.MAX_LOCATIONS ?? "—"}`}
-          hint={`${locations.filter((l) => !l.structural).length} storage bins`}
-        />
-        <StatTile
-          label="Selected Location Scope"
-          value={selectedLocation ? selectedLocation.name : "All Locations"}
-          hint={selectedLocation ? selectedLocation.pathString : "Entire warehouse tree"}
-        />
-        <StatTile
-          label="Concurrency Mode"
-          value="Batched HQL Deltas"
-          hint="PESSIMISTIC_WRITE + beforeCommit flush"
-        />
-      </div>
-
       {showImporter && (
         <ImportWizard
           targetType="STOCK"
@@ -835,14 +813,16 @@ function StockAndLocationsPageContent() {
                     label: "New Stock Item",
                     onClick: () => {
                       setCreateStockError(null);
-                      setCreateStockForm((prev) => ({
-                        ...prev,
-                        partId: parts[0]?.id ?? "",
-                        locationId:
-                          selectedLocation && !selectedLocation.structural
-                            ? selectedLocation.id
-                            : "",
-                      }));
+                      setCreateStockForm({
+                        partId: "",
+                        locationId: "",
+                        quantity: "",
+                        serialNumber: "",
+                        batchCode: "",
+                        status: "",
+                        customBarcode: "",
+                        notes: "",
+                      });
                       setShowCreateStock(true);
                     },
                   }
@@ -860,7 +840,20 @@ function StockAndLocationsPageContent() {
                 hasPermission("STOCK:CREATE") && (
                   <button
                     type="button"
-                    onClick={() => setShowCreateStock(true)}
+                    onClick={() => {
+                      setCreateStockError(null);
+                      setCreateStockForm({
+                        partId: "",
+                        locationId: "",
+                        quantity: "",
+                        serialNumber: "",
+                        batchCode: "",
+                        status: "",
+                        customBarcode: "",
+                        notes: "",
+                      });
+                      setShowCreateStock(true);
+                    }}
                     className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white"
                   >
                     <Plus className="h-4 w-4" />
@@ -983,6 +976,7 @@ function StockAndLocationsPageContent() {
                     }
                     className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
                   >
+                    <option value="">Select status…</option>
                     <option value="OK">OK</option>
                     <option value="ATTENTION">ATTENTION</option>
                     <option value="QUARANTINED">QUARANTINED</option>
