@@ -55,6 +55,19 @@ export default function PlatformConsolePage() {
   const [auditLogs, setAuditLogs] = useState<PlatformAuditItem[]>([]);
   const [message, setMessage] = useState<string | null>(null);
 
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [registerError, setRegisterError] = useState<string | null>(null);
+  const [registering, setRegistering] = useState(false);
+  const [tenantForm, setTenantForm] = useState({
+    tenantName: "",
+    tenantSlug: "",
+    baseCurrency: "USD",
+    planCode: "TRIAL",
+    adminFullName: "",
+    adminEmail: "",
+    adminPassword: "",
+  });
+
   const loadAll = useCallback(async () => {
     try {
       const [tRes, pRes, oRes, aRes] = await Promise.all([
@@ -95,6 +108,49 @@ export default function PlatformConsolePage() {
     }
     setAuthed(true);
     await loadAll();
+  }
+
+  async function handleRegisterTenant(e: React.FormEvent) {
+    e.preventDefault();
+    setRegisterError(null);
+    setRegistering(true);
+    try {
+      const res = await fetch(`${PLATFORM_API_BASE}/tenants`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tenantName: tenantForm.tenantName,
+          tenantSlug: tenantForm.tenantSlug,
+          baseCurrency: tenantForm.baseCurrency,
+          planCode: tenantForm.planCode,
+          adminFullName: tenantForm.adminFullName,
+          adminEmail: tenantForm.adminEmail,
+          adminPassword: tenantForm.adminPassword,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setRegisterError(data.message ?? "Failed to register tenant");
+        return;
+      }
+      setShowRegisterModal(false);
+      setTenantForm({
+        tenantName: "",
+        tenantSlug: "",
+        baseCurrency: "USD",
+        planCode: "TRIAL",
+        adminFullName: "",
+        adminEmail: "",
+        adminPassword: "",
+      });
+      setMessage(`Registered tenant ${data.name} (${data.slug})`);
+      await loadAll();
+    } catch (err) {
+      setRegisterError(err instanceof Error ? err.message : "Failed to register tenant");
+    } finally {
+      setRegistering(false);
+    }
   }
 
   if (!authed) {
@@ -163,6 +219,22 @@ export default function PlatformConsolePage() {
         )}
 
         {tab === "tenants" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-slate-400">
+                {tenants.length} registered {tenants.length === 1 ? "tenant" : "tenants"}
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setRegisterError(null);
+                  setShowRegisterModal(true);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white"
+              >
+                + Register Tenant
+              </button>
+            </div>
           <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-slate-950/60 text-xs uppercase text-slate-400">
@@ -250,6 +322,7 @@ export default function PlatformConsolePage() {
               </tbody>
             </table>
           </div>
+          </div>
         )}
 
         {tab === "plans" && (
@@ -329,6 +402,165 @@ export default function PlatformConsolePage() {
           </div>
         )}
       </div>
+
+      {showRegisterModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-900 p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h2 className="text-base font-bold text-white">Register New Tenant</h2>
+              <button
+                type="button"
+                onClick={() => setShowRegisterModal(false)}
+                className="text-xs text-slate-400 hover:text-white"
+              >
+                Close
+              </button>
+            </div>
+
+            {registerError && (
+              <div className="rounded-lg bg-red-950/60 border border-red-800 px-3 py-2 text-xs text-red-300">
+                {registerError}
+              </div>
+            )}
+
+            <form onSubmit={handleRegisterTenant} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">
+                  Organization Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={tenantForm.tenantName}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    setTenantForm((prev) => ({
+                      ...prev,
+                      tenantName: name,
+                      tenantSlug: prev.tenantSlug
+                        ? prev.tenantSlug
+                        : name
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, "-")
+                            .replace(/^-|-$/g, ""),
+                    }));
+                  }}
+                  placeholder="Apex Precision Systems"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div className="col-span-2">
+                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                    Tenant Slug *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={tenantForm.tenantSlug}
+                    onChange={(e) => setTenantForm({ ...tenantForm, tenantSlug: e.target.value })}
+                    placeholder="apex-precision"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm font-mono text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                    Currency
+                  </label>
+                  <select
+                    value={tenantForm.baseCurrency}
+                    onChange={(e) => setTenantForm({ ...tenantForm, baseCurrency: e.target.value })}
+                    className="w-full px-2 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white"
+                  >
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Plan</label>
+                <select
+                  value={tenantForm.planCode}
+                  onChange={(e) => setTenantForm({ ...tenantForm, planCode: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white"
+                >
+                  {plans.length === 0 ? (
+                    <option value="TRIAL">TRIAL</option>
+                  ) : (
+                    plans.map((p) => (
+                      <option key={p.id} value={p.code}>
+                        {p.name} ({p.code})
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">
+                  Administrator Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={tenantForm.adminFullName}
+                  onChange={(e) => setTenantForm({ ...tenantForm, adminFullName: e.target.value })}
+                  placeholder="Jordan Chen"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">
+                  Administrator Email *
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={tenantForm.adminEmail}
+                  onChange={(e) => setTenantForm({ ...tenantForm, adminEmail: e.target.value })}
+                  placeholder="jordan@apex-precision.com"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">
+                  Password (min 8 chars) *
+                </label>
+                <input
+                  type="password"
+                  required
+                  minLength={8}
+                  value={tenantForm.adminPassword}
+                  onChange={(e) => setTenantForm({ ...tenantForm, adminPassword: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowRegisterModal(false)}
+                  className="px-4 py-2 rounded-lg border border-slate-700 text-xs text-slate-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={registering}
+                  className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white disabled:opacity-50"
+                >
+                  {registering ? "Provisioning…" : "Register Tenant"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

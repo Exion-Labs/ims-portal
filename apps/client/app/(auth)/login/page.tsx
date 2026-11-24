@@ -126,13 +126,6 @@ export default function LoginPage() {
             </button>
           </div>
         </div>
-
-        <div className="mt-5 text-center text-[13px] text-[#52525B]">
-          New organization?{" "}
-          <Link href="/register" className="font-medium text-[#1D4ED8] hover:underline">
-            Register a tenant
-          </Link>
-        </div>
       </div>
     </div>
   );
