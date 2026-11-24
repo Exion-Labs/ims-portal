@@ -24,6 +24,8 @@ import {
   StatusBadge,
 } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
+import { useEditMode } from "@/lib/edit-mode";
+import { EditModeHint } from "@/components/edit-mode-hint";
 import { ListToolbar, ListToolbarMenuItem } from "@/components/list-toolbar";
 import {
   ArrowRightLeft,
@@ -59,6 +61,7 @@ function StockAndLocationsPageContent() {
   const initialAddStock = searchParams.get("addStock") === "true";
   const initialPartId = searchParams.get("partId") ?? "";
   const { me, hasPermission, hasFeature, refetch } = useEntitlements();
+  const { editMode } = useEditMode();
 
   const [locations, setLocations] = useState<LocationView[]>([]);
   const [parts, setParts] = useState<PartView[]>([]);
@@ -603,7 +606,7 @@ function StockAndLocationsPageContent() {
                 <div className="text-[14px] font-semibold text-[#18181B]">Locations</div>
                 <div className="text-[11px] text-[#63636B]">Warehouse / Room / Aisle / Bin</div>
               </div>
-              {hasPermission("STOCK:CREATE") && (
+              {hasPermission("STOCK:CREATE") && editMode && (
                 <button
                   type="button"
                   onClick={() => {
@@ -700,45 +703,49 @@ function StockAndLocationsPageContent() {
                 <div className="text-[12px] font-medium text-[#18181B]">
                   {selectedLocation.pathString}
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLocName(selectedLocation.name);
-                      setLocDesc(selectedLocation.description ?? "");
-                      setLocType(selectedLocation.locationType);
-                      setLocStructural(selectedLocation.structural);
-                      setLocExternal(selectedLocation.externalLocation);
-                      setLocBarcode(selectedLocation.customBarcode ?? "");
-                      setLocError(null);
-                      setShowLocationModal({ mode: "edit", location: selectedLocation });
-                    }}
-                    className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] bg-white px-2 text-[11px] font-medium"
-                  >
-                    <Edit3 className="h-3 w-3" />
-                    <span>Edit</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLocParentId(selectedLocation.parentId ?? "");
-                      setLocError(null);
-                      setShowLocationModal({ mode: "move", location: selectedLocation });
-                    }}
-                    className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] bg-white px-2 text-[11px] font-medium"
-                  >
-                    <ArrowRightLeft className="h-3 w-3" />
-                    <span>Move</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteLocation(selectedLocation)}
-                    className="inline-flex h-7 items-center gap-1 rounded border border-[#FECACA] bg-[#FEE2E2]/40 px-2 text-[11px] font-medium text-[#991B1B]"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                    <span>Delete</span>
-                  </button>
-                </div>
+                {editMode ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLocName(selectedLocation.name);
+                        setLocDesc(selectedLocation.description ?? "");
+                        setLocType(selectedLocation.locationType);
+                        setLocStructural(selectedLocation.structural);
+                        setLocExternal(selectedLocation.externalLocation);
+                        setLocBarcode(selectedLocation.customBarcode ?? "");
+                        setLocError(null);
+                        setShowLocationModal({ mode: "edit", location: selectedLocation });
+                      }}
+                      className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] bg-white px-2 text-[11px] font-medium"
+                    >
+                      <Edit3 className="h-3 w-3" />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLocParentId(selectedLocation.parentId ?? "");
+                        setLocError(null);
+                        setShowLocationModal({ mode: "move", location: selectedLocation });
+                      }}
+                      className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] bg-white px-2 text-[11px] font-medium"
+                    >
+                      <ArrowRightLeft className="h-3 w-3" />
+                      <span>Move</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteLocation(selectedLocation)}
+                      className="inline-flex h-7 items-center gap-1 rounded border border-[#FECACA] bg-[#FEE2E2]/40 px-2 text-[11px] font-medium text-[#991B1B]"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                ) : (
+                  <EditModeHint actionDescription="edit, move, or delete locations" />
+                )}
               </div>
             )}
           </div>

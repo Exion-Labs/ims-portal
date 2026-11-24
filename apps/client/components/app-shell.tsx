@@ -5,9 +5,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   ChevronDown,
+  Lock,
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
+  Pencil,
   Search,
   Settings,
   User,
@@ -15,12 +17,14 @@ import {
 import { StatusBadge } from "@ims/ui";
 import { NAV_GROUPS, SETTINGS_NAV } from "@/lib/constants";
 import { useEntitlements } from "@/lib/entitlements";
+import { useEditMode } from "@/lib/edit-mode";
 import { CommandPalette } from "./command-palette";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { me, hasFeature, hasPermission } = useEntitlements();
+  const { editMode, canUseEditMode, setEditMode, toggleEditMode } = useEditMode();
   const [cmdOpen, setCmdOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -60,6 +64,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   })();
 
   async function handleLogout() {
+    setEditMode(false);
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
   }
@@ -213,6 +218,34 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-2.5">
+            {canUseEditMode && (
+              <button
+                type="button"
+                onClick={toggleEditMode}
+                title={
+                  editMode
+                    ? "Edit Mode is enabled — click to lock structural edits"
+                    : "View Only — click to enable Edit Mode"
+                }
+                className={`inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[12px] font-medium transition-colors ${
+                  editMode
+                    ? "border-[#F59E0B] bg-[#FEF3C7] text-[#92400E] hover:bg-[#FDE68A]"
+                    : "border-[#E4E4E7] bg-[#F7F7F8] text-[#52525B] hover:border-[#D4D4D8] hover:text-[#18181B]"
+                }`}
+              >
+                {editMode ? (
+                  <>
+                    <Pencil className="h-3.5 w-3.5" />
+                    <span>Edit Mode ON</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="h-3.5 w-3.5" />
+                    <span>View Only</span>
+                  </>
+                )}
+              </button>
+            )}
 
             <div ref={userMenuRef} className="relative">
               <button
@@ -258,6 +291,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         {me?.email ?? ""}
                       </div>
                     </div>
+                    {canUseEditMode && (
+                      <div className="flex shrink-0 flex-col items-end gap-0.5">
+                        <span className="text-[10px] font-medium uppercase tracking-wide text-[#63636B]">
+                          Edit
+                        </span>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={editMode}
+                          aria-label="Toggle Edit Mode"
+                          title={editMode ? "Edit Mode ON" : "Edit Mode OFF"}
+                          onClick={toggleEditMode}
+                          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors ${
+                            editMode ? "bg-[#F59E0B]" : "bg-[#D4D4D8]"
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+                              editMode ? "translate-x-4.5" : "translate-x-0.5"
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="my-1.5 border-t border-[#E4E4E7]" />

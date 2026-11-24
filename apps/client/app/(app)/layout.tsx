@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ACCESS_COOKIE_NAME, REFRESH_COOKIE_NAME } from "@/lib/bff";
 import { EntitlementProvider } from "@/lib/entitlements";
+import { EditModeProvider } from "@/lib/edit-mode";
 import { AppShell } from "@/components/app-shell";
 
 export default async function AuthenticatedAppLayout({
@@ -20,7 +21,9 @@ export default async function AuthenticatedAppLayout({
 
   return (
     <EntitlementProvider>
-      <AppShell>{children}</AppShell>
+      <EditModeProvider>
+        <AppShell>{children}</AppShell>
+      </EditModeProvider>
     </EntitlementProvider>
   );
 }

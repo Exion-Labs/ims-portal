@@ -21,6 +21,8 @@ import {
   StatusBadge,
 } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
+import { useEditMode } from "@/lib/edit-mode";
+import { EditModeHint } from "@/components/edit-mode-hint";
 import { ListToolbar } from "@/components/list-toolbar";
 import {
   ArrowRightLeft,
@@ -38,6 +40,7 @@ function PartsCatalogPageContent() {
   const searchParams = useSearchParams();
   const initialCatId = searchParams.get("categoryId");
   const { me, hasFeature, hasPermission, refetch } = useEntitlements();
+  const { editMode } = useEditMode();
 
   const [categories, setCategories] = useState<CategoryView[]>([]);
   const [partsPage, setPartsPage] = useState<PageResponse<PartView> | null>(null);
@@ -421,7 +424,7 @@ function PartsCatalogPageContent() {
                 <div className="text-[14px] font-semibold text-[#18181B]">Categories</div>
                 <div className="text-[11px] text-[#63636B]">Filter items by folder</div>
               </div>
-              {hasPermission("PART:CREATE") && (
+              {hasPermission("PART:CREATE") && editMode && (
                 <button
                   type="button"
                   onClick={() => {
@@ -517,41 +520,45 @@ function PartsCatalogPageContent() {
                 {selectedCategory.description && (
                   <div className="text-[11px] text-[#63636B]">{selectedCategory.description}</div>
                 )}
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCatName(selectedCategory.name);
-                      setCatDesc(selectedCategory.description ?? "");
-                      setCatFormError(null);
-                      setShowCategoryModal({ mode: "edit", category: selectedCategory });
-                    }}
-                    className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] bg-white px-2 text-[11px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
-                  >
-                    <Edit3 className="h-3 w-3" />
-                    <span>Rename</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCatParentId(selectedCategory.parentId ?? "");
-                      setCatFormError(null);
-                      setShowCategoryModal({ mode: "move", category: selectedCategory });
-                    }}
-                    className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] bg-white px-2 text-[11px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
-                  >
-                    <ArrowRightLeft className="h-3 w-3" />
-                    <span>Move</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteCategory(selectedCategory)}
-                    className="inline-flex h-7 items-center gap-1 rounded border border-[#FECACA] bg-[#FEE2E2]/40 px-2 text-[11px] font-medium text-[#991B1B] hover:bg-[#FEE2E2]"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                    <span>Delete</span>
-                  </button>
-                </div>
+                {editMode ? (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCatName(selectedCategory.name);
+                        setCatDesc(selectedCategory.description ?? "");
+                        setCatFormError(null);
+                        setShowCategoryModal({ mode: "edit", category: selectedCategory });
+                      }}
+                      className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] bg-white px-2 text-[11px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
+                    >
+                      <Edit3 className="h-3 w-3" />
+                      <span>Rename</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCatParentId(selectedCategory.parentId ?? "");
+                        setCatFormError(null);
+                        setShowCategoryModal({ mode: "move", category: selectedCategory });
+                      }}
+                      className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] bg-white px-2 text-[11px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
+                    >
+                      <ArrowRightLeft className="h-3 w-3" />
+                      <span>Move</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCategory(selectedCategory)}
+                      className="inline-flex h-7 items-center gap-1 rounded border border-[#FECACA] bg-[#FEE2E2]/40 px-2 text-[11px] font-medium text-[#991B1B] hover:bg-[#FEE2E2]"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                ) : (
+                  <EditModeHint actionDescription="rename, move, or delete categories" className="mt-1" />
+                )}
               </div>
             )}
           </div>

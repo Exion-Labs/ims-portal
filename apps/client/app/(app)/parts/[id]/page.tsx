@@ -21,6 +21,8 @@ import {
 } from "@ims/api-client";
 import { EmptyState, ErrorState, StatTile, StatusBadge } from "@ims/ui";
 import { useEntitlements } from "@/lib/entitlements";
+import { useEditMode } from "@/lib/edit-mode";
+import { EditModeHint } from "@/components/edit-mode-hint";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -79,6 +81,7 @@ export default function PartDetailPage() {
   const router = useRouter();
   const partId = params.id;
   const { hasPermission, hasFeature } = useEntitlements();
+  const { editMode } = useEditMode();
 
   const [part, setPart] = useState<PartView | null>(null);
   const [categories, setCategories] = useState<CategoryView[]>([]);
@@ -532,7 +535,7 @@ export default function PartDetailPage() {
             </Link>
           )}
 
-          {hasPermission("PART:CREATE") && (
+          {hasPermission("PART:CREATE") && editMode && (
             <button
               type="button"
               onClick={() => {
@@ -548,7 +551,7 @@ export default function PartDetailPage() {
             </button>
           )}
 
-          {hasPermission("PART:UPDATE") && (
+          {hasPermission("PART:UPDATE") && editMode && (
             <button
               type="button"
               onClick={() => {
@@ -582,6 +585,8 @@ export default function PartDetailPage() {
           )}
         </div>
       </div>
+
+      <EditModeHint actionDescription="edit item details, add variants, or remove specs/notes" />
 
       {/* Low Stock Alert */}
       {isLowStock && (
@@ -1101,7 +1106,7 @@ export default function PartDetailPage() {
                         {pp.checkbox ? "Yes/No" : pp.templateUnits || "Text"}
                       </td>
                       <td className="px-4 py-2.5 text-right">
-                        {hasPermission("PART:UPDATE") && (
+                        {hasPermission("PART:UPDATE") && editMode && (
                           <button
                             type="button"
                             onClick={() => handleDeleteParameter(pp.id)}
@@ -1311,7 +1316,7 @@ export default function PartDetailPage() {
                         {b.quantity} {b.subPartUnit ?? ""}
                       </td>
                       <td className="px-4 py-2.5 text-right">
-                        {hasPermission("PART:UPDATE") && (
+                        {hasPermission("PART:UPDATE") && editMode && (
                           <button
                             type="button"
                             onClick={async () => {
@@ -1452,13 +1457,15 @@ export default function PartDetailPage() {
                 >
                   <div className="flex items-center justify-between text-[11px] text-[#63636B]">
                     <span>{new Date(n.createdAt).toLocaleString()}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteNote(n.id)}
-                      className="text-[#991B1B] hover:underline"
-                    >
-                      Delete
-                    </button>
+                    {editMode && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteNote(n.id)}
+                        className="text-[#991B1B] hover:underline"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                   <p className="mt-1 text-[#18181B]">{n.content}</p>
                 </div>
