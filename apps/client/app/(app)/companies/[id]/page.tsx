@@ -117,7 +117,7 @@ export default function CompanyDetailPage() {
 
       {/* Contacts & Addresses */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+        <div className="ims-card">
           <h2 className="text-[15px] font-semibold text-[#18181B]">Contacts ({contacts.length})</h2>
           {hasPermission("COMPANY:UPDATE") && (
             <form onSubmit={handleAddContact} className="mt-3 grid grid-cols-2 gap-2">
@@ -166,7 +166,7 @@ export default function CompanyDetailPage() {
           </div>
         </div>
 
-        <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+        <div className="ims-card">
           <h2 className="text-[15px] font-semibold text-[#18181B]">Addresses ({addresses.length})</h2>
           {hasPermission("COMPANY:UPDATE") && (
             <form onSubmit={handleAddAddress} className="mt-3 grid grid-cols-2 gap-2">
@@ -216,13 +216,13 @@ export default function CompanyDetailPage() {
 
       {/* Supplied Parts Catalog */}
       {company.supplier && (
-        <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+        <div className="ims-card">
           <h2 className="text-[15px] font-semibold text-[#18181B]">
             Supplier SKUs & Converted Price Breaks ({supplierParts.length})
           </h2>
           <div className="mt-3 overflow-x-auto rounded-[8px] border border-[#E4E4E7]">
             <table className="w-full border-collapse text-left text-[13px]">
-              <thead className="bg-[#F7F7F8] text-[12px] text-[#52525B]">
+              <thead className="ims-table-head">
                 <tr className="border-b border-[#E4E4E7]">
                   <th className="px-4 py-2 font-semibold">Supplier SKU</th>
                   <th className="px-4 py-2 font-semibold">Internal Part</th>

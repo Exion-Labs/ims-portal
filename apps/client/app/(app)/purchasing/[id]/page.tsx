@@ -285,7 +285,7 @@ export default function PurchaseOrderDetailPage() {
         </div>
 
         {/* Line Items Builder & Table */}
-        <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+        <div className="ims-card">
           <h2 className="text-[15px] font-semibold text-[#18181B]">Purchase Order Line Items</h2>
 
           {canEditLines && (
@@ -339,7 +339,7 @@ export default function PurchaseOrderDetailPage() {
 
           <div className="mt-4 overflow-x-auto rounded-[8px] border border-[#E4E4E7]">
             <table className="w-full border-collapse text-left text-[13px]">
-              <thead className="bg-[#F7F7F8] text-[12px] text-[#52525B]">
+              <thead className="ims-table-head">
                 <tr className="border-b border-[#E4E4E7]">
                   <th className="px-4 py-2.5 font-semibold">Supplier SKU</th>
                   <th className="px-4 py-2.5 font-semibold">Part</th>
@@ -427,9 +427,9 @@ export default function PurchaseOrderDetailPage() {
 
         {/* Modal: Receive Items into Stock */}
         {receiveLine && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="w-full max-w-md rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
-              <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+          <div className="ims-modal-backdrop">
+            <div className="ims-modal-panel max-w-md">
+              <div className="ims-modal-header">
                 <h2 className="text-[16px] font-semibold text-[#18181B]">
                   Receive into Stock · {receiveLine.partIpn}
                 </h2>
@@ -444,7 +444,7 @@ export default function PurchaseOrderDetailPage() {
 
               <form onSubmit={handleReceiveSubmit} className="mt-4 space-y-3">
                 {recvError && (
-                  <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-3 py-2 text-[12px] text-[#991B1B]">
+                  <div className="ims-alert-error">
                     {recvError}
                   </div>
                 )}
@@ -461,7 +461,7 @@ export default function PurchaseOrderDetailPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     Quantity (Packs) *
                   </label>
                   <input
@@ -470,19 +470,19 @@ export default function PurchaseOrderDetailPage() {
                     required
                     value={recvQtyPacks}
                     onChange={(e) => setRecvQtyPacks(e.target.value)}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+                    className="ims-input mt-1 font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     Destination Bin *
                   </label>
                   <select
                     required
                     value={recvLocationId}
                     onChange={(e) => setRecvLocationId(e.target.value)}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                    className="ims-select mt-1"
                   >
                     <option value="">Select warehouse bin…</option>
                     {locations
@@ -496,7 +496,7 @@ export default function PurchaseOrderDetailPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     Batch / Lot Code
                   </label>
                   <input
@@ -504,15 +504,15 @@ export default function PurchaseOrderDetailPage() {
                     value={recvBatchCode}
                     onChange={(e) => setRecvBatchCode(e.target.value)}
                     placeholder="LOT-RECV-01"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+                    className="ims-input mt-1 font-mono"
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 border-t border-[#E4E4E7] pt-4">
+                <div className="ims-modal-footer">
                   <button
                     type="button"
                     onClick={() => setReceiveLine(null)}
-                    className="h-9 rounded-[8px] border border-[#E4E4E7] px-4 text-[13px]"
+                    className="ims-btn-secondary"
                   >
                     Cancel
                   </button>

@@ -364,7 +364,7 @@ function PartsCatalogPageContent() {
       {/* Modal: Import Wizard */}
       {showImporter && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className="ims-modal-backdrop"
           onClick={() => setShowImporter(false)}
         >
           <div
@@ -418,8 +418,8 @@ function PartsCatalogPageContent() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Left Pane: Category Tree (backed by PostgreSQL ltree) */}
         <div className="lg:col-span-3">
-          <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-4">
-            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+          <div className="ims-card p-4">
+            <div className="ims-modal-header">
               <div>
                 <div className="text-[14px] font-semibold text-[#18181B]">Categories</div>
                 <div className="text-[11px] text-[#63636B]">Filter items by folder</div>
@@ -707,9 +707,9 @@ function PartsCatalogPageContent() {
 
       {/* Modal: Create Item */}
       {showCreatePart && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-lg rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+        <div className="ims-modal-backdrop">
+          <div className="ims-modal-panel">
+            <div className="ims-modal-header">
               <h2 className="text-[16px] font-semibold text-[#18181B]">Add New Item</h2>
               <button
                 type="button"
@@ -722,14 +722,14 @@ function PartsCatalogPageContent() {
 
             <form onSubmit={handleCreatePart} className="mt-4 space-y-4">
               {partFormError && (
-                <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-3 py-2 text-[12px] text-[#991B1B]">
+                <div className="ims-alert-error">
                   {partFormError}
                 </div>
               )}
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     SKU / Item Code *
                   </label>
                   <input
@@ -738,17 +738,17 @@ function PartsCatalogPageContent() {
                     value={partForm.ipn}
                     onChange={(e) => setPartForm({ ...partForm, ipn: e.target.value })}
                     placeholder="ITEM-001"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+                    className="ims-input mt-1 font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     Category
                   </label>
                   <select
                     value={partForm.categoryId}
                     onChange={(e) => setPartForm({ ...partForm, categoryId: e.target.value })}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                    className="ims-select mt-1"
                   >
                     <option value="">Uncategorized</option>
                     {categories
@@ -763,7 +763,7 @@ function PartsCatalogPageContent() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-medium text-[#18181B]">
+                <label className="ims-label">
                   Item Name *
                 </label>
                 <input
@@ -772,13 +772,13 @@ function PartsCatalogPageContent() {
                   value={partForm.name}
                   onChange={(e) => setPartForm({ ...partForm, name: e.target.value })}
                   placeholder="e.g. Wireless Barcode Scanner"
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+                  className="ims-input mt-1"
                 />
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     Unit of Measure
                   </label>
                   <input
@@ -786,11 +786,11 @@ function PartsCatalogPageContent() {
                     value={partForm.unit}
                     onChange={(e) => setPartForm({ ...partForm, unit: e.target.value })}
                     placeholder="pcs, box, kg, L"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+                    className="ims-input mt-1 font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     Low Stock Alert Threshold
                   </label>
                   <input
@@ -799,13 +799,13 @@ function PartsCatalogPageContent() {
                     min="0"
                     value={partForm.minimumStock}
                     onChange={(e) => setPartForm({ ...partForm, minimumStock: e.target.value })}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+                    className="ims-input mt-1 font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[12px] font-medium text-[#18181B]">
+                <label className="ims-label">
                   Description (Optional)
                 </label>
                 <input
@@ -813,7 +813,7 @@ function PartsCatalogPageContent() {
                   value={partForm.description}
                   onChange={(e) => setPartForm({ ...partForm, description: e.target.value })}
                   placeholder="Short notes or product details"
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+                  className="ims-input mt-1"
                 />
               </div>
 
@@ -854,7 +854,7 @@ function PartsCatalogPageContent() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 border-t border-[#E4E4E7] pt-4">
+              <div className="ims-modal-footer">
                 <button
                   type="button"
                   onClick={() => setShowCreatePart(false)}
@@ -865,7 +865,7 @@ function PartsCatalogPageContent() {
                 <button
                   type="submit"
                   disabled={submittingPart}
-                  className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white hover:bg-[#1E40AF] disabled:opacity-50"
+                  className="ims-btn-primary"
                 >
                   {submittingPart ? "Saving…" : "Save Item"}
                 </button>
@@ -877,9 +877,9 @@ function PartsCatalogPageContent() {
 
       {/* Modal: Create / Edit / Move Category */}
       {showCategoryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+        <div className="ims-modal-backdrop">
+          <div className="ims-modal-panel max-w-md">
+            <div className="ims-modal-header">
               <h2 className="text-[16px] font-semibold text-[#18181B]">
                 {showCategoryModal.mode === "create"
                   ? "New Category"
@@ -898,7 +898,7 @@ function PartsCatalogPageContent() {
 
             <form onSubmit={handleSaveCategory} className="mt-4 space-y-4">
               {catFormError && (
-                <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-3 py-2 text-[12px] text-[#991B1B]">
+                <div className="ims-alert-error">
                   {catFormError}
                 </div>
               )}
@@ -906,7 +906,7 @@ function PartsCatalogPageContent() {
               {showCategoryModal.mode !== "move" && (
                 <>
                   <div>
-                    <label className="block text-[12px] font-medium text-[#18181B]">
+                    <label className="ims-label">
                       Category Name *
                     </label>
                     <input
@@ -915,11 +915,11 @@ function PartsCatalogPageContent() {
                       value={catName}
                       onChange={(e) => setCatName(e.target.value)}
                       placeholder="e.g. Beverages, Electronics, Packaging"
-                      className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+                      className="ims-input mt-1"
                     />
                   </div>
                   <div>
-                    <label className="block text-[12px] font-medium text-[#18181B]">
+                    <label className="ims-label">
                       Description (Optional)
                     </label>
                     <input
@@ -927,7 +927,7 @@ function PartsCatalogPageContent() {
                       value={catDesc}
                       onChange={(e) => setCatDesc(e.target.value)}
                       placeholder="Optional notes about this category"
-                      className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+                      className="ims-input mt-1"
                     />
                   </div>
                 </>
@@ -935,13 +935,13 @@ function PartsCatalogPageContent() {
 
               {(showCategoryModal.mode === "create" || showCategoryModal.mode === "move") && (
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     Parent Category
                   </label>
                   <select
                     value={catParentId}
                     onChange={(e) => setCatParentId(e.target.value)}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                    className="ims-select mt-1"
                   >
                     <option value="">(Top-level category)</option>
                     {categories
@@ -955,7 +955,7 @@ function PartsCatalogPageContent() {
                 </div>
               )}
 
-              <div className="flex justify-end gap-2 border-t border-[#E4E4E7] pt-4">
+              <div className="ims-modal-footer">
                 <button
                   type="button"
                   onClick={() => setShowCategoryModal(null)}

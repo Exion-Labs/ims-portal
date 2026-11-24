@@ -285,9 +285,9 @@ export default function PurchaseOrdersPage() {
         )}
 
         {showCreate && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="w-full max-w-lg rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
-              <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+          <div className="ims-modal-backdrop">
+            <div className="ims-modal-panel">
+              <div className="ims-modal-header">
                 <h2 className="text-[16px] font-semibold text-[#18181B]">New Purchase Order</h2>
                 <button
                   type="button"
@@ -300,13 +300,13 @@ export default function PurchaseOrdersPage() {
 
               <form onSubmit={handleCreatePo} className="mt-4 space-y-3">
                 {formError && (
-                  <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-3 py-2 text-[12px] text-[#991B1B]">
+                  <div className="ims-alert-error">
                     {formError}
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">Supplier *</label>
+                  <label className="ims-label">Supplier *</label>
                   <select
                     required
                     value={form.supplierId}
@@ -318,7 +318,7 @@ export default function PurchaseOrdersPage() {
                         currency: sup?.defaultCurrency ?? form.currency,
                       });
                     }}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                    className="ims-select mt-1"
                   >
                     <option value="">Select supplier…</option>
                     {suppliers.map((s) => (
@@ -331,7 +331,7 @@ export default function PurchaseOrdersPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[12px] font-medium text-[#18181B]">
+                    <label className="ims-label">
                       Currency
                     </label>
                     <input
@@ -339,17 +339,17 @@ export default function PurchaseOrdersPage() {
                       maxLength={3}
                       value={form.currency}
                       onChange={(e) => setForm({ ...form, currency: e.target.value.toUpperCase() })}
-                      className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+                      className="ims-input mt-1 font-mono"
                     />
                   </div>
                   <div>
-                    <label className="block text-[12px] font-medium text-[#18181B]">
+                    <label className="ims-label">
                       Default Receiving Bin
                     </label>
                     <select
                       value={form.destinationLocationId}
                       onChange={(e) => setForm({ ...form, destinationLocationId: e.target.value })}
-                      className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                      className="ims-select mt-1"
                     >
                       <option value="">Select bin at receive time</option>
                       {locations
@@ -364,7 +364,7 @@ export default function PurchaseOrdersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     Description
                   </label>
                   <input
@@ -372,21 +372,21 @@ export default function PurchaseOrdersPage() {
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
                     placeholder="Monthly component replenishment"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+                    className="ims-input mt-1"
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 border-t border-[#E4E4E7] pt-4">
+                <div className="ims-modal-footer">
                   <button
                     type="button"
                     onClick={() => setShowCreate(false)}
-                    className="h-9 rounded-[8px] border border-[#E4E4E7] px-4 text-[13px]"
+                    className="ims-btn-secondary"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white"
+                    className="ims-btn-primary"
                   >
                     Create PO
                   </button>

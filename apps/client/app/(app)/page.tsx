@@ -26,12 +26,10 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-[24px] font-semibold tracking-tight text-[#18181B]">
-            Workspace Overview
-          </h1>
-          <p className="mt-0.5 text-[14px] text-[#52525B]">
+          <h1 className="ims-page-title">Workspace Overview</h1>
+          <p className="ims-page-subtitle">
             Multi-tenant foundation active for{" "}
-            <strong className="text-[#18181B]">{me?.tenantName}</strong> (
+            <strong className="text-[var(--text-primary)]">{me?.tenantName}</strong> (
             <span className="font-mono text-[13px]">{me?.tenantSlug}</span>)
           </p>
         </div>
@@ -69,66 +67,41 @@ export default function DashboardPage() {
 
       {/* Quick Navigation & Administration Cards */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Link
-          href="/parts"
-          className="rounded-[12px] border border-[#C7D2FE] bg-[#EEF2FF]/40 p-4 transition-colors hover:border-[#1D4ED8]"
-        >
-          <Cpu className="h-5 w-5 text-[#1D4ED8]" />
-          <div className="mt-3 text-[15px] font-semibold text-[#18181B]">
-            Parts Catalog
-          </div>
-          <p className="mt-1 text-[13px] text-[#52525B]">
+        <Link href="/parts" className="ims-nav-card-featured">
+          <Cpu className="h-5 w-5 text-[var(--brand-primary)]" />
+          <div className="ims-nav-card-title">Parts Catalog</div>
+          <p className="ims-nav-card-desc">
             Hierarchical categories, revisions, variants, and Indriya parameters.
           </p>
         </Link>
-        <Link
-          href="/settings/users"
-          className="rounded-[12px] border border-[#E4E4E7] bg-white p-4 transition-colors hover:border-[#1D4ED8]"
-        >
-          <Users className="h-5 w-5 text-[#1D4ED8]" />
-          <div className="mt-3 text-[15px] font-semibold text-[#18181B]">
-            Users & Invitations
-          </div>
-          <p className="mt-1 text-[13px] text-[#52525B]">
+        <Link href="/settings/users" className="ims-nav-card">
+          <Users className="h-5 w-5 text-[var(--brand-primary)]" />
+          <div className="ims-nav-card-title">Users & Invitations</div>
+          <p className="ims-nav-card-desc">
             Invite team members and manage multi-role assignments.
           </p>
         </Link>
 
-        <Link
-          href="/settings/roles"
-          className="rounded-[12px] border border-[#E4E4E7] bg-white p-4 transition-colors hover:border-[#1D4ED8]"
-        >
-          <ShieldCheck className="h-5 w-5 text-[#1D4ED8]" />
-          <div className="mt-3 text-[15px] font-semibold text-[#18181B]">
-            Roles & RBAC Matrix
-          </div>
-          <p className="mt-1 text-[13px] text-[#52525B]">
+        <Link href="/settings/roles" className="ims-nav-card">
+          <ShieldCheck className="h-5 w-5 text-[var(--brand-primary)]" />
+          <div className="ims-nav-card-title">Roles & RBAC Matrix</div>
+          <p className="ims-nav-card-desc">
             Granular domain permissions filtered by enabled entitlements.
           </p>
         </Link>
 
-        <Link
-          href="/settings/api-tokens"
-          className="rounded-[12px] border border-[#E4E4E7] bg-white p-4 transition-colors hover:border-[#1D4ED8]"
-        >
-          <KeyRound className="h-5 w-5 text-[#1D4ED8]" />
-          <div className="mt-3 text-[15px] font-semibold text-[#18181B]">
-            API Access Tokens
-          </div>
-          <p className="mt-1 text-[13px] text-[#52525B]">
+        <Link href="/settings/api-tokens" className="ims-nav-card">
+          <KeyRound className="h-5 w-5 text-[var(--brand-primary)]" />
+          <div className="ims-nav-card-title">API Access Tokens</div>
+          <p className="ims-nav-card-desc">
             Generate SHA-256 hashed tokens with scoped permissions.
           </p>
         </Link>
 
-        <Link
-          href="/settings/audit-log"
-          className="rounded-[12px] border border-[#E4E4E7] bg-white p-4 transition-colors hover:border-[#1D4ED8]"
-        >
-          <History className="h-5 w-5 text-[#1D4ED8]" />
-          <div className="mt-3 text-[15px] font-semibold text-[#18181B]">
-            Immutable Audit Log
-          </div>
-          <p className="mt-1 text-[13px] text-[#52525B]">
+        <Link href="/settings/audit-log" className="ims-nav-card">
+          <History className="h-5 w-5 text-[var(--brand-primary)]" />
+          <div className="ims-nav-card-title">Immutable Audit Log</div>
+          <p className="ims-nav-card-desc">
             Inspect before/after field diffs and export compliance CSVs.
           </p>
         </Link>

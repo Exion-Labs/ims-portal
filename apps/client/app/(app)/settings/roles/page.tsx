@@ -60,7 +60,7 @@ export default function RolesSettingsPage() {
     <div className="space-y-6">
       <form
         onSubmit={handleCreateRole}
-        className="rounded-[12px] border border-[#E4E4E7] bg-white p-5"
+        className="ims-card"
       >
         <div className="flex items-center gap-2">
           <Plus className="h-4 w-4 text-[#1D4ED8]" />
@@ -130,7 +130,7 @@ export default function RolesSettingsPage() {
         {(roles ?? []).map((role) => (
           <div
             key={role.id}
-            className="rounded-[12px] border border-[#E4E4E7] bg-white p-4"
+            className="ims-card p-4"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">

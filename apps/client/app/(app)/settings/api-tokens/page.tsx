@@ -94,7 +94,7 @@ export default function ApiTokensSettingsPage() {
       <div className="space-y-6">
         <form
           onSubmit={handleCreate}
-          className="rounded-[12px] border border-[#E4E4E7] bg-white p-5"
+          className="ims-card"
         >
           <div className="flex items-center gap-2">
             <KeyRound className="h-4 w-4 text-[#1D4ED8]" />

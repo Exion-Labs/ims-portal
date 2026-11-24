@@ -600,8 +600,8 @@ function StockAndLocationsPageContent() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Left Pane: Locations Tree */}
         <div className="lg:col-span-3">
-          <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-4">
-            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+          <div className="ims-card p-4">
+            <div className="ims-modal-header">
               <div>
                 <div className="text-[14px] font-semibold text-[#18181B]">Locations</div>
                 <div className="text-[11px] text-[#63636B]">Warehouse / Room / Aisle / Bin</div>
@@ -909,9 +909,9 @@ function StockAndLocationsPageContent() {
 
       {/* Modal: Create Stock Item */}
       {showCreateStock && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-lg rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+        <div className="ims-modal-backdrop">
+          <div className="ims-modal-panel">
+            <div className="ims-modal-header">
               <h2 className="text-[16px] font-semibold text-[#18181B]">Create Stock Item</h2>
               <button
                 type="button"
@@ -924,20 +924,20 @@ function StockAndLocationsPageContent() {
 
             <form onSubmit={handleCreateStock} className="mt-4 space-y-3">
               {createStockError && (
-                <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-3 py-2 text-[12px] text-[#991B1B]">
+                <div className="ims-alert-error">
                   {createStockError}
                 </div>
               )}
 
               <div>
-                <label className="block text-[12px] font-medium text-[#18181B]">Part *</label>
+                <label className="ims-label">Part *</label>
                 <select
                   required
                   value={createStockForm.partId}
                   onChange={(e) =>
                     setCreateStockForm({ ...createStockForm, partId: e.target.value })
                   }
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                  className="ims-select mt-1"
                 >
                   <option value="">Select part…</option>
                   {parts.map((p) => (
@@ -949,7 +949,7 @@ function StockAndLocationsPageContent() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-medium text-[#18181B]">
+                <label className="ims-label">
                   Storage Location (Non-structural)
                 </label>
                 <select
@@ -957,7 +957,7 @@ function StockAndLocationsPageContent() {
                   onChange={(e) =>
                     setCreateStockForm({ ...createStockForm, locationId: e.target.value })
                   }
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                  className="ims-select mt-1"
                 >
                   <option value="">Unassigned</option>
                   {locations.map((l) => (
@@ -970,7 +970,7 @@ function StockAndLocationsPageContent() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">Quantity *</label>
+                  <label className="ims-label">Quantity *</label>
                   <input
                     type="number"
                     step="any"
@@ -979,17 +979,17 @@ function StockAndLocationsPageContent() {
                     onChange={(e) =>
                       setCreateStockForm({ ...createStockForm, quantity: e.target.value })
                     }
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+                    className="ims-input mt-1 font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">Status</label>
+                  <label className="ims-label">Status</label>
                   <select
                     value={createStockForm.status}
                     onChange={(e) =>
                       setCreateStockForm({ ...createStockForm, status: e.target.value })
                     }
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                    className="ims-select mt-1"
                   >
                     <option value="">Select status…</option>
                     <option value="OK">OK</option>
@@ -1001,7 +1001,7 @@ function StockAndLocationsPageContent() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     Batch / Lot Code
                   </label>
                   <input
@@ -1011,11 +1011,11 @@ function StockAndLocationsPageContent() {
                       setCreateStockForm({ ...createStockForm, batchCode: e.target.value })
                     }
                     placeholder="LOT-2026-11"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+                    className="ims-input mt-1 font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     Serial Number (Trackable only)
                   </label>
                   <input
@@ -1025,22 +1025,22 @@ function StockAndLocationsPageContent() {
                       setCreateStockForm({ ...createStockForm, serialNumber: e.target.value })
                     }
                     placeholder="SN-0001"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+                    className="ims-input mt-1 font-mono"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 border-t border-[#E4E4E7] pt-4">
+              <div className="ims-modal-footer">
                 <button
                   type="button"
                   onClick={() => setShowCreateStock(false)}
-                  className="h-9 rounded-[8px] border border-[#E4E4E7] px-4 text-[13px]"
+                  className="ims-btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white"
+                  className="ims-btn-primary"
                 >
                   Create Stock
                 </button>
@@ -1052,9 +1052,9 @@ function StockAndLocationsPageContent() {
 
       {/* Modal: Location Create / Edit / Move */}
       {showLocationModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+        <div className="ims-modal-backdrop">
+          <div className="ims-modal-panel max-w-md">
+            <div className="ims-modal-header">
               <h2 className="text-[16px] font-semibold text-[#18181B]">
                 {showLocationModal.mode === "create"
                   ? "New Storage Location"
@@ -1073,7 +1073,7 @@ function StockAndLocationsPageContent() {
 
             <form onSubmit={handleSaveLocation} className="mt-4 space-y-3">
               {locError && (
-                <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-3 py-2 text-[12px] text-[#991B1B]">
+                <div className="ims-alert-error">
                   {locError}
                 </div>
               )}
@@ -1081,7 +1081,7 @@ function StockAndLocationsPageContent() {
               {showLocationModal.mode !== "move" && (
                 <>
                   <div>
-                    <label className="block text-[12px] font-medium text-[#18181B]">
+                    <label className="ims-label">
                       Location Name *
                     </label>
                     <input
@@ -1090,18 +1090,18 @@ function StockAndLocationsPageContent() {
                       value={locName}
                       onChange={(e) => setLocName(e.target.value)}
                       placeholder="Bin A-01"
-                      className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+                      className="ims-input mt-1"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[12px] font-medium text-[#18181B]">
+                      <label className="ims-label">
                         Location Type
                       </label>
                       <select
                         value={locType}
                         onChange={(e) => setLocType(e.target.value)}
-                        className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                        className="ims-select mt-1"
                       >
                         <option value="WAREHOUSE">WAREHOUSE</option>
                         <option value="ROOM">ROOM</option>
@@ -1113,7 +1113,7 @@ function StockAndLocationsPageContent() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[12px] font-medium text-[#18181B]">
+                      <label className="ims-label">
                         Custom Barcode
                       </label>
                       <input
@@ -1121,7 +1121,7 @@ function StockAndLocationsPageContent() {
                         value={locBarcode}
                         onChange={(e) => setLocBarcode(e.target.value)}
                         placeholder="LOC-A01"
-                        className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+                        className="ims-input mt-1 font-mono"
                       />
                     </div>
                   </div>
@@ -1140,13 +1140,13 @@ function StockAndLocationsPageContent() {
 
               {(showLocationModal.mode === "create" || showLocationModal.mode === "move") && (
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     Parent Location
                   </label>
                   <select
                     value={locParentId}
                     onChange={(e) => setLocParentId(e.target.value)}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                    className="ims-select mt-1"
                   >
                     <option value="">(Root level)</option>
                     {locations
@@ -1160,17 +1160,17 @@ function StockAndLocationsPageContent() {
                 </div>
               )}
 
-              <div className="flex justify-end gap-2 border-t border-[#E4E4E7] pt-4">
+              <div className="ims-modal-footer">
                 <button
                   type="button"
                   onClick={() => setShowLocationModal(null)}
-                  className="h-9 rounded-[8px] border border-[#E4E4E7] px-4 text-[13px]"
+                  className="ims-btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white"
+                  className="ims-btn-primary"
                 >
                   Save
                 </button>
@@ -1182,9 +1182,9 @@ function StockAndLocationsPageContent() {
 
       {/* Modal: Transfer / Count / Split / Serialize */}
       {opModal && opModal.type !== "inspect" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+        <div className="ims-modal-backdrop">
+          <div className="ims-modal-panel max-w-md">
+            <div className="ims-modal-header">
               <h2 className="text-[16px] font-semibold text-[#18181B]">
                 {opModal.type === "transfer"
                   ? "Transfer Stock (Auto-splits if partial)"
@@ -1205,7 +1205,7 @@ function StockAndLocationsPageContent() {
 
             <form onSubmit={handleRunStockOperation} className="mt-4 space-y-3">
               {opError && (
-                <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-3 py-2 text-[12px] text-[#991B1B]">
+                <div className="ims-alert-error">
                   {opError}
                 </div>
               )}
@@ -1241,19 +1241,19 @@ function StockAndLocationsPageContent() {
 
               {opModal.type !== "serialize" ? (
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">Quantity *</label>
+                  <label className="ims-label">Quantity *</label>
                   <input
                     type="number"
                     step="any"
                     required
                     value={opQty}
                     onChange={(e) => setOpQty(e.target.value)}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+                    className="ims-input mt-1 font-mono"
                   />
                 </div>
               ) : (
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     Serial Numbers (comma or newline separated) *
                   </label>
                   <textarea
@@ -1271,14 +1271,14 @@ function StockAndLocationsPageContent() {
                 opModal.type === "split" ||
                 opModal.type === "serialize") && (
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     Destination Location
                   </label>
                   <select
                     required={opModal.type === "transfer"}
                     value={opTargetLocId}
                     onChange={(e) => setOpTargetLocId(e.target.value)}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                    className="ims-select mt-1"
                   >
                     <option value="">Select destination bin…</option>
                     {locations.map((l) => (
@@ -1291,27 +1291,27 @@ function StockAndLocationsPageContent() {
               )}
 
               <div>
-                <label className="block text-[12px] font-medium text-[#18181B]">Notes</label>
+                <label className="ims-label">Notes</label>
                 <input
                   type="text"
                   value={opNotes}
                   onChange={(e) => setOpNotes(e.target.value)}
                   placeholder="Audit note for StockItemTracking ledger"
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+                  className="ims-input mt-1"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 border-t border-[#E4E4E7] pt-4">
+              <div className="ims-modal-footer">
                 <button
                   type="button"
                   onClick={() => setOpModal(null)}
-                  className="h-9 rounded-[8px] border border-[#E4E4E7] px-4 text-[13px]"
+                  className="ims-btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white"
+                  className="ims-btn-primary"
                 >
                   Confirm
                 </button>
@@ -1323,9 +1323,9 @@ function StockAndLocationsPageContent() {
 
       {/* Modal: Stock History Timeline, ZXing QR Barcode & Quality Tests */}
       {opModal && opModal.type === "inspect" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+        <div className="ims-modal-backdrop">
           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+            <div className="ims-modal-header">
               <div>
                 <h2 className="text-[16px] font-semibold text-[#18181B]">
                   Stock Ledger & Quality Inspection · {opModal.item.partIpn}
@@ -1472,9 +1472,9 @@ function StockAndLocationsPageContent() {
 
       {/* Modal: Unified Barcode Scan Resolver */}
       {showScanner && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+        <div className="ims-modal-backdrop">
+          <div className="ims-modal-panel max-w-md">
+            <div className="ims-modal-header">
               <h2 className="text-[16px] font-semibold text-[#18181B]">
                 Barcode / QR Scan Resolver
               </h2>

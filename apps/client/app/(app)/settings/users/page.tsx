@@ -106,7 +106,7 @@ export default function UsersSettingsPage() {
       {/* Invite Form */}
       <form
         onSubmit={handleInvite}
-        className="rounded-[12px] border border-[#E4E4E7] bg-white p-5"
+        className="ims-card"
       >
         <div className="flex items-center gap-2">
           <UserPlus className="h-4 w-4 text-[#1D4ED8]" />

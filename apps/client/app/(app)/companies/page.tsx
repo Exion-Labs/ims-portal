@@ -345,9 +345,9 @@ export default function CompaniesPage() {
 
       {/* Modal: Create Company */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-lg rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+        <div className="ims-modal-backdrop">
+          <div className="ims-modal-panel">
+            <div className="ims-modal-header">
               <h2 className="text-[16px] font-semibold text-[#18181B]">New Company</h2>
               <button
                 type="button"
@@ -360,14 +360,14 @@ export default function CompaniesPage() {
 
             <form onSubmit={handleCreateCompany} className="mt-4 space-y-3">
               {formError && (
-                <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-3 py-2 text-[12px] text-[#991B1B]">
+                <div className="ims-alert-error">
                   {formError}
                 </div>
               )}
 
               <div className="grid grid-cols-3 gap-3">
                 <div className="col-span-2">
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     Company Name *
                   </label>
                   <input
@@ -376,11 +376,11 @@ export default function CompaniesPage() {
                     value={companyForm.name}
                     onChange={(e) => setCompanyForm({ ...companyForm, name: e.target.value })}
                     placeholder="Mouser Electronics"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+                    className="ims-input mt-1"
                   />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">
+                  <label className="ims-label">
                     Currency
                   </label>
                   <input
@@ -393,28 +393,28 @@ export default function CompaniesPage() {
                         defaultCurrency: e.target.value.toUpperCase(),
                       })
                     }
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+                    className="ims-input mt-1 font-mono"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">Email</label>
+                  <label className="ims-label">Email</label>
                   <input
                     type="email"
                     value={companyForm.email}
                     onChange={(e) => setCompanyForm({ ...companyForm, email: e.target.value })}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+                    className="ims-input mt-1"
                   />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-medium text-[#18181B]">Website</label>
+                  <label className="ims-label">Website</label>
                   <input
                     type="text"
                     value={companyForm.website}
                     onChange={(e) => setCompanyForm({ ...companyForm, website: e.target.value })}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+                    className="ims-input mt-1"
                   />
                 </div>
               </div>
@@ -441,17 +441,17 @@ export default function CompaniesPage() {
                 ))}
               </div>
 
-              <div className="flex justify-end gap-2 border-t border-[#E4E4E7] pt-4">
+              <div className="ims-modal-footer">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="h-9 rounded-[8px] border border-[#E4E4E7] px-4 text-[13px]"
+                  className="ims-btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white"
+                  className="ims-btn-primary"
                 >
                   Create Company
                 </button>
@@ -463,9 +463,9 @@ export default function CompaniesPage() {
 
       {/* Modal: Exchange Rates */}
       {showRatesModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-lg rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+        <div className="ims-modal-backdrop">
+          <div className="ims-modal-panel">
+            <div className="ims-modal-header">
               <div>
                 <h2 className="text-[16px] font-semibold text-[#18181B]">
                   Exchange Rates (1 USD = X Target)

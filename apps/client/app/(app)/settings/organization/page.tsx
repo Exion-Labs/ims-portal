@@ -47,7 +47,7 @@ export default function OrganizationSettingsPage() {
     <div className="space-y-6">
       <form
         onSubmit={handleSaveOrg}
-        className="rounded-[12px] border border-[#E4E4E7] bg-white p-6"
+        className="ims-card p-6"
       >
         <h2 className="text-[15px] font-semibold text-[#18181B]">
           Organization Profile
@@ -64,7 +64,7 @@ export default function OrganizationSettingsPage() {
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-[12px] font-medium text-[#18181B]">
+            <label className="ims-label">
               Organization Name
             </label>
             <input
@@ -72,12 +72,12 @@ export default function OrganizationSettingsPage() {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+              className="ims-input mt-1"
             />
           </div>
 
           <div>
-            <label className="block text-[12px] font-medium text-[#18181B]">
+            <label className="ims-label">
               Tenant Slug (Read-only)
             </label>
             <input
@@ -89,13 +89,13 @@ export default function OrganizationSettingsPage() {
           </div>
 
           <div>
-            <label className="block text-[12px] font-medium text-[#18181B]">
+            <label className="ims-label">
               Base Currency
             </label>
             <select
               value={baseCurrency}
               onChange={(e) => setBaseCurrency(e.target.value)}
-              className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+              className="ims-select mt-1"
             >
               <option value="USD">USD — US Dollar</option>
               <option value="EUR">EUR — Euro</option>
@@ -106,7 +106,7 @@ export default function OrganizationSettingsPage() {
           </div>
 
           <div>
-            <label className="block text-[12px] font-medium text-[#18181B]">
+            <label className="ims-label">
               Default Timezone
             </label>
             <input
@@ -114,7 +114,7 @@ export default function OrganizationSettingsPage() {
               required
               value={timezone}
               onChange={(e) => setTimezone(e.target.value)}
-              className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+              className="ims-input mt-1 font-mono"
             />
           </div>
         </div>
@@ -123,7 +123,7 @@ export default function OrganizationSettingsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white hover:bg-[#1E40AF] disabled:opacity-50"
+            className="ims-btn-primary"
           >
             {saving ? "Saving…" : "Save Changes"}
           </button>
@@ -131,7 +131,7 @@ export default function OrganizationSettingsPage() {
       </form>
 
       {/* Typed Key-Value Store Viewer */}
-      <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-6">
+      <div className="ims-card p-6">
         <h3 className="text-[15px] font-semibold text-[#18181B]">
           Typed Tenant Preferences (`TenantSetting`)
         </h3>

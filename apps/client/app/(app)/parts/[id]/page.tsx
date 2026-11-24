@@ -864,9 +864,9 @@ export default function PartDetailPage() {
             )}
           </div>
 
-          <div className="overflow-x-auto rounded-[8px] border border-[#E4E4E7]">
+          <div className="ims-table-wrap">
             <table className="w-full border-collapse text-left text-[13px]">
-              <thead className="bg-[#F7F7F8] text-[12px] text-[#52525B]">
+              <thead className="ims-table-head">
                 <tr className="border-b border-[#E4E4E7]">
                   <th className="px-4 py-2.5 font-semibold">Location</th>
                   <th className="px-4 py-2.5 font-semibold">Batch / Serial</th>
@@ -979,9 +979,9 @@ export default function PartDetailPage() {
               description="Additions, sales, counts, and transfers will appear here automatically."
             />
           ) : (
-            <div className="overflow-x-auto rounded-[8px] border border-[#E4E4E7]">
+            <div className="ims-table-wrap">
               <table className="w-full border-collapse text-left text-[13px]">
-                <thead className="bg-[#F7F7F8] text-[12px] text-[#52525B]">
+                <thead className="ims-table-head">
                   <tr className="border-b border-[#E4E4E7]">
                     <th className="px-4 py-2 font-semibold">Date</th>
                     <th className="px-4 py-2 font-semibold">Action</th>
@@ -1032,7 +1032,7 @@ export default function PartDetailPage() {
           </div>
 
           {paramError && (
-            <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-3 py-2 text-[12px] text-[#991B1B]">
+            <div className="ims-alert-error">
               {paramError}
             </div>
           )}
@@ -1076,9 +1076,9 @@ export default function PartDetailPage() {
             </form>
           )}
 
-          <div className="overflow-x-auto rounded-[8px] border border-[#E4E4E7]">
+          <div className="ims-table-wrap">
             <table className="w-full border-collapse text-left text-[13px]">
-              <thead className="bg-[#F7F7F8] text-[12px] text-[#52525B]">
+              <thead className="ims-table-head">
                 <tr className="border-b border-[#E4E4E7]">
                   <th className="px-4 py-2.5 font-semibold">Specification</th>
                   <th className="px-4 py-2.5 font-semibold">Value</th>
@@ -1128,7 +1128,7 @@ export default function PartDetailPage() {
       {/* TAB: Suppliers */}
       {activeTab === "suppliers" && (
         <div className="space-y-6">
-          <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+          <div className="ims-card">
             <h2 className="text-[15px] font-semibold text-[#18181B]">
               Suppliers & Purchase Pricing ({supplierParts.length})
             </h2>
@@ -1137,7 +1137,7 @@ export default function PartDetailPage() {
             </p>
             <div className="mt-3 overflow-x-auto rounded-[8px] border border-[#E4E4E7]">
               <table className="w-full border-collapse text-left text-[13px]">
-                <thead className="bg-[#F7F7F8] text-[12px] text-[#52525B]">
+                <thead className="ims-table-head">
                   <tr className="border-b border-[#E4E4E7]">
                     <th className="px-4 py-2 font-semibold">Supplier</th>
                     <th className="px-4 py-2 font-semibold">Vendor SKU</th>
@@ -1191,7 +1191,7 @@ export default function PartDetailPage() {
           </div>
 
           {manufacturerParts.length > 0 && (
-            <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+            <div className="ims-card">
               <h2 className="text-[15px] font-semibold text-[#18181B]">
                 Manufacturer Part Numbers ({manufacturerParts.length})
               </h2>
@@ -1213,7 +1213,7 @@ export default function PartDetailPage() {
       {/* TAB: Kit / Bundle */}
       {activeTab === "kit" && (
         <div className="space-y-6">
-          <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+          <div className="ims-card">
             <h2 className="text-[15px] font-semibold text-[#18181B]">Kit / Bundle Contents</h2>
             <p className="text-[12px] text-[#52525B]">
               Items included in one unit of {part.name}.
@@ -1361,7 +1361,7 @@ export default function PartDetailPage() {
 
       {/* TAB: Variants */}
       {activeTab === "variants" && (
-        <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+        <div className="ims-card">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-[15px] font-semibold text-[#18181B]">
@@ -1423,7 +1423,7 @@ export default function PartDetailPage() {
       {/* TAB: Notes & Files */}
       {activeTab === "notes" && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+          <div className="ims-card">
             <h2 className="text-[15px] font-semibold text-[#18181B]">
               Internal Notes ({notes.length})
             </h2>
@@ -1473,7 +1473,7 @@ export default function PartDetailPage() {
             </div>
           </div>
 
-          <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+          <div className="ims-card">
             <h2 className="text-[15px] font-semibold text-[#18181B]">
               Files & Manuals ({attachments.length})
             </h2>

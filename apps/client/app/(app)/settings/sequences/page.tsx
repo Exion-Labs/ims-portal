@@ -24,7 +24,7 @@ export default function SequencesSettingsPage() {
   }
 
   return (
-    <div className="rounded-[12px] border border-[#E4E4E7] bg-white p-6">
+    <div className="ims-card p-6">
       <h2 className="text-[15px] font-semibold text-[#18181B]">
         Reference Number Sequences
       </h2>
