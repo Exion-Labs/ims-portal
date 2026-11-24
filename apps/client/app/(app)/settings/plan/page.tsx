@@ -67,12 +67,11 @@ export default function PlanAndFeaturesPage() {
                     {used} / {limit}
                   </span>
                 </div>
-                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#F4F4F5]">
-                  <div
-                    className={`h-full rounded-full ${
-                      nearLimit ? "bg-[#92400E]" : "bg-[#1D4ED8]"
-                    }`}
-                    style={{ width: `${pct}%` }}
+                <div className="mt-2">
+                  <progress
+                    value={used}
+                    max={limit > 0 ? limit : 1}
+                    className={`ims-progress ${nearLimit ? "ims-progress-warning" : ""}`}
                   />
                 </div>
                 <div className="mt-1.5 flex items-center justify-between text-[11px] text-[#63636B]">

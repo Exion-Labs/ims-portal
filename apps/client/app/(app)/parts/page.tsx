@@ -482,11 +482,19 @@ function PartsCatalogPageContent() {
 
               {categories.map((cat) => {
                 const active = selectedCategoryId === cat.id;
+                const depthPadding = [
+                  "pl-0",
+                  "pl-3.5",
+                  "pl-7",
+                  "pl-10",
+                  "pl-14",
+                  "pl-[70px]",
+                  "pl-[84px]",
+                ][Math.min(cat.depth, 6)];
                 return (
                   <div
                     key={cat.id}
-                    style={{ paddingLeft: `${Math.min(cat.depth, 6) * 14}px` }}
-                    className="group flex items-center justify-between rounded-[8px] pr-1 hover:bg-[#F7F7F8]"
+                    className={`group flex items-center justify-between rounded-[8px] pr-1 hover:bg-[#F7F7F8] ${depthPadding}`}
                   >
                     <button
                       type="button"
