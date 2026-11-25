@@ -455,7 +455,7 @@ export default function PartDetailPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="h-8 w-64 animate-pulse rounded bg-[#E4E4E7]" />
+        <div className="h-8 w-64 animate-pulse rounded bg-[var(--border-subtle)]" />
         <div className="h-40 animate-pulse rounded-[12px] bg-white" />
       </div>
     );
@@ -491,35 +491,35 @@ export default function PartDetailPage() {
         <div>
           <Link
             href="/parts"
-            className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#52525B] hover:text-[#1D4ED8]"
+            className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)]"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>Back to Items</span>
           </Link>
 
           <div className="mt-2 flex flex-wrap items-center gap-2.5">
-            <span className="rounded-[8px] border border-[#C7D2FE] bg-[#EEF2FF] px-2.5 py-1 font-mono text-[14px] font-semibold text-[#1D4ED8]">
+            <span className="rounded-[8px] border border-[var(--border-brand)] bg-[var(--brand-tint)] px-2.5 py-1 font-mono text-[14px] font-semibold text-[var(--brand-primary)]">
               {part.ipn}
             </span>
-            <h1 className="text-[22px] font-semibold tracking-tight text-[#18181B]">
+            <h1 className="text-[22px] font-semibold tracking-tight text-[var(--text-primary)]">
               {part.name}
             </h1>
             <StatusBadge
               label={part.active ? "Active" : "Inactive"}
               tone={part.active ? "success" : "neutral"}
             />
-            <span className="rounded border border-[#E4E4E7] bg-white px-2 py-0.5 text-[12px] text-[#52525B]">
+            <span className="rounded border border-[var(--border-subtle)] bg-white px-2 py-0.5 text-[12px] text-[var(--text-secondary)]">
               {itemTypeLabel}
             </span>
             {part.categoryPathString && (
-              <span className="rounded border border-[#E4E4E7] bg-[#F7F7F8] px-2 py-0.5 text-[12px] text-[#52525B]">
+              <span className="rounded border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-2 py-0.5 text-[12px] text-[var(--text-secondary)]">
                 {part.categoryPathString}
               </span>
             )}
           </div>
 
           {part.description && (
-            <p className="mt-1 max-w-2xl text-[13px] text-[#52525B]">{part.description}</p>
+            <p className="mt-1 max-w-2xl text-[13px] text-[var(--text-secondary)]">{part.description}</p>
           )}
         </div>
 
@@ -528,9 +528,9 @@ export default function PartDetailPage() {
           {hasPermission("STOCK:CREATE") && (
             <Link
               href={`/stock?addStock=true&partId=${part.id}`}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
+              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
             >
-              <Plus className="h-4 w-4 text-[#166534]" />
+              <Plus className="h-4 w-4 text-[var(--status-success-fg)]" />
               <span>Add Stock</span>
             </Link>
           )}
@@ -544,9 +544,9 @@ export default function PartDetailPage() {
                 setVariantError(null);
                 setShowVariantModal(true);
               }}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
+              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
             >
-              <Layers className="h-4 w-4 text-[#6D28D9]" />
+              <Layers className="h-4 w-4 text-[var(--status-violet-fg)]" />
               <span>+ Variant</span>
             </button>
           )}
@@ -577,7 +577,7 @@ export default function PartDetailPage() {
                 setEditError(null);
                 setShowEditModal(true);
               }}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#1D4ED8] px-3.5 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
+              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[var(--brand-primary)] px-3.5 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
             >
               <Edit3 className="h-4 w-4" />
               <span>Edit Item</span>
@@ -590,7 +590,7 @@ export default function PartDetailPage() {
 
       {/* Low Stock Alert */}
       {isLowStock && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[#FDE68A] bg-[#FEF3C7]/70 px-4 py-3 text-[13px] text-[#92400E]">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[var(--border-warning)] bg-[var(--status-warning-bg)]/70 px-4 py-3 text-[13px] text-[var(--status-warning-fg)]">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 shrink-0" />
             <span>
@@ -601,7 +601,7 @@ export default function PartDetailPage() {
           </div>
           <Link
             href="/purchasing"
-            className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#92400E] px-3 py-1.5 text-[12px] font-medium text-white hover:bg-[#78350F]"
+            className="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--status-warning-fg)] px-3 py-1.5 text-[12px] font-medium text-white hover:opacity-90"
           >
             <ShoppingCart className="h-3.5 w-3.5" />
             <span>Reorder Stock</span>
@@ -638,7 +638,7 @@ export default function PartDetailPage() {
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex items-center gap-1 overflow-x-auto border-b border-[#E4E4E7]">
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-[var(--border-subtle)]">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const active = activeTab === tab.id;
@@ -649,8 +649,8 @@ export default function PartDetailPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`inline-flex shrink-0 items-center gap-2 border-b-2 px-4 py-2.5 text-[13px] font-medium transition-colors ${
                 active
-                  ? "border-[#1D4ED8] text-[#1D4ED8]"
-                  : "border-transparent text-[#52525B] hover:text-[#18181B]"
+                  ? "border-[var(--brand-primary)] text-[var(--brand-primary)]"
+                  : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -667,8 +667,8 @@ export default function PartDetailPage() {
           <Card>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-[#1D4ED8]" />
-                <h2 className="text-[15px] font-semibold text-[#18181B]">Pricing & Margin</h2>
+                <DollarSign className="h-4 w-4 text-[var(--brand-primary)]" />
+                <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Pricing & Margin</h2>
               </div>
               {hasPermission("PART:UPDATE") && (
                 <button
@@ -696,7 +696,7 @@ export default function PartDetailPage() {
                     setEditError(null);
                     setShowEditModal(true);
                   }}
-                  className="text-[12px] font-medium text-[#1D4ED8] hover:underline"
+                  className="text-[12px] font-medium text-[var(--brand-primary)] hover:underline"
                 >
                   Edit pricing →
                 </button>
@@ -705,34 +705,34 @@ export default function PartDetailPage() {
 
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="ims-subcard">
-                <div className="text-[11px] font-medium uppercase tracking-wide text-[#63636B]">
+                <div className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-muted)]">
                   Cost Price
                 </div>
-                <div className="mt-1 font-mono text-[16px] font-semibold text-[#18181B]">
+                <div className="mt-1 font-mono text-[16px] font-semibold text-[var(--text-primary)]">
                   {costPrice !== null ? `${currency} ${costPrice.toFixed(2)}` : "Not set"}
                 </div>
               </div>
               <div className="ims-subcard">
-                <div className="text-[11px] font-medium uppercase tracking-wide text-[#63636B]">
+                <div className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-muted)]">
                   Selling Price
                 </div>
-                <div className="mt-1 font-mono text-[16px] font-semibold text-[#1D4ED8]">
+                <div className="mt-1 font-mono text-[16px] font-semibold text-[var(--brand-primary)]">
                   {sellingPrice !== null ? `${currency} ${sellingPrice.toFixed(2)}` : "Not set"}
                 </div>
               </div>
               <div className="ims-subcard">
-                <div className="text-[11px] font-medium uppercase tracking-wide text-[#63636B]">
+                <div className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-muted)]">
                   Gross Margin
                 </div>
-                <div className="mt-1 font-mono text-[15px] font-semibold text-[#166534]">
+                <div className="mt-1 font-mono text-[15px] font-semibold text-[var(--status-success-fg)]">
                   {grossMarginPct !== null ? `${grossMarginPct.toFixed(1)}%` : "—"}
                 </div>
               </div>
               <div className="ims-subcard">
-                <div className="text-[11px] font-medium uppercase tracking-wide text-[#63636B]">
+                <div className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-muted)]">
                   Tax Rate
                 </div>
-                <div className="mt-1 font-mono text-[15px] font-semibold text-[#18181B]">
+                <div className="mt-1 font-mono text-[15px] font-semibold text-[var(--text-primary)]">
                   {taxRate !== null ? `${taxRate}%` : "—"}
                 </div>
               </div>
@@ -743,13 +743,13 @@ export default function PartDetailPage() {
           <Card>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <QrCode className="h-4 w-4 text-[#1D4ED8]" />
-                <h2 className="text-[15px] font-semibold text-[#18181B]">Barcode & Label</h2>
+                <QrCode className="h-4 w-4 text-[var(--brand-primary)]" />
+                <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Barcode & Label</h2>
               </div>
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] px-2.5 py-1 text-[12px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
+                className="inline-flex items-center gap-1.5 rounded-[8px] border border-[var(--border-subtle)] px-2.5 py-1 text-[12px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
               >
                 <Printer className="h-3.5 w-3.5" />
                 <span>Print Label</span>
@@ -760,21 +760,21 @@ export default function PartDetailPage() {
                 <img
                   src={`/api/v1/barcode/image?code=${encodeURIComponent(barcodeValue)}&format=CODE_128&width=220&height=70`}
                   alt={`Barcode ${barcodeValue}`}
-                  className="h-[70px] rounded border border-[#E4E4E7] bg-white p-1"
+                  className="h-[70px] rounded border border-[var(--border-subtle)] bg-white p-1"
                 />
               ) : (
-                <div className="flex h-[70px] w-[180px] items-center justify-center rounded border border-dashed border-[#D4D4D8] bg-white text-[12px] text-[#71717A]">
+                <div className="flex h-[70px] w-[180px] items-center justify-center rounded border border-dashed border-[var(--border-strong)] bg-white text-[12px] text-[var(--text-muted)]">
                   Barcode preview
                 </div>
               )}
               <div className="space-y-1 text-[13px]">
-                <div className="text-[11px] uppercase tracking-wide text-[#63636B]">
+                <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)]">
                   Scan Code
                 </div>
-                <div className="font-mono text-[15px] font-semibold text-[#18181B]">
+                <div className="font-mono text-[15px] font-semibold text-[var(--text-primary)]">
                   {barcodeValue}
                 </div>
-                <div className="text-[12px] text-[#52525B]">
+                <div className="text-[12px] text-[var(--text-secondary)]">
                   Unit: <span className="font-mono">{part.unit}</span>
                 </div>
               </div>
@@ -783,7 +783,7 @@ export default function PartDetailPage() {
 
           {/* Item Settings & Capabilities */}
           <Card>
-            <h2 className="text-[15px] font-semibold text-[#18181B]">Item Settings</h2>
+            <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Item Settings</h2>
             <div className="mt-4 grid grid-cols-2 gap-3 text-[13px]">
               {[
                 { label: "For Sale", enabled: part.salable },
@@ -793,9 +793,9 @@ export default function PartDetailPage() {
               ].map((flag) => (
                 <div
                   key={flag.label}
-                  className="flex items-center justify-between rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] px-3 py-2"
+                  className="flex items-center justify-between rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-3 py-2"
                 >
-                  <span className="text-[#18181B]">{flag.label}</span>
+                  <span className="text-[var(--text-primary)]">{flag.label}</span>
                   <StatusBadge
                     label={flag.enabled ? "Yes" : "No"}
                     tone={flag.enabled ? "primary" : "neutral"}
@@ -809,28 +809,28 @@ export default function PartDetailPage() {
           {/* Stock by Location Snapshot */}
           <Card>
             <div className="flex items-center justify-between">
-              <h2 className="text-[15px] font-semibold text-[#18181B]">Stock by Location</h2>
+              <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Stock by Location</h2>
               <button
                 type="button"
                 onClick={() => setActiveTab("locations")}
-                className="text-[12px] font-medium text-[#1D4ED8] hover:underline"
+                className="text-[12px] font-medium text-[var(--brand-primary)] hover:underline"
               >
                 Manage stock →
               </button>
             </div>
             {stockItems.length === 0 ? (
-              <p className="mt-4 text-[13px] text-[#63636B]">
+              <p className="mt-4 text-[13px] text-[var(--text-muted)]">
                 No stock recorded yet. Use <strong>Add Stock</strong> above to receive initial inventory.
               </p>
             ) : (
-              <dl className="mt-4 divide-y divide-[#E4E4E7] text-[13px]">
+              <dl className="mt-4 divide-y divide-[var(--border-subtle)] text-[13px]">
                 {stockItems.slice(0, 5).map((item) => (
                   <div key={item.id} className="flex items-center justify-between py-2">
-                    <dt className="text-[#52525B]">
+                    <dt className="text-[var(--text-secondary)]">
                       {item.locationPathString ?? item.locationName ?? "Unassigned Location"}
                       {item.serialNumber ? ` · SN: ${item.serialNumber}` : ""}
                     </dt>
-                    <dd className="font-mono font-semibold text-[#18181B]">
+                    <dd className="font-mono font-semibold text-[var(--text-primary)]">
                       {Number(item.quantity).toLocaleString()} {part.unit}
                     </dd>
                   </div>
@@ -843,20 +843,20 @@ export default function PartDetailPage() {
 
       {/* TAB: Stock & Locations */}
       {activeTab === "locations" && (
-        <div className="space-y-4 rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+        <div className="space-y-4 rounded-[12px] border border-[var(--border-subtle)] bg-white p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-[15px] font-semibold text-[#18181B]">
+              <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
                 Stock by Location ({stockItems.length})
               </h2>
-              <p className="text-[12px] text-[#52525B]">
+              <p className="text-[12px] text-[var(--text-secondary)]">
                 View quantities across shelves/rooms and quickly adjust or transfer stock.
               </p>
             </div>
             {hasPermission("STOCK:CREATE") && (
               <Link
                 href={`/stock?addStock=true&partId=${part.id}`}
-                className="inline-flex h-8 items-center gap-1.5 rounded-[8px] bg-[#1D4ED8] px-3 text-[12px] font-medium text-white hover:bg-[#1E40AF]"
+                className="inline-flex h-8 items-center gap-1.5 rounded-[8px] bg-[var(--brand-primary)] px-3 text-[12px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Add Stock</span>
@@ -867,7 +867,7 @@ export default function PartDetailPage() {
           <div className="ims-table-wrap">
             <table className="w-full border-collapse text-left text-[13px]">
               <thead className="ims-table-head">
-                <tr className="border-b border-[#E4E4E7]">
+                <tr className="border-b border-[var(--border-subtle)]">
                   <th className="px-4 py-2.5 font-semibold">Location</th>
                   <th className="px-4 py-2.5 font-semibold">Batch / Serial</th>
                   <th className="px-4 py-2.5 font-semibold">Status</th>
@@ -875,20 +875,20 @@ export default function PartDetailPage() {
                   <th className="px-4 py-2.5 text-right font-semibold">Quick Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E4E4E7]">
+              <tbody className="divide-y divide-[var(--border-subtle)]">
                 {stockItems.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-[#63636B]">
+                    <td colSpan={5} className="px-4 py-8 text-center text-[var(--text-muted)]">
                       No stock lots found for this item.
                     </td>
                   </tr>
                 ) : (
                   stockItems.map((item) => (
                     <tr key={item.id}>
-                      <td className="px-4 py-2.5 font-medium text-[#18181B]">
+                      <td className="px-4 py-2.5 font-medium text-[var(--text-primary)]">
                         {item.locationPathString ?? item.locationName ?? "Unassigned"}
                       </td>
-                      <td className="px-4 py-2.5 font-mono text-[12px] text-[#52525B]">
+                      <td className="px-4 py-2.5 font-mono text-[12px] text-[var(--text-secondary)]">
                         {item.serialNumber
                           ? `SN: ${item.serialNumber}`
                           : item.batchCode
@@ -901,7 +901,7 @@ export default function PartDetailPage() {
                           tone={item.status === "OK" ? "success" : "warning"}
                         />
                       </td>
-                      <td className="px-4 py-2.5 text-right font-mono font-semibold text-[#18181B]">
+                      <td className="px-4 py-2.5 text-right font-mono font-semibold text-[var(--text-primary)]">
                         {Number(item.quantity).toLocaleString()} {part.unit}
                       </td>
                       <td className="px-4 py-2.5 text-right">
@@ -916,9 +916,9 @@ export default function PartDetailPage() {
                                 setOpError(null);
                                 setStockOp({ type: "add", item });
                               }}
-                              className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] px-2 text-[12px] hover:bg-[#F7F7F8]"
+                              className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-subtle)] px-2 text-[12px] hover:bg-[var(--bg-canvas)]"
                             >
-                              <Plus className="h-3 w-3 text-[#166534]" />
+                              <Plus className="h-3 w-3 text-[var(--status-success-fg)]" />
                               <span>Add</span>
                             </button>
                             <button
@@ -930,9 +930,9 @@ export default function PartDetailPage() {
                                 setOpError(null);
                                 setStockOp({ type: "remove", item });
                               }}
-                              className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] px-2 text-[12px] hover:bg-[#F7F7F8]"
+                              className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-subtle)] px-2 text-[12px] hover:bg-[var(--bg-canvas)]"
                             >
-                              <Minus className="h-3 w-3 text-[#991B1B]" />
+                              <Minus className="h-3 w-3 text-[var(--status-danger-fg)]" />
                               <span>Remove</span>
                             </button>
                             <button
@@ -947,9 +947,9 @@ export default function PartDetailPage() {
                                 setOpError(null);
                                 setStockOp({ type: "transfer", item });
                               }}
-                              className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] px-2 text-[12px] hover:bg-[#F7F7F8]"
+                              className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-subtle)] px-2 text-[12px] hover:bg-[var(--bg-canvas)]"
                             >
-                              <ArrowRightLeft className="h-3 w-3 text-[#1D4ED8]" />
+                              <ArrowRightLeft className="h-3 w-3 text-[var(--brand-primary)]" />
                               <span>Move</span>
                             </button>
                           </div>
@@ -966,10 +966,10 @@ export default function PartDetailPage() {
 
       {/* TAB: Stock History */}
       {activeTab === "activity" && (
-        <div className="space-y-4 rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+        <div className="space-y-4 rounded-[12px] border border-[var(--border-subtle)] bg-white p-5">
           <div>
-            <h2 className="text-[15px] font-semibold text-[#18181B]">Stock Movement History</h2>
-            <p className="text-[12px] text-[#52525B]">
+            <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Stock Movement History</h2>
+            <p className="text-[12px] text-[var(--text-secondary)]">
               Recent additions, removals, stock counts, and location transfers for this item.
             </p>
           </div>
@@ -982,7 +982,7 @@ export default function PartDetailPage() {
             <div className="ims-table-wrap">
               <table className="w-full border-collapse text-left text-[13px]">
                 <thead className="ims-table-head">
-                  <tr className="border-b border-[#E4E4E7]">
+                  <tr className="border-b border-[var(--border-subtle)]">
                     <th className="px-4 py-2 font-semibold">Date</th>
                     <th className="px-4 py-2 font-semibold">Action</th>
                     <th className="px-4 py-2 font-semibold">Location</th>
@@ -991,27 +991,27 @@ export default function PartDetailPage() {
                     <th className="px-4 py-2 font-semibold">Notes</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E4E4E7]">
+                <tbody className="divide-y divide-[var(--border-subtle)]">
                   {trackingHistory.map((tr) => (
                     <tr key={tr.id}>
-                      <td className="px-4 py-2 text-[12px] text-[#52525B]">
+                      <td className="px-4 py-2 text-[12px] text-[var(--text-secondary)]">
                         {new Date(tr.createdAt).toLocaleString()}
                       </td>
-                      <td className="px-4 py-2 font-medium text-[#18181B]">{tr.trackingType}</td>
-                      <td className="px-4 py-2 text-[12px] text-[#52525B]">
+                      <td className="px-4 py-2 font-medium text-[var(--text-primary)]">{tr.trackingType}</td>
+                      <td className="px-4 py-2 text-[12px] text-[var(--text-secondary)]">
                         {tr.locationPathString ?? "—"}
                       </td>
                       <td
                         className={`px-4 py-2 text-right font-mono font-semibold ${
-                          tr.quantityDelta >= 0 ? "text-[#166534]" : "text-[#991B1B]"
+                          tr.quantityDelta >= 0 ? "text-[var(--status-success-fg)]" : "text-[var(--status-danger-fg)]"
                         }`}
                       >
                         {tr.quantityDelta >= 0 ? `+${tr.quantityDelta}` : tr.quantityDelta}
                       </td>
-                      <td className="px-4 py-2 text-right font-mono text-[#18181B]">
+                      <td className="px-4 py-2 text-right font-mono text-[var(--text-primary)]">
                         {tr.quantityAfter} {part.unit}
                       </td>
-                      <td className="px-4 py-2 text-[12px] text-[#52525B]">{tr.notes ?? "—"}</td>
+                      <td className="px-4 py-2 text-[12px] text-[var(--text-secondary)]">{tr.notes ?? "—"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1023,10 +1023,10 @@ export default function PartDetailPage() {
 
       {/* TAB: Specifications */}
       {activeTab === "specs" && (
-        <div className="space-y-4 rounded-[12px] border border-[#E4E4E7] bg-white p-5">
+        <div className="space-y-4 rounded-[12px] border border-[var(--border-subtle)] bg-white p-5">
           <div>
-            <h2 className="text-[15px] font-semibold text-[#18181B]">Item Specifications</h2>
-            <p className="text-[12px] text-[#52525B]">
+            <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Item Specifications</h2>
+            <p className="text-[12px] text-[var(--text-secondary)]">
               Store searchable attributes such as size, color, material, or electrical rating.
             </p>
           </div>
@@ -1040,13 +1040,13 @@ export default function PartDetailPage() {
           {hasPermission("PART:UPDATE") && (
             <form
               onSubmit={handleUpsertParameter}
-              className="flex flex-wrap items-center gap-2.5 rounded-[10px] border border-[#E4E4E7] bg-[#F7F7F8] p-3"
+              className="flex flex-wrap items-center gap-2.5 rounded-[10px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] p-3"
             >
               <select
                 required
                 value={selectedTemplateId}
                 onChange={(e) => setSelectedTemplateId(e.target.value)}
-                className="h-9 min-w-[220px] rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                className="h-9 min-w-[220px] rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px]"
               >
                 <option value="">Select specification…</option>
                 {templates.map((t) => (
@@ -1062,13 +1062,13 @@ export default function PartDetailPage() {
                 value={paramValue}
                 onChange={(e) => setParamValue(e.target.value)}
                 placeholder="Enter value (e.g. Black, 12 V, 250 g)…"
-                className="h-9 min-w-[240px] flex-1 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                className="h-9 min-w-[240px] flex-1 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px]"
               />
 
               <button
                 type="submit"
                 disabled={savingParam}
-                className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white hover:bg-[#1E40AF] disabled:opacity-50"
+                className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)] disabled:opacity-50"
               >
                 <Plus className="h-4 w-4" />
                 <span>{savingParam ? "Saving…" : "Save Spec"}</span>
@@ -1079,30 +1079,30 @@ export default function PartDetailPage() {
           <div className="ims-table-wrap">
             <table className="w-full border-collapse text-left text-[13px]">
               <thead className="ims-table-head">
-                <tr className="border-b border-[#E4E4E7]">
+                <tr className="border-b border-[var(--border-subtle)]">
                   <th className="px-4 py-2.5 font-semibold">Specification</th>
                   <th className="px-4 py-2.5 font-semibold">Value</th>
                   <th className="px-4 py-2.5 font-semibold">Unit / Type</th>
                   <th className="px-4 py-2.5 text-right font-semibold">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E4E4E7]">
+              <tbody className="divide-y divide-[var(--border-subtle)]">
                 {part.parameters.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-[#63636B]">
+                    <td colSpan={4} className="px-4 py-8 text-center text-[var(--text-muted)]">
                       No specifications recorded for this item yet.
                     </td>
                   </tr>
                 ) : (
                   part.parameters.map((pp) => (
                     <tr key={pp.id}>
-                      <td className="px-4 py-2.5 font-medium text-[#18181B]">
+                      <td className="px-4 py-2.5 font-medium text-[var(--text-primary)]">
                         {pp.templateName}
                       </td>
-                      <td className="px-4 py-2.5 font-mono font-semibold text-[#1D4ED8]">
+                      <td className="px-4 py-2.5 font-mono font-semibold text-[var(--brand-primary)]">
                         {pp.valueText}
                       </td>
-                      <td className="px-4 py-2.5 text-[12px] text-[#63636B]">
+                      <td className="px-4 py-2.5 text-[12px] text-[var(--text-muted)]">
                         {pp.checkbox ? "Yes/No" : pp.templateUnits || "Text"}
                       </td>
                       <td className="px-4 py-2.5 text-right">
@@ -1110,7 +1110,7 @@ export default function PartDetailPage() {
                           <button
                             type="button"
                             onClick={() => handleDeleteParameter(pp.id)}
-                            className="text-[12px] text-[#991B1B] hover:underline"
+                            className="text-[12px] text-[var(--status-danger-fg)] hover:underline"
                           >
                             Remove
                           </button>
@@ -1129,41 +1129,41 @@ export default function PartDetailPage() {
       {activeTab === "suppliers" && (
         <div className="space-y-6">
           <div className="ims-card">
-            <h2 className="text-[15px] font-semibold text-[#18181B]">
+            <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
               Suppliers & Purchase Pricing ({supplierParts.length})
             </h2>
-            <p className="text-[12px] text-[#52525B]">
+            <p className="text-[12px] text-[var(--text-secondary)]">
               Vendor SKUs, minimum order quantities, and pack-to-unit conversions ({part.unit}).
             </p>
-            <div className="mt-3 overflow-x-auto rounded-[8px] border border-[#E4E4E7]">
+            <div className="mt-3 overflow-x-auto rounded-[8px] border border-[var(--border-subtle)]">
               <table className="w-full border-collapse text-left text-[13px]">
                 <thead className="ims-table-head">
-                  <tr className="border-b border-[#E4E4E7]">
+                  <tr className="border-b border-[var(--border-subtle)]">
                     <th className="px-4 py-2 font-semibold">Supplier</th>
                     <th className="px-4 py-2 font-semibold">Vendor SKU</th>
                     <th className="px-4 py-2 font-semibold">Pack Size & MOQ</th>
                     <th className="px-4 py-2 font-semibold">Price Breaks</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E4E4E7]">
+                <tbody className="divide-y divide-[var(--border-subtle)]">
                   {supplierParts.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-4 py-6 text-center text-[#63636B]">
+                      <td colSpan={4} className="px-4 py-6 text-center text-[var(--text-muted)]">
                         No suppliers linked to this item yet.
                       </td>
                     </tr>
                   ) : (
                     supplierParts.map((sp) => (
                       <tr key={sp.id}>
-                        <td className="px-4 py-2.5 font-medium text-[#18181B]">
+                        <td className="px-4 py-2.5 font-medium text-[var(--text-primary)]">
                           <Link
                             href={`/companies/${sp.supplierId}`}
-                            className="text-[#1D4ED8] hover:underline"
+                            className="text-[var(--brand-primary)] hover:underline"
                           >
                             {sp.supplierName}
                           </Link>
                         </td>
-                        <td className="px-4 py-2.5 font-mono font-semibold text-[#18181B]">
+                        <td className="px-4 py-2.5 font-mono font-semibold text-[var(--text-primary)]">
                           {sp.sku}
                         </td>
                         <td className="px-4 py-2.5 font-mono text-[12px]">
@@ -1175,7 +1175,7 @@ export default function PartDetailPage() {
                             : sp.priceBreaks.map((pb) => (
                                 <div key={pb.id}>
                                   ≥{pb.minQuantity}: {pb.unitPrice} {pb.currency}/pack →{" "}
-                                  <span className="font-semibold text-[#1D4ED8]">
+                                  <span className="font-semibold text-[var(--brand-primary)]">
                                     {pb.convertedInternalUnitPriceInBase} {pb.tenantBaseCurrency}/
                                     {part.unit}
                                   </span>
@@ -1192,15 +1192,15 @@ export default function PartDetailPage() {
 
           {manufacturerParts.length > 0 && (
             <div className="ims-card">
-              <h2 className="text-[15px] font-semibold text-[#18181B]">
+              <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
                 Manufacturer Part Numbers ({manufacturerParts.length})
               </h2>
-              <div className="mt-3 divide-y divide-[#E4E4E7] rounded-[8px] border border-[#E4E4E7] text-[13px]">
+              <div className="mt-3 divide-y divide-[var(--border-subtle)] rounded-[8px] border border-[var(--border-subtle)] text-[13px]">
                 {manufacturerParts.map((mp) => (
                   <div key={mp.id} className="flex items-center justify-between px-4 py-2.5">
                     <div>
-                      <span className="font-mono font-semibold text-[#1D4ED8]">{mp.mpn}</span>
-                      <span className="ml-2 text-[#52525B]">by {mp.manufacturerName}</span>
+                      <span className="font-mono font-semibold text-[var(--brand-primary)]">{mp.mpn}</span>
+                      <span className="ml-2 text-[var(--text-secondary)]">by {mp.manufacturerName}</span>
                     </div>
                   </div>
                 ))}
@@ -1214,8 +1214,8 @@ export default function PartDetailPage() {
       {activeTab === "kit" && (
         <div className="space-y-6">
           <div className="ims-card">
-            <h2 className="text-[15px] font-semibold text-[#18181B]">Kit / Bundle Contents</h2>
-            <p className="text-[12px] text-[#52525B]">
+            <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Kit / Bundle Contents</h2>
+            <p className="text-[12px] text-[var(--text-secondary)]">
               Items included in one unit of {part.name}.
             </p>
           </div>
@@ -1241,16 +1241,16 @@ export default function PartDetailPage() {
                   setBomError(err instanceof Error ? err.message : "Failed to add item");
                 }
               }}
-              className="space-y-3 rounded-[12px] border border-[#E4E4E7] bg-white p-4"
+              className="space-y-3 rounded-[12px] border border-[var(--border-subtle)] bg-white p-4"
             >
-              <div className="text-[13px] font-semibold text-[#18181B]">Add Item to Kit</div>
+              <div className="text-[13px] font-semibold text-[var(--text-primary)]">Add Item to Kit</div>
               {bomError && <div className="text-[12px] text-red-600">{bomError}</div>}
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <select
                   required
                   value={bomSubPartId}
                   onChange={(e) => setBomSubPartId(e.target.value)}
-                  className="sm:col-span-2 rounded-lg border border-[#E4E4E7] px-3 py-2 text-[13px]"
+                  className="sm:col-span-2 rounded-lg border border-[var(--border-subtle)] px-3 py-2 text-[13px]"
                 >
                   <option value="">Select item...</option>
                   {allParts
@@ -1271,11 +1271,11 @@ export default function PartDetailPage() {
                     value={bomQuantity}
                     onChange={(e) => setBomQuantity(e.target.value)}
                     placeholder="Qty"
-                    className="flex-1 rounded-lg border border-[#E4E4E7] px-3 py-2 text-[13px]"
+                    className="flex-1 rounded-lg border border-[var(--border-subtle)] px-3 py-2 text-[13px]"
                   />
                   <button
                     type="submit"
-                    className="rounded-lg bg-[#1D4ED8] px-4 py-2 text-[13px] font-medium text-white"
+                    className="rounded-lg bg-[var(--brand-primary)] px-4 py-2 text-[13px] font-medium text-white"
                   >
                     Add
                   </button>
@@ -1284,19 +1284,19 @@ export default function PartDetailPage() {
             </form>
           )}
 
-          <div className="overflow-hidden rounded-[12px] border border-[#E4E4E7] bg-white">
+          <div className="overflow-hidden rounded-[12px] border border-[var(--border-subtle)] bg-white">
             <table className="w-full text-[13px]">
-              <thead className="bg-[#F4F4F5] text-left text-[11px] uppercase text-[#71717A]">
+              <thead className="bg-[var(--bg-muted)] text-left text-[11px] uppercase text-[var(--text-muted)]">
                 <tr>
                   <th className="px-4 py-2.5">Included Item</th>
                   <th className="px-4 py-2.5 text-right">Quantity</th>
                   <th className="px-4 py-2.5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E4E4E7]">
+              <tbody className="divide-y divide-[var(--border-subtle)]">
                 {bomItems.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="px-4 py-6 text-center text-[#71717A]">
+                    <td colSpan={3} className="px-4 py-6 text-center text-[var(--text-muted)]">
                       No items in this kit yet.
                     </td>
                   </tr>
@@ -1306,7 +1306,7 @@ export default function PartDetailPage() {
                       <td className="px-4 py-2.5">
                         <Link
                           href={`/parts/${b.subPartId}`}
-                          className="font-medium text-[#1D4ED8] hover:underline"
+                          className="font-medium text-[var(--brand-primary)] hover:underline"
                         >
                           {b.subPartIpn ? `${b.subPartIpn} · ` : ""}
                           {b.subPartName}
@@ -1337,20 +1337,20 @@ export default function PartDetailPage() {
           </div>
 
           {whereUsed.length > 0 && (
-            <div className="space-y-3 rounded-[12px] border border-[#E4E4E7] bg-white p-5">
-              <h3 className="text-[14px] font-semibold text-[#18181B]">
+            <div className="space-y-3 rounded-[12px] border border-[var(--border-subtle)] bg-white p-5">
+              <h3 className="text-[14px] font-semibold text-[var(--text-primary)]">
                 Included in Kits ({whereUsed.length})
               </h3>
-              <div className="divide-y divide-[#E4E4E7]">
+              <div className="divide-y divide-[var(--border-subtle)]">
                 {whereUsed.map((wu) => (
                   <div key={wu.id} className="flex items-center justify-between py-2 text-[13px]">
                     <Link
                       href={`/parts/${wu.partId}`}
-                      className="font-medium text-[#1D4ED8] hover:underline"
+                      className="font-medium text-[var(--brand-primary)] hover:underline"
                     >
                       Kit {wu.partId}
                     </Link>
-                    <span className="font-mono text-[#52525B]">Qty: {wu.quantity}</span>
+                    <span className="font-mono text-[var(--text-secondary)]">Qty: {wu.quantity}</span>
                   </div>
                 ))}
               </div>
@@ -1364,10 +1364,10 @@ export default function PartDetailPage() {
         <div className="ims-card">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-[15px] font-semibold text-[#18181B]">
+              <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
                 Product Variants ({variants.length})
               </h2>
-              <p className="text-[12px] text-[#52525B]">
+              <p className="text-[12px] text-[var(--text-secondary)]">
                 Size, color, or model variations of this item.
               </p>
             </div>
@@ -1380,7 +1380,7 @@ export default function PartDetailPage() {
                   setVariantError(null);
                   setShowVariantModal(true);
                 }}
-                className="inline-flex h-8 items-center gap-1 rounded-[8px] bg-[#1D4ED8] px-3 text-[12px] font-medium text-white"
+                className="inline-flex h-8 items-center gap-1 rounded-[8px] bg-[var(--brand-primary)] px-3 text-[12px] font-medium text-white"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>New Variant</span>
@@ -1396,17 +1396,17 @@ export default function PartDetailPage() {
               />
             </div>
           ) : (
-            <div className="mt-4 divide-y divide-[#E4E4E7] rounded-[8px] border border-[#E4E4E7]">
+            <div className="mt-4 divide-y divide-[var(--border-subtle)] rounded-[8px] border border-[var(--border-subtle)]">
               {variants.map((v) => (
                 <div key={v.id} className="flex items-center justify-between px-3.5 py-2.5">
                   <div>
                     <Link
                       href={`/parts/${v.id}`}
-                      className="font-mono text-[13px] font-medium text-[#1D4ED8] hover:underline"
+                      className="font-mono text-[13px] font-medium text-[var(--brand-primary)] hover:underline"
                     >
                       {v.ipn}
                     </Link>
-                    <div className="text-[12px] text-[#18181B]">{v.name}</div>
+                    <div className="text-[12px] text-[var(--text-primary)]">{v.name}</div>
                   </div>
                   <StatusBadge
                     label={v.active ? "Active" : "Inactive"}
@@ -1424,10 +1424,10 @@ export default function PartDetailPage() {
       {activeTab === "notes" && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="ims-card">
-            <h2 className="text-[15px] font-semibold text-[#18181B]">
+            <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
               Internal Notes ({notes.length})
             </h2>
-            <p className="text-[12px] text-[#52525B]">
+            <p className="text-[12px] text-[var(--text-secondary)]">
               Keep supplier remarks, warranty details, or handling instructions for staff.
             </p>
 
@@ -1437,12 +1437,12 @@ export default function PartDetailPage() {
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
                 placeholder="Add a note for this item…"
-                className="w-full rounded-[8px] border border-[#E4E4E7] p-2.5 text-[13px]"
+                className="w-full rounded-[8px] border border-[var(--border-subtle)] p-2.5 text-[13px]"
               />
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  className="h-8 rounded-[8px] bg-[#1D4ED8] px-3 text-[12px] font-medium text-white hover:bg-[#1E40AF]"
+                  className="h-8 rounded-[8px] bg-[var(--brand-primary)] px-3 text-[12px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
                 >
                   Save Note
                 </button>
@@ -1453,31 +1453,31 @@ export default function PartDetailPage() {
               {notes.map((n) => (
                 <div
                   key={n.id}
-                  className="rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] p-3 text-[13px]"
+                  className="rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] p-3 text-[13px]"
                 >
-                  <div className="flex items-center justify-between text-[11px] text-[#63636B]">
+                  <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
                     <span>{new Date(n.createdAt).toLocaleString()}</span>
                     {editMode && (
                       <button
                         type="button"
                         onClick={() => handleDeleteNote(n.id)}
-                        className="text-[#991B1B] hover:underline"
+                        className="text-[var(--status-danger-fg)] hover:underline"
                       >
                         Delete
                       </button>
                     )}
                   </div>
-                  <p className="mt-1 text-[#18181B]">{n.content}</p>
+                  <p className="mt-1 text-[var(--text-primary)]">{n.content}</p>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="ims-card">
-            <h2 className="text-[15px] font-semibold text-[#18181B]">
+            <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
               Files & Manuals ({attachments.length})
             </h2>
-            <p className="text-[12px] text-[#52525B]">
+            <p className="text-[12px] text-[var(--text-secondary)]">
               Attach product manuals, warranty cards, or supplier quotes.
             </p>
 
@@ -1491,26 +1491,26 @@ export default function PartDetailPage() {
                 value={attachmentFileName}
                 onChange={(e) => setAttachmentFileName(e.target.value)}
                 placeholder="manual.pdf"
-                className="h-9 rounded-[8px] border border-[#E4E4E7] px-2.5 text-[12px]"
+                className="h-9 rounded-[8px] border border-[var(--border-subtle)] px-2.5 text-[12px]"
               />
               <input
                 type="text"
                 value={attachmentComment}
                 onChange={(e) => setAttachmentComment(e.target.value)}
                 placeholder="Comment (optional)"
-                className="h-9 rounded-[8px] border border-[#E4E4E7] px-2.5 text-[12px]"
+                className="h-9 rounded-[8px] border border-[var(--border-subtle)] px-2.5 text-[12px]"
               />
               <button
                 type="submit"
-                className="h-9 rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] px-3 text-[12px] font-medium text-[#18181B] hover:border-[#1D4ED8]"
+                className="h-9 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-3 text-[12px] font-medium text-[var(--text-primary)] hover:border-[var(--brand-primary)]"
               >
                 + Attach File
               </button>
             </form>
 
-            <div className="mt-4 divide-y divide-[#E4E4E7] rounded-[8px] border border-[#E4E4E7]">
+            <div className="mt-4 divide-y divide-[var(--border-subtle)] rounded-[8px] border border-[var(--border-subtle)]">
               {attachments.length === 0 ? (
-                <div className="p-6 text-center text-[12px] text-[#63636B]">
+                <div className="p-6 text-center text-[12px] text-[var(--text-muted)]">
                   No files attached to this item yet.
                 </div>
               ) : (
@@ -1520,11 +1520,11 @@ export default function PartDetailPage() {
                     className="flex items-center justify-between px-3.5 py-2.5 text-[13px]"
                   >
                     <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-[#1D4ED8]" />
+                      <FileText className="h-4 w-4 text-[var(--brand-primary)]" />
                       <div>
-                        <div className="font-medium text-[#18181B]">{att.fileName}</div>
+                        <div className="font-medium text-[var(--text-primary)]">{att.fileName}</div>
                         {att.comment && (
-                          <div className="text-[11px] text-[#63636B]">{att.comment}</div>
+                          <div className="text-[11px] text-[var(--text-muted)]">{att.comment}</div>
                         )}
                       </div>
                     </div>
@@ -1795,7 +1795,7 @@ export default function PartDetailPage() {
               { key: "assembly", label: "Kit / Bundle" },
               { key: "virtual", label: "Non-Physical Service" },
             ].map((opt) => (
-              <label key={opt.key} className="flex items-center gap-2 text-[#18181B]">
+              <label key={opt.key} className="flex items-center gap-2 text-[var(--text-primary)]">
                 <input
                   type="checkbox"
                   checked={Boolean(editForm[opt.key as keyof typeof editForm])}

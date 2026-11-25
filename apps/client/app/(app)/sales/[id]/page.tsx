@@ -273,7 +273,7 @@ export default function SalesOrderDetailPage() {
         </div>
 
         {showAddLine && (
-          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="ims-modal-backdrop bg-black/50">
             <div className="bg-card border rounded-xl w-full max-w-md p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">Add Sales Order Line</h3>
@@ -354,7 +354,7 @@ export default function SalesOrderDetailPage() {
         )}
 
         {allocLine && (
-          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="ims-modal-backdrop bg-black/50">
             <div className="bg-card border rounded-xl w-full max-w-md p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">Allocate Stock: {allocLine.partName}</h3>

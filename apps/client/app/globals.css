@@ -5,18 +5,26 @@
   --bg-surface: #FFFFFF;
   --bg-muted: #F4F4F5;
   --border-subtle: #E4E4E7;
+  --border-strong: #D4D4D8;
   --text-primary: #18181B;
   --text-secondary: #52525B;
   --text-muted: #63636B;
   --brand-primary: #1D4ED8;
   --brand-primary-hover: #1E40AF;
   --brand-tint: #EEF2FF;
+  --border-brand: #C7D2FE;
   --status-success-bg: #DCFCE7;
   --status-success-fg: #166534;
+  --border-success: #BBF7D0;
   --status-warning-bg: #FEF3C7;
   --status-warning-fg: #92400E;
+  --border-warning: #FDE68A;
   --status-danger-bg: #FEE2E2;
   --status-danger-fg: #991B1B;
+  --border-danger: #FECACA;
+  --status-violet-bg: #EDE9FE;
+  --status-violet-fg: #6D28D9;
+  --border-violet: #DDD6FE;
 }
 
 body {
@@ -53,6 +61,18 @@ body {
 
   .ims-nav-card-desc {
     @apply mt-1 text-[13px] text-[var(--text-secondary)];
+  }
+
+  .ims-auth-shell {
+    @apply flex min-h-screen items-center justify-center bg-[var(--bg-canvas)] px-4 py-10;
+  }
+
+  .ims-auth-card {
+    @apply w-full max-w-md rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-8 shadow-xs;
+  }
+
+  .ims-section-title {
+    @apply text-[15px] font-semibold text-[var(--text-primary)];
   }
 
   .ims-subcard {

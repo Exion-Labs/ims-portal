@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+:root {
+  --platform-bg: #F7F7F8;
+  --platform-fg: #18181B;
+  --platform-banner-bg: #6D28D9;
+}
+
+@layer components {
+  .ims-platform-banner {
+    @apply bg-[var(--platform-banner-bg)] px-4 py-1.5 text-center text-[12px] font-medium text-white;
+  }
+
+  .ims-platform-modal-backdrop {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4;
+  }
+
+  .ims-platform-modal-panel {
+    @apply w-full max-w-md rounded-xl border border-slate-800 bg-slate-900 p-6 space-y-4;
+  }
+}

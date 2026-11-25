@@ -184,28 +184,28 @@ export default function PurchaseOrderDetailPage() {
           <div>
             <Link
               href="/purchasing"
-              className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#52525B] hover:text-[#1D4ED8]"
+              className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)]"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               <span>Back to Purchase Orders</span>
             </Link>
             <div className="mt-2 flex flex-wrap items-center gap-2.5">
-              <span className="rounded-[8px] border border-[#C7D2FE] bg-[#EEF2FF] px-2.5 py-1 font-mono text-[14px] font-semibold text-[#1D4ED8]">
+              <span className="rounded-[8px] border border-[var(--border-brand)] bg-[var(--brand-tint)] px-2.5 py-1 font-mono text-[14px] font-semibold text-[var(--brand-primary)]">
                 {po.reference}
               </span>
-              <h1 className="text-[22px] font-semibold text-[#18181B]">{po.supplierName}</h1>
+              <h1 className="text-[22px] font-semibold text-[var(--text-primary)]">{po.supplierName}</h1>
               <StatusBadge label={po.status} tone={po.status === "COMPLETE" ? "success" : "primary"} />
             </div>
-            {po.description && <p className="mt-1 text-[13px] text-[#52525B]">{po.description}</p>}
+            {po.description && <p className="mt-1 text-[13px] text-[var(--text-secondary)]">{po.description}</p>}
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={handleOpenDocument}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] font-medium text-[#18181B]"
+              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px] font-medium text-[var(--text-primary)]"
             >
-              <FileText className="h-4 w-4 text-[#1D4ED8]" />
+              <FileText className="h-4 w-4 text-[var(--brand-primary)]" />
               <span>PO Document</span>
             </button>
 
@@ -214,7 +214,7 @@ export default function PurchaseOrderDetailPage() {
                 <button
                   type="button"
                   onClick={() => handleTransition("place")}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#1D4ED8] px-3.5 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[var(--brand-primary)] px-3.5 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
                 >
                   <Send className="h-4 w-4" />
                   <span>Place Order</span>
@@ -227,7 +227,7 @@ export default function PurchaseOrderDetailPage() {
                 <button
                   type="button"
                   onClick={() => handleTransition("cancel")}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/40 px-3 text-[13px] font-medium text-[#991B1B]"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/40 px-3 text-[13px] font-medium text-[var(--status-danger-fg)]"
                 >
                   <XCircle className="h-4 w-4" />
                   <span>Cancel</span>
@@ -237,7 +237,7 @@ export default function PurchaseOrderDetailPage() {
         </div>
 
         {/* Status Stepper */}
-        <div className="grid grid-cols-4 gap-2 rounded-[12px] border border-[#E4E4E7] bg-white p-3">
+        <div className="grid grid-cols-4 gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-white p-3">
           {STATUS_STEPS.map((step, idx) => {
             const currentIdx = STATUS_STEPS.indexOf(po.status as (typeof STATUS_STEPS)[number]);
             const reached = currentIdx >= idx;
@@ -246,8 +246,8 @@ export default function PurchaseOrderDetailPage() {
                 key={step}
                 className={`flex items-center gap-2 rounded-[8px] px-3 py-2 text-[12px] font-medium ${
                   reached
-                    ? "bg-[#EEF2FF] text-[#1D4ED8]"
-                    : "bg-[#F7F7F8] text-[#63636B]"
+                    ? "bg-[var(--brand-tint)] text-[var(--brand-primary)]"
+                    : "bg-[var(--bg-canvas)] text-[var(--text-muted)]"
                 }`}
               >
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
@@ -258,7 +258,7 @@ export default function PurchaseOrderDetailPage() {
         </div>
 
         {actionError && (
-          <div className="rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-4 py-2.5 text-[13px] text-[#991B1B]">
+          <div className="rounded-[8px] border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/60 px-4 py-2.5 text-[13px] text-[var(--status-danger-fg)]">
             {actionError}
           </div>
         )}
@@ -286,18 +286,18 @@ export default function PurchaseOrderDetailPage() {
 
         {/* Line Items Builder & Table */}
         <div className="ims-card">
-          <h2 className="text-[15px] font-semibold text-[#18181B]">Purchase Order Line Items</h2>
+          <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Purchase Order Line Items</h2>
 
           {canEditLines && (
             <form
               onSubmit={handleAddLine}
-              className="mt-3 flex flex-wrap items-center gap-2.5 rounded-[10px] border border-[#E4E4E7] bg-[#F7F7F8] p-3"
+              className="mt-3 flex flex-wrap items-center gap-2.5 rounded-[10px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] p-3"
             >
               <select
                 required
                 value={selectedSpId}
                 onChange={(e) => setSelectedSpId(e.target.value)}
-                className="h-9 min-w-[260px] flex-1 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                className="h-9 min-w-[260px] flex-1 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px]"
               >
                 <option value="">Select supplier SKU…</option>
                 {supplierParts.map((sp) => (
@@ -315,7 +315,7 @@ export default function PurchaseOrderDetailPage() {
                 value={lineQty}
                 onChange={(e) => setLineQty(e.target.value)}
                 placeholder="Packs"
-                className="h-9 w-24 rounded-[8px] border border-[#E4E4E7] bg-white px-2.5 font-mono text-[13px]"
+                className="h-9 w-24 rounded-[8px] border border-[var(--border-subtle)] bg-white px-2.5 font-mono text-[13px]"
               />
 
               <input
@@ -324,12 +324,12 @@ export default function PurchaseOrderDetailPage() {
                 value={linePrice}
                 onChange={(e) => setLinePrice(e.target.value)}
                 placeholder={`Auto (${po.currency}/pack)`}
-                className="h-9 w-36 rounded-[8px] border border-[#E4E4E7] bg-white px-2.5 font-mono text-[13px]"
+                className="h-9 w-36 rounded-[8px] border border-[var(--border-subtle)] bg-white px-2.5 font-mono text-[13px]"
               />
 
               <button
                 type="submit"
-                className="inline-flex h-9 items-center gap-1 rounded-[8px] bg-[#1D4ED8] px-3.5 text-[13px] font-medium text-white"
+                className="inline-flex h-9 items-center gap-1 rounded-[8px] bg-[var(--brand-primary)] px-3.5 text-[13px] font-medium text-white"
               >
                 <Plus className="h-4 w-4" />
                 <span>Add Line</span>
@@ -337,10 +337,10 @@ export default function PurchaseOrderDetailPage() {
             </form>
           )}
 
-          <div className="mt-4 overflow-x-auto rounded-[8px] border border-[#E4E4E7]">
+          <div className="mt-4 overflow-x-auto rounded-[8px] border border-[var(--border-subtle)]">
             <table className="w-full border-collapse text-left text-[13px]">
               <thead className="ims-table-head">
-                <tr className="border-b border-[#E4E4E7]">
+                <tr className="border-b border-[var(--border-subtle)]">
                   <th className="px-4 py-2.5 font-semibold">Supplier SKU</th>
                   <th className="px-4 py-2.5 font-semibold">Part</th>
                   <th className="px-4 py-2.5 text-right font-semibold">Ordered / Received</th>
@@ -349,33 +349,33 @@ export default function PurchaseOrderDetailPage() {
                   <th className="px-4 py-2.5 text-right font-semibold">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E4E4E7]">
+              <tbody className="divide-y divide-[var(--border-subtle)]">
                 {po.lines.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-[#63636B]">
+                    <td colSpan={6} className="px-4 py-8 text-center text-[var(--text-muted)]">
                       No line items added yet.
                     </td>
                   </tr>
                 ) : (
                   po.lines.map((l) => (
                     <tr key={l.id}>
-                      <td className="px-4 py-2.5 font-mono font-semibold text-[#18181B]">
+                      <td className="px-4 py-2.5 font-mono font-semibold text-[var(--text-primary)]">
                         {l.supplierSku}
                       </td>
                       <td className="px-4 py-2.5">
                         <Link
                           href={`/parts/${l.partId}`}
-                          className="font-mono text-[#1D4ED8] hover:underline"
+                          className="font-mono text-[var(--brand-primary)] hover:underline"
                         >
                           {l.partIpn}
                         </Link>
-                        <div className="text-[12px] text-[#52525B]">{l.partName}</div>
+                        <div className="text-[12px] text-[var(--text-secondary)]">{l.partName}</div>
                       </td>
                       <td className="px-4 py-2.5 text-right font-mono text-[12px]">
                         <div>
                           {l.received} / {l.quantity} packs
                         </div>
-                        <div className="text-[11px] text-[#63636B]">
+                        <div className="text-[11px] text-[var(--text-muted)]">
                           ({l.internalQuantityTotal} {l.partUnit} total)
                         </div>
                       </td>
@@ -400,7 +400,7 @@ export default function PurchaseOrderDetailPage() {
                                 setRecvNotes("");
                                 setRecvError(null);
                               }}
-                              className="inline-flex h-7 items-center gap-1 rounded bg-[#166534] px-2.5 text-[11px] font-medium text-white hover:bg-[#15803D]"
+                              className="inline-flex h-7 items-center gap-1 rounded bg-[var(--status-success-fg)] px-2.5 text-[11px] font-medium text-white hover:opacity-90"
                             >
                               <PackageCheck className="h-3.5 w-3.5" />
                               <span>Receive</span>
@@ -410,7 +410,7 @@ export default function PurchaseOrderDetailPage() {
                             <button
                               type="button"
                               onClick={() => handleRemoveLine(l.id)}
-                              className="rounded p-1 text-[#991B1B] hover:bg-[#FEE2E2]"
+                              className="rounded p-1 text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -430,13 +430,13 @@ export default function PurchaseOrderDetailPage() {
           <div className="ims-modal-backdrop">
             <div className="ims-modal-panel max-w-md">
               <div className="ims-modal-header">
-                <h2 className="text-[16px] font-semibold text-[#18181B]">
+                <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">
                   Receive into Stock · {receiveLine.partIpn}
                 </h2>
                 <button
                   type="button"
                   onClick={() => setReceiveLine(null)}
-                  className="rounded p-1 text-[#63636B]"
+                  className="rounded p-1 text-[var(--text-muted)]"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -449,12 +449,12 @@ export default function PurchaseOrderDetailPage() {
                   </div>
                 )}
 
-                <div className="rounded-[8px] bg-[#F7F7F8] p-3 text-[12px]">
+                <div className="rounded-[8px] bg-[var(--bg-canvas)] p-3 text-[12px]">
                   <div>
                     Remaining: <strong>{receiveLine.remaining}</strong> packs (×{" "}
                     {receiveLine.packQuantity} {receiveLine.partUnit}/pack)
                   </div>
-                  <div className="mt-0.5 font-mono text-[#1D4ED8]">
+                  <div className="mt-0.5 font-mono text-[var(--brand-primary)]">
                     Receiving {Number(recvQtyPacks || 0) * receiveLine.packQuantity}{" "}
                     {receiveLine.partUnit} into warehouse stock
                   </div>
@@ -518,7 +518,7 @@ export default function PurchaseOrderDetailPage() {
                   </button>
                   <button
                     type="submit"
-                    className="h-9 rounded-[8px] bg-[#166534] px-4 text-[13px] font-medium text-white"
+                    className="h-9 rounded-[8px] bg-[var(--status-success-fg)] px-4 text-[13px] font-medium text-white"
                   >
                     Confirm Receipt
                   </button>
@@ -530,16 +530,16 @@ export default function PurchaseOrderDetailPage() {
 
         {/* Modal: Printable PO Document Preview */}
         {docHtml && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="ims-modal-backdrop bg-black/50">
             <div className="flex max-h-[90vh] w-full max-w-4xl flex-col rounded-[12px] bg-white shadow-2xl">
-              <div className="flex items-center justify-between border-b border-[#E4E4E7] px-5 py-3">
+              <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-3">
                 <span className="text-[14px] font-semibold">
                   Purchase Order Document · {po.reference}
                 </span>
                 <button
                   type="button"
                   onClick={() => setDocHtml(null)}
-                  className="rounded p-1 text-[#63636B]"
+                  className="rounded p-1 text-[var(--text-muted)]"
                 >
                   <X className="h-4 w-4" />
                 </button>

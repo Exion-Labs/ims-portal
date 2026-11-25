@@ -404,8 +404,8 @@ export default function PlatformConsolePage() {
       </div>
 
       {showRegisterModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-900 p-6 space-y-4">
+        <div className="ims-platform-modal-backdrop">
+          <div className="ims-platform-modal-panel">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h2 className="text-base font-bold text-white">Register New Tenant</h2>
               <button

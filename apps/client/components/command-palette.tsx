@@ -59,28 +59,28 @@ export function CommandPalette({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 pt-24 backdrop-blur-[1px]"
+      className="ims-modal-backdrop items-start pt-24 backdrop-blur-[1px]"
       onClick={() => onOpenChange(false)}
     >
       <div
-        className="w-full max-w-xl overflow-hidden rounded-[12px] border border-[#E4E4E7] bg-white shadow-2xl"
+        className="w-full max-w-xl overflow-hidden rounded-[12px] border border-[var(--border-subtle)] bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center border-b border-[#E4E4E7] px-4 py-3">
-          <Search className="h-4 w-4 text-[#63636B]" />
+        <div className="flex items-center border-b border-[var(--border-subtle)] px-4 py-3">
+          <Search className="h-4 w-4 text-[var(--text-muted)]" />
           <input
             type="text"
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Jump to any part, stock item, setting, or search notes (pg_trgm)…"
-            className="ml-3 flex-1 bg-transparent text-[14px] text-[#18181B] placeholder:text-[#63636B] focus:outline-hidden"
+            className="ml-3 flex-1 bg-transparent text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-hidden"
           />
           <button
             type="button"
             onClick={() => onOpenChange(false)}
             aria-label="Close command palette"
-            className="rounded p-1 text-[#63636B] hover:bg-[#F7F7F8]"
+            className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-canvas)]"
           >
             <X className="h-4 w-4" />
           </button>
@@ -88,7 +88,7 @@ export function CommandPalette({
 
         <div className="max-h-80 overflow-y-auto p-2">
           {allItems.length === 0 ? (
-            <div className="py-8 text-center text-[13px] text-[#63636B]">
+            <div className="py-8 text-center text-[13px] text-[var(--text-muted)]">
               No matching records or pages found.
             </div>
           ) : (
@@ -100,20 +100,20 @@ export function CommandPalette({
                   onOpenChange(false);
                   router.push(item.href);
                 }}
-                className="flex w-full items-center justify-between rounded-[8px] px-3 py-2 text-left hover:bg-[#EEF2FF]/70"
+                className="flex w-full items-center justify-between rounded-[8px] px-3 py-2 text-left hover:bg-[var(--brand-tint)]/70"
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="rounded bg-[#F4F4F5] px-1.5 py-0.5 text-[11px] font-medium text-[#52525B]">
+                    <span className="rounded bg-[var(--bg-muted)] px-1.5 py-0.5 text-[11px] font-medium text-[var(--text-secondary)]">
                       {item.category}
                     </span>
-                    <span className="text-[13px] font-medium text-[#18181B]">
+                    <span className="text-[13px] font-medium text-[var(--text-primary)]">
                       {item.title}
                     </span>
                   </div>
-                  <div className="mt-0.5 text-[12px] text-[#63636B]">{item.subtitle}</div>
+                  <div className="mt-0.5 text-[12px] text-[var(--text-muted)]">{item.subtitle}</div>
                 </div>
-                <CornerDownLeft className="h-3.5 w-3.5 text-[#63636B]" />
+                <CornerDownLeft className="h-3.5 w-3.5 text-[var(--text-muted)]" />
               </button>
             ))
           )}

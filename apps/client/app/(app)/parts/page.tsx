@@ -275,7 +275,7 @@ function PartsCatalogPageContent() {
         cell: ({ row }) => (
           <Link
             href={`/parts/${row.original.id}`}
-            className="font-mono text-[13px] font-medium text-[#1D4ED8] hover:underline"
+            className="font-mono text-[13px] font-medium text-[var(--brand-primary)] hover:underline"
           >
             {row.original.ipn}
           </Link>
@@ -289,7 +289,7 @@ function PartsCatalogPageContent() {
             <div className="flex items-center gap-2">
               <Link
                 href={`/parts/${row.original.id}`}
-                className="text-[13px] font-medium text-[#18181B] hover:text-[#1D4ED8]"
+                className="text-[13px] font-medium text-[var(--text-primary)] hover:text-[var(--brand-primary)]"
               >
                 {row.original.name}
               </Link>
@@ -298,7 +298,7 @@ function PartsCatalogPageContent() {
               )}
             </div>
             {row.original.description && (
-              <div className="mt-0.5 max-w-md truncate text-[12px] text-[#63636B]">
+              <div className="mt-0.5 max-w-md truncate text-[12px] text-[var(--text-muted)]">
                 {row.original.description}
               </div>
             )}
@@ -310,12 +310,12 @@ function PartsCatalogPageContent() {
         header: "Category",
         cell: ({ row }) =>
           row.original.categoryPathString ? (
-            <span className="inline-flex items-center gap-1 rounded-[6px] bg-[#F4F4F5] px-2 py-0.5 text-[12px] text-[#52525B]">
-              <Folder className="h-3 w-3 text-[#63636B]" />
+            <span className="inline-flex items-center gap-1 rounded-[6px] bg-[var(--bg-muted)] px-2 py-0.5 text-[12px] text-[var(--text-secondary)]">
+              <Folder className="h-3 w-3 text-[var(--text-muted)]" />
               <span>{row.original.categoryPathString}</span>
             </span>
           ) : (
-            <span className="text-[12px] text-[#63636B]">Uncategorized</span>
+            <span className="text-[12px] text-[var(--text-muted)]">Uncategorized</span>
           ),
       },
       {
@@ -342,10 +342,10 @@ function PartsCatalogPageContent() {
           const minStock = Number(p.minimumStock ?? 0);
           const textColor =
             inStock <= 0
-              ? "text-[#991B1B]"
+              ? "text-[var(--status-danger-fg)]"
               : minStock > 0 && inStock < minStock
-                ? "text-[#92400E]"
-                : "text-[#166534]";
+                ? "text-[var(--status-warning-fg)]"
+                : "text-[var(--status-success-fg)]";
           return (
             <div className={`text-right font-mono text-[13px] font-medium tabular-nums ${textColor}`}>
               {inStock.toLocaleString()} {p.unit}
@@ -368,16 +368,16 @@ function PartsCatalogPageContent() {
           onClick={() => setShowImporter(false)}
         >
           <div
-            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl"
+            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[12px] border border-[var(--border-subtle)] bg-white p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mb-4 flex items-center justify-between border-b border-[#E4E4E7] pb-3">
-              <h2 className="text-[16px] font-semibold text-[#18181B]">Import Items (CSV / XLSX)</h2>
+            <div className="mb-4 flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">Import Items (CSV / XLSX)</h2>
               <button
                 type="button"
                 onClick={() => setShowImporter(false)}
                 aria-label="Close importer"
-                className="rounded p-1 text-[#63636B] hover:bg-[#F7F7F8]"
+                className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-canvas)]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -397,7 +397,7 @@ function PartsCatalogPageContent() {
               ]}
             />
 
-            <div className="mt-4 flex justify-end border-t border-[#E4E4E7] pt-4">
+            <div className="mt-4 flex justify-end border-t border-[var(--border-subtle)] pt-4">
               <button
                 type="button"
                 onClick={() => {
@@ -405,7 +405,7 @@ function PartsCatalogPageContent() {
                   loadParts();
                   refetch();
                 }}
-                className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
+                className="h-9 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
               >
                 Done & Refresh Table
               </button>
@@ -421,8 +421,8 @@ function PartsCatalogPageContent() {
           <div className="ims-card p-4">
             <div className="ims-modal-header">
               <div>
-                <div className="text-[14px] font-semibold text-[#18181B]">Categories</div>
-                <div className="text-[11px] text-[#63636B]">Filter items by folder</div>
+                <div className="text-[14px] font-semibold text-[var(--text-primary)]">Categories</div>
+                <div className="text-[11px] text-[var(--text-muted)]">Filter items by folder</div>
               </div>
               {hasPermission("PART:CREATE") && editMode && (
                 <button
@@ -435,16 +435,16 @@ function PartsCatalogPageContent() {
                     setShowCategoryModal({ mode: "create" });
                   }}
                   title="New Category"
-                  className="inline-flex h-8 items-center gap-1 rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] px-2.5 text-[12px] font-medium text-[#18181B] hover:border-[#1D4ED8]"
+                  className="inline-flex h-8 items-center gap-1 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-2.5 text-[12px] font-medium text-[var(--text-primary)] hover:border-[var(--brand-primary)]"
                 >
-                  <FolderPlus className="h-3.5 w-3.5 text-[#1D4ED8]" />
+                  <FolderPlus className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
                   <span>New</span>
                 </button>
               )}
             </div>
 
             {/* Include Subcategories Toggle */}
-            <label className="mt-3 flex items-center gap-2 text-[12px] text-[#52525B]">
+            <label className="mt-3 flex items-center gap-2 text-[12px] text-[var(--text-secondary)]">
               <input
                 type="checkbox"
                 checked={includeSubcategories}
@@ -452,7 +452,7 @@ function PartsCatalogPageContent() {
                   setIncludeSubcategories(e.target.checked);
                   setPageIndex(0);
                 }}
-                className="rounded border-[#E4E4E7]"
+                className="rounded border-[var(--border-subtle)]"
               />
               <span>Include subcategories</span>
             </label>
@@ -467,15 +467,15 @@ function PartsCatalogPageContent() {
                 }}
                 className={`flex w-full items-center justify-between rounded-[8px] px-2.5 py-1.5 text-left text-[13px] font-medium ${
                   selectedCategoryId === null
-                    ? "bg-[#EEF2FF] text-[#1D4ED8]"
-                    : "text-[#18181B] hover:bg-[#F7F7F8]"
+                    ? "bg-[var(--brand-tint)] text-[var(--brand-primary)]"
+                    : "text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
                 }`}
               >
                 <span className="flex items-center gap-2">
                   <Folder className="h-3.5 w-3.5" />
                   <span>All Categories</span>
                 </span>
-                <span className="font-mono text-[11px] text-[#63636B]">
+                <span className="font-mono text-[11px] text-[var(--text-muted)]">
                   {me?.usage?.MAX_PARTS ?? partsPage?.totalElements ?? 0}
                 </span>
               </button>
@@ -494,7 +494,7 @@ function PartsCatalogPageContent() {
                 return (
                   <div
                     key={cat.id}
-                    className={`group flex items-center justify-between rounded-[8px] pr-1 hover:bg-[#F7F7F8] ${depthPadding}`}
+                    className={`group flex items-center justify-between rounded-[8px] pr-1 hover:bg-[var(--bg-canvas)] ${depthPadding}`}
                   >
                     <button
                       type="button"
@@ -503,14 +503,14 @@ function PartsCatalogPageContent() {
                         setPageIndex(0);
                       }}
                       className={`flex min-w-0 flex-1 items-center justify-between rounded-[8px] px-2 py-1.5 text-left text-[13px] ${
-                        active ? "bg-[#EEF2FF] font-semibold text-[#1D4ED8]" : "text-[#18181B]"
+                        active ? "bg-[var(--brand-tint)] font-semibold text-[var(--brand-primary)]" : "text-[var(--text-primary)]"
                       }`}
                     >
                       <span className="flex min-w-0 items-center gap-1.5 truncate">
-                        <Folder className="h-3.5 w-3.5 shrink-0 text-[#1D4ED8]" />
+                        <Folder className="h-3.5 w-3.5 shrink-0 text-[var(--brand-primary)]" />
                         <span className="truncate">{cat.name}</span>
                       </span>
-                      <span className="ml-1 font-mono text-[11px] text-[#63636B]">
+                      <span className="ml-1 font-mono text-[11px] text-[var(--text-muted)]">
                         {cat.directPartCount}
                       </span>
                     </button>
@@ -521,12 +521,12 @@ function PartsCatalogPageContent() {
 
             {/* Selected Category Action Footer */}
             {selectedCategory && (
-              <div className="mt-4 space-y-2 border-t border-[#E4E4E7] pt-3">
-                <div className="text-[12px] font-medium text-[#18181B]">
+              <div className="mt-4 space-y-2 border-t border-[var(--border-subtle)] pt-3">
+                <div className="text-[12px] font-medium text-[var(--text-primary)]">
                   {selectedCategory.pathString}
                 </div>
                 {selectedCategory.description && (
-                  <div className="text-[11px] text-[#63636B]">{selectedCategory.description}</div>
+                  <div className="text-[11px] text-[var(--text-muted)]">{selectedCategory.description}</div>
                 )}
                 {editMode ? (
                   <div className="flex flex-wrap gap-1.5 pt-1">
@@ -538,7 +538,7 @@ function PartsCatalogPageContent() {
                         setCatFormError(null);
                         setShowCategoryModal({ mode: "edit", category: selectedCategory });
                       }}
-                      className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] bg-white px-2 text-[11px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
+                      className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-subtle)] bg-white px-2 text-[11px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
                     >
                       <Edit3 className="h-3 w-3" />
                       <span>Rename</span>
@@ -550,7 +550,7 @@ function PartsCatalogPageContent() {
                         setCatFormError(null);
                         setShowCategoryModal({ mode: "move", category: selectedCategory });
                       }}
-                      className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] bg-white px-2 text-[11px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
+                      className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-subtle)] bg-white px-2 text-[11px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
                     >
                       <ArrowRightLeft className="h-3 w-3" />
                       <span>Move</span>
@@ -558,7 +558,7 @@ function PartsCatalogPageContent() {
                     <button
                       type="button"
                       onClick={() => handleDeleteCategory(selectedCategory)}
-                      className="inline-flex h-7 items-center gap-1 rounded border border-[#FECACA] bg-[#FEE2E2]/40 px-2 text-[11px] font-medium text-[#991B1B] hover:bg-[#FEE2E2]"
+                      className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/40 px-2 text-[11px] font-medium text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]"
                     >
                       <Trash2 className="h-3 w-3" />
                       <span>Delete</span>
@@ -603,8 +603,8 @@ function PartsCatalogPageContent() {
                       }}
                       className={`h-8 rounded-full border px-3 text-[12px] font-medium transition-colors ${
                         active
-                          ? "border-[#1D4ED8] bg-[#EEF2FF] text-[#1D4ED8]"
-                          : "border-[#E4E4E7] bg-white text-[#52525B] hover:bg-[#F7F7F8]"
+                          ? "border-[var(--brand-primary)] bg-[var(--brand-tint)] text-[var(--brand-primary)]"
+                          : "border-[var(--border-subtle)] bg-white text-[var(--text-secondary)] hover:bg-[var(--bg-canvas)]"
                       }`}
                     >
                       {tab.label}
@@ -619,13 +619,13 @@ function PartsCatalogPageContent() {
                     {
                       key: "import",
                       label: showImporter ? "Hide Importer" : "Import CSV / XLSX",
-                      icon: <FileSpreadsheet className="h-4 w-4 text-[#1D4ED8]" />,
+                      icon: <FileSpreadsheet className="h-4 w-4 text-[var(--brand-primary)]" />,
                       onClick: () => setShowImporter((v) => !v),
                     },
                     {
                       key: "export",
                       label: "Export CSV",
-                      icon: <Download className="h-4 w-4 text-[#52525B]" />,
+                      icon: <Download className="h-4 w-4 text-[var(--text-secondary)]" />,
                       href: "/api/v1/parts/export?format=csv",
                     },
                   ]
@@ -663,7 +663,7 @@ function PartsCatalogPageContent() {
                   <button
                     type="button"
                     onClick={() => setShowCreatePart(true)}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
                   >
                     <Plus className="h-4 w-4" />
                     <span>New Item</span>
@@ -710,11 +710,11 @@ function PartsCatalogPageContent() {
         <div className="ims-modal-backdrop">
           <div className="ims-modal-panel">
             <div className="ims-modal-header">
-              <h2 className="text-[16px] font-semibold text-[#18181B]">Add New Item</h2>
+              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">Add New Item</h2>
               <button
                 type="button"
                 onClick={() => setShowCreatePart(false)}
-                className="rounded p-1 text-[#63636B] hover:bg-[#F7F7F8]"
+                className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-canvas)]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -819,11 +819,11 @@ function PartsCatalogPageContent() {
 
               {/* Simplified Business Options */}
               <div>
-                <div className="mb-1.5 text-[12px] font-medium text-[#18181B]">
+                <div className="mb-1.5 text-[12px] font-medium text-[var(--text-primary)]">
                   Item Options
                 </div>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                  <label className="flex items-center gap-2 rounded-[8px] border border-[#E4E4E7] px-3 py-2 text-[12px]">
+                  <label className="flex items-center gap-2 rounded-[8px] border border-[var(--border-subtle)] px-3 py-2 text-[12px]">
                     <input
                       type="checkbox"
                       checked={partForm.purchaseable}
@@ -833,7 +833,7 @@ function PartsCatalogPageContent() {
                     />
                     <span>We buy this</span>
                   </label>
-                  <label className="flex items-center gap-2 rounded-[8px] border border-[#E4E4E7] px-3 py-2 text-[12px]">
+                  <label className="flex items-center gap-2 rounded-[8px] border border-[var(--border-subtle)] px-3 py-2 text-[12px]">
                     <input
                       type="checkbox"
                       checked={partForm.salable}
@@ -841,7 +841,7 @@ function PartsCatalogPageContent() {
                     />
                     <span>We sell this</span>
                   </label>
-                  <label className="flex items-center gap-2 rounded-[8px] border border-[#E4E4E7] px-3 py-2 text-[12px]">
+                  <label className="flex items-center gap-2 rounded-[8px] border border-[var(--border-subtle)] px-3 py-2 text-[12px]">
                     <input
                       type="checkbox"
                       checked={partForm.trackable}
@@ -858,7 +858,7 @@ function PartsCatalogPageContent() {
                 <button
                   type="button"
                   onClick={() => setShowCreatePart(false)}
-                  className="h-9 rounded-[8px] border border-[#E4E4E7] px-4 text-[13px] font-medium text-[#52525B]"
+                  className="h-9 rounded-[8px] border border-[var(--border-subtle)] px-4 text-[13px] font-medium text-[var(--text-secondary)]"
                 >
                   Cancel
                 </button>
@@ -880,7 +880,7 @@ function PartsCatalogPageContent() {
         <div className="ims-modal-backdrop">
           <div className="ims-modal-panel max-w-md">
             <div className="ims-modal-header">
-              <h2 className="text-[16px] font-semibold text-[#18181B]">
+              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">
                 {showCategoryModal.mode === "create"
                   ? "New Category"
                   : showCategoryModal.mode === "edit"
@@ -890,7 +890,7 @@ function PartsCatalogPageContent() {
               <button
                 type="button"
                 onClick={() => setShowCategoryModal(null)}
-                className="rounded p-1 text-[#63636B] hover:bg-[#F7F7F8]"
+                className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-canvas)]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -959,13 +959,13 @@ function PartsCatalogPageContent() {
                 <button
                   type="button"
                   onClick={() => setShowCategoryModal(null)}
-                  className="h-9 rounded-[8px] border border-[#E4E4E7] px-4 text-[13px] font-medium text-[#52525B]"
+                  className="h-9 rounded-[8px] border border-[var(--border-subtle)] px-4 text-[13px] font-medium text-[var(--text-secondary)]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
+                  className="h-9 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
                 >
                   Save
                 </button>

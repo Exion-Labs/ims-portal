@@ -414,11 +414,11 @@ function StockAndLocationsPageContent() {
           <div>
             <Link
               href={`/parts/${row.original.partId}`}
-              className="font-mono text-[13px] font-medium text-[#1D4ED8] hover:underline"
+              className="font-mono text-[13px] font-medium text-[var(--brand-primary)] hover:underline"
             >
               {row.original.partIpn}
             </Link>
-            <div className="max-w-[220px] truncate text-[12px] text-[#52525B]">
+            <div className="max-w-[220px] truncate text-[12px] text-[var(--text-secondary)]">
               {row.original.partName}
             </div>
           </div>
@@ -429,12 +429,12 @@ function StockAndLocationsPageContent() {
         header: "Warehouse Location",
         cell: ({ row }) =>
           row.original.locationPathString ? (
-            <span className="inline-flex items-center gap-1 rounded-[6px] bg-[#F4F4F5] px-2 py-0.5 text-[12px] text-[#18181B]">
-              <MapPin className="h-3 w-3 text-[#1D4ED8]" />
+            <span className="inline-flex items-center gap-1 rounded-[6px] bg-[var(--bg-muted)] px-2 py-0.5 text-[12px] text-[var(--text-primary)]">
+              <MapPin className="h-3 w-3 text-[var(--brand-primary)]" />
               <span>{row.original.locationPathString}</span>
             </span>
           ) : (
-            <span className="text-[12px] text-[#63636B]">Unassigned</span>
+            <span className="text-[12px] text-[var(--text-muted)]">Unassigned</span>
           ),
       },
       {
@@ -445,17 +445,17 @@ function StockAndLocationsPageContent() {
           return (
             <div className="flex flex-wrap items-center gap-1.5 font-mono text-[12px]">
               {item.serialNumber && (
-                <span className="rounded border border-[#DDD6FE] bg-[#EDE9FE] px-2 py-0.5 text-[#6D28D9]">
+                <span className="rounded border border-[var(--border-violet)] bg-[var(--status-violet-bg)] px-2 py-0.5 text-[var(--status-violet-fg)]">
                   SN: {item.serialNumber}
                 </span>
               )}
               {item.batchCode && (
-                <span className="rounded border border-[#E4E4E7] bg-[#F7F7F8] px-2 py-0.5 text-[#52525B]">
+                <span className="rounded border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-2 py-0.5 text-[var(--text-secondary)]">
                   Batch: {item.batchCode}
                 </span>
               )}
               {!item.serialNumber && !item.batchCode && (
-                <span className="text-[#63636B]">—</span>
+                <span className="text-[var(--text-muted)]">—</span>
               )}
             </div>
           );
@@ -479,7 +479,7 @@ function StockAndLocationsPageContent() {
         accessorKey: "quantity",
         header: () => <div className="text-right">Quantity</div>,
         cell: ({ row }) => (
-          <div className="text-right font-mono text-[13px] font-semibold tabular-nums text-[#18181B]">
+          <div className="text-right font-mono text-[13px] font-semibold tabular-nums text-[var(--text-primary)]">
             {Number(row.original.quantity).toLocaleString()} {row.original.partUnit}
           </div>
         ),
@@ -501,7 +501,7 @@ function StockAndLocationsPageContent() {
                   setOpModal({ type: "transfer", item });
                 }}
                 title="Transfer (full or partial auto-split)"
-                className="rounded border border-[#E4E4E7] bg-white px-2 py-1 text-[11px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
+                className="rounded border border-[var(--border-subtle)] bg-white px-2 py-1 text-[11px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
               >
                 Transfer
               </button>
@@ -515,7 +515,7 @@ function StockAndLocationsPageContent() {
                       setOpError(null);
                       setOpModal({ type: "adjust", item, mode: "count" });
                     }}
-                    className="rounded border border-[#E4E4E7] bg-white px-2 py-1 text-[11px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
+                    className="rounded border border-[var(--border-subtle)] bg-white px-2 py-1 text-[11px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
                   >
                     Count / +/-
                   </button>
@@ -528,7 +528,7 @@ function StockAndLocationsPageContent() {
                       setOpError(null);
                       setOpModal({ type: "split", item });
                     }}
-                    className="rounded border border-[#E4E4E7] bg-white px-2 py-1 text-[11px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
+                    className="rounded border border-[var(--border-subtle)] bg-white px-2 py-1 text-[11px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
                   >
                     Split
                   </button>
@@ -542,7 +542,7 @@ function StockAndLocationsPageContent() {
                         setOpError(null);
                         setOpModal({ type: "serialize", item });
                       }}
-                      className="rounded border border-[#DDD6FE] bg-[#EDE9FE]/60 px-2 py-1 text-[11px] font-medium text-[#6D28D9] hover:bg-[#EDE9FE]"
+                      className="rounded border border-[var(--border-violet)] bg-[var(--status-violet-bg)]/60 px-2 py-1 text-[11px] font-medium text-[var(--status-violet-fg)] hover:bg-[var(--status-violet-bg)]"
                     >
                       Serialize
                     </button>
@@ -552,7 +552,7 @@ function StockAndLocationsPageContent() {
               <button
                 type="button"
                 onClick={() => openInspectModal(item)}
-                className="inline-flex items-center gap-1 rounded border border-[#C7D2FE] bg-[#EEF2FF] px-2 py-1 text-[11px] font-medium text-[#1D4ED8]"
+                className="inline-flex items-center gap-1 rounded border border-[var(--border-brand)] bg-[var(--brand-tint)] px-2 py-1 text-[11px] font-medium text-[var(--brand-primary)]"
               >
                 <History className="h-3 w-3" />
                 <span>History</span>
@@ -568,7 +568,7 @@ function StockAndLocationsPageContent() {
   return (
     <div className="space-y-6">
       {reconcileBanner && (
-        <div className="flex items-center justify-between rounded-[10px] border border-[#BBF7D0] bg-[#DCFCE7]/70 px-4 py-2.5 text-[13px] text-[#166534]">
+        <div className="flex items-center justify-between rounded-[10px] border border-[var(--border-success)] bg-[var(--status-success-bg)]/70 px-4 py-2.5 text-[13px] text-[var(--status-success-fg)]">
           <span className="flex items-center gap-2 font-medium">
             <CheckCircle2 className="h-4 w-4" />
             <span>{reconcileBanner}</span>
@@ -603,8 +603,8 @@ function StockAndLocationsPageContent() {
           <div className="ims-card p-4">
             <div className="ims-modal-header">
               <div>
-                <div className="text-[14px] font-semibold text-[#18181B]">Locations</div>
-                <div className="text-[11px] text-[#63636B]">Warehouse / Room / Aisle / Bin</div>
+                <div className="text-[14px] font-semibold text-[var(--text-primary)]">Locations</div>
+                <div className="text-[11px] text-[var(--text-muted)]">Warehouse / Room / Aisle / Bin</div>
               </div>
               {hasPermission("STOCK:CREATE") && editMode && (
                 <button
@@ -620,15 +620,15 @@ function StockAndLocationsPageContent() {
                     setLocError(null);
                     setShowLocationModal({ mode: "create" });
                   }}
-                  className="inline-flex h-8 items-center gap-1 rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] px-2.5 text-[12px] font-medium text-[#18181B] hover:border-[#1D4ED8]"
+                  className="inline-flex h-8 items-center gap-1 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-2.5 text-[12px] font-medium text-[var(--text-primary)] hover:border-[var(--brand-primary)]"
                 >
-                  <FolderPlus className="h-3.5 w-3.5 text-[#1D4ED8]" />
+                  <FolderPlus className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
                   <span>New</span>
                 </button>
               )}
             </div>
 
-            <label className="mt-3 flex items-center gap-2 text-[12px] text-[#52525B]">
+            <label className="mt-3 flex items-center gap-2 text-[12px] text-[var(--text-secondary)]">
               <input
                 type="checkbox"
                 checked={includeSublocations}
@@ -649,15 +649,15 @@ function StockAndLocationsPageContent() {
                 }}
                 className={`flex w-full items-center justify-between rounded-[8px] px-2.5 py-1.5 text-left text-[13px] font-medium ${
                   selectedLocationId === null
-                    ? "bg-[#EEF2FF] text-[#1D4ED8]"
-                    : "text-[#18181B] hover:bg-[#F7F7F8]"
+                    ? "bg-[var(--brand-tint)] text-[var(--brand-primary)]"
+                    : "text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
                 }`}
               >
                 <span className="flex items-center gap-2">
                   <Boxes className="h-3.5 w-3.5" />
                   <span>All Locations</span>
                 </span>
-                <span className="font-mono text-[11px] text-[#63636B]">{locations.length}</span>
+                <span className="font-mono text-[11px] text-[var(--text-muted)]">{locations.length}</span>
               </button>
 
               {locations.map((loc) => {
@@ -674,7 +674,7 @@ function StockAndLocationsPageContent() {
                 return (
                   <div
                     key={loc.id}
-                    className={`flex items-center justify-between rounded-[8px] pr-1 hover:bg-[#F7F7F8] ${depthPadding}`}
+                    className={`flex items-center justify-between rounded-[8px] pr-1 hover:bg-[var(--bg-canvas)] ${depthPadding}`}
                   >
                     <button
                       type="button"
@@ -683,21 +683,21 @@ function StockAndLocationsPageContent() {
                         setPageIndex(0);
                       }}
                       className={`flex min-w-0 flex-1 items-center justify-between rounded-[8px] px-2 py-1.5 text-left text-[13px] ${
-                        active ? "bg-[#EEF2FF] font-semibold text-[#1D4ED8]" : "text-[#18181B]"
+                        active ? "bg-[var(--brand-tint)] font-semibold text-[var(--brand-primary)]" : "text-[var(--text-primary)]"
                       }`}
                     >
                       <span className="flex min-w-0 items-center gap-1.5 truncate">
                         <MapPin
                           className={`h-3.5 w-3.5 shrink-0 ${
-                            loc.structural ? "text-[#92400E]" : "text-[#1D4ED8]"
+                            loc.structural ? "text-[var(--status-warning-fg)]" : "text-[var(--brand-primary)]"
                           }`}
                         />
                         <span className="truncate">{loc.name}</span>
-                        <span className="rounded bg-[#F4F4F5] px-1 text-[10px] font-mono text-[#63636B]">
+                        <span className="rounded bg-[var(--bg-muted)] px-1 text-[10px] font-mono text-[var(--text-muted)]">
                           {loc.locationType}
                         </span>
                       </span>
-                      <span className="ml-1 font-mono text-[11px] text-[#63636B]">
+                      <span className="ml-1 font-mono text-[11px] text-[var(--text-muted)]">
                         {loc.directItemCount}
                       </span>
                     </button>
@@ -707,8 +707,8 @@ function StockAndLocationsPageContent() {
             </div>
 
             {selectedLocation && (
-              <div className="mt-4 space-y-2 border-t border-[#E4E4E7] pt-3">
-                <div className="text-[12px] font-medium text-[#18181B]">
+              <div className="mt-4 space-y-2 border-t border-[var(--border-subtle)] pt-3">
+                <div className="text-[12px] font-medium text-[var(--text-primary)]">
                   {selectedLocation.pathString}
                 </div>
                 {editMode ? (
@@ -725,7 +725,7 @@ function StockAndLocationsPageContent() {
                         setLocError(null);
                         setShowLocationModal({ mode: "edit", location: selectedLocation });
                       }}
-                      className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] bg-white px-2 text-[11px] font-medium"
+                      className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-subtle)] bg-white px-2 text-[11px] font-medium"
                     >
                       <Edit3 className="h-3 w-3" />
                       <span>Edit</span>
@@ -737,7 +737,7 @@ function StockAndLocationsPageContent() {
                         setLocError(null);
                         setShowLocationModal({ mode: "move", location: selectedLocation });
                       }}
-                      className="inline-flex h-7 items-center gap-1 rounded border border-[#E4E4E7] bg-white px-2 text-[11px] font-medium"
+                      className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-subtle)] bg-white px-2 text-[11px] font-medium"
                     >
                       <ArrowRightLeft className="h-3 w-3" />
                       <span>Move</span>
@@ -745,7 +745,7 @@ function StockAndLocationsPageContent() {
                     <button
                       type="button"
                       onClick={() => handleDeleteLocation(selectedLocation)}
-                      className="inline-flex h-7 items-center gap-1 rounded border border-[#FECACA] bg-[#FEE2E2]/40 px-2 text-[11px] font-medium text-[#991B1B]"
+                      className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/40 px-2 text-[11px] font-medium text-[var(--status-danger-fg)]"
                     >
                       <Trash2 className="h-3 w-3" />
                       <span>Delete</span>
@@ -775,7 +775,7 @@ function StockAndLocationsPageContent() {
                   setStatusFilter(e.target.value);
                   setPageIndex(0);
                 }}
-                className="h-9 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+                className="h-9 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px]"
               >
                 <option value="">All Statuses</option>
                 <option value="OK">OK</option>
@@ -792,7 +792,7 @@ function StockAndLocationsPageContent() {
                 items.push({
                   key: "import",
                   label: showImporter ? "Hide Importer" : "Import Stock",
-                  icon: <FileSpreadsheet className="h-4 w-4 text-[#1D4ED8]" />,
+                  icon: <FileSpreadsheet className="h-4 w-4 text-[var(--brand-primary)]" />,
                   onClick: () => setShowImporter((v) => !v),
                 });
               }
@@ -800,7 +800,7 @@ function StockAndLocationsPageContent() {
                 items.push({
                   key: "scan",
                   label: "Scan Barcode",
-                  icon: <QrCode className="h-4 w-4 text-[#1D4ED8]" />,
+                  icon: <QrCode className="h-4 w-4 text-[var(--brand-primary)]" />,
                   onClick: () => {
                     setScanInput("");
                     setScanResult(null);
@@ -814,7 +814,7 @@ function StockAndLocationsPageContent() {
                 label: reconciling ? "Reconciling…" : "Verify & Reconcile",
                 icon: (
                   <RefreshCw
-                    className={`h-4 w-4 text-[#166534] ${reconciling ? "animate-spin" : ""}`}
+                    className={`h-4 w-4 text-[var(--status-success-fg)] ${reconciling ? "animate-spin" : ""}`}
                   />
                 ),
                 onClick: handleReconcile,
@@ -869,7 +869,7 @@ function StockAndLocationsPageContent() {
                       });
                       setShowCreateStock(true);
                     }}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white"
                   >
                     <Plus className="h-4 w-4" />
                     <span>Create Stock Item</span>
@@ -899,7 +899,7 @@ function StockAndLocationsPageContent() {
           <button
             type="button"
             onClick={handleMergeSelected}
-            className="inline-flex items-center gap-1 rounded-full bg-[#1D4ED8] px-3 py-1 text-[12px] font-medium text-white hover:bg-[#1E40AF]"
+            className="inline-flex items-center gap-1 rounded-full bg-[var(--brand-primary)] px-3 py-1 text-[12px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
           >
             <GitMerge className="h-3.5 w-3.5" />
             <span>Merge {selectedItems.length} Batches</span>
@@ -912,11 +912,11 @@ function StockAndLocationsPageContent() {
         <div className="ims-modal-backdrop">
           <div className="ims-modal-panel">
             <div className="ims-modal-header">
-              <h2 className="text-[16px] font-semibold text-[#18181B]">Create Stock Item</h2>
+              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">Create Stock Item</h2>
               <button
                 type="button"
                 onClick={() => setShowCreateStock(false)}
-                className="rounded p-1 text-[#63636B]"
+                className="rounded p-1 text-[var(--text-muted)]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1055,7 +1055,7 @@ function StockAndLocationsPageContent() {
         <div className="ims-modal-backdrop">
           <div className="ims-modal-panel max-w-md">
             <div className="ims-modal-header">
-              <h2 className="text-[16px] font-semibold text-[#18181B]">
+              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">
                 {showLocationModal.mode === "create"
                   ? "New Storage Location"
                   : showLocationModal.mode === "edit"
@@ -1065,7 +1065,7 @@ function StockAndLocationsPageContent() {
               <button
                 type="button"
                 onClick={() => setShowLocationModal(null)}
-                className="rounded p-1 text-[#63636B]"
+                className="rounded p-1 text-[var(--text-muted)]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1125,7 +1125,7 @@ function StockAndLocationsPageContent() {
                       />
                     </div>
                   </div>
-                  <label className="flex items-center gap-2 rounded-[8px] border border-[#E4E4E7] p-2.5 text-[12px]">
+                  <label className="flex items-center gap-2 rounded-[8px] border border-[var(--border-subtle)] p-2.5 text-[12px]">
                     <input
                       type="checkbox"
                       checked={locStructural}
@@ -1185,7 +1185,7 @@ function StockAndLocationsPageContent() {
         <div className="ims-modal-backdrop">
           <div className="ims-modal-panel max-w-md">
             <div className="ims-modal-header">
-              <h2 className="text-[16px] font-semibold text-[#18181B]">
+              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">
                 {opModal.type === "transfer"
                   ? "Transfer Stock (Auto-splits if partial)"
                   : opModal.type === "adjust"
@@ -1197,7 +1197,7 @@ function StockAndLocationsPageContent() {
               <button
                 type="button"
                 onClick={() => setOpModal(null)}
-                className="rounded p-1 text-[#63636B]"
+                className="rounded p-1 text-[var(--text-muted)]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1210,11 +1210,11 @@ function StockAndLocationsPageContent() {
                 </div>
               )}
 
-              <div className="rounded-[8px] bg-[#F7F7F8] p-2.5 text-[12px]">
-                <div className="font-mono font-semibold text-[#18181B]">
+              <div className="rounded-[8px] bg-[var(--bg-canvas)] p-2.5 text-[12px]">
+                <div className="font-mono font-semibold text-[var(--text-primary)]">
                   {opModal.item.partIpn} — {opModal.item.partName}
                 </div>
-                <div className="text-[#52525B]">
+                <div className="text-[var(--text-secondary)]">
                   Current Qty: {opModal.item.quantity} {opModal.item.partUnit} ·{" "}
                   {opModal.item.locationPathString ?? "Unassigned"}
                 </div>
@@ -1229,8 +1229,8 @@ function StockAndLocationsPageContent() {
                       onClick={() => setOpModal({ ...opModal, mode: m })}
                       className={`flex-1 rounded-[8px] border py-1.5 text-[12px] font-medium capitalize ${
                         opModal.mode === m
-                          ? "border-[#1D4ED8] bg-[#EEF2FF] text-[#1D4ED8]"
-                          : "border-[#E4E4E7] bg-white text-[#52525B]"
+                          ? "border-[var(--brand-primary)] bg-[var(--brand-tint)] text-[var(--brand-primary)]"
+                          : "border-[var(--border-subtle)] bg-white text-[var(--text-secondary)]"
                       }`}
                     >
                       {m === "count" ? "Set Count (=)" : m === "add" ? "Add (+)" : "Remove (−)"}
@@ -1262,7 +1262,7 @@ function StockAndLocationsPageContent() {
                     value={opSerialsText}
                     onChange={(e) => setOpSerialsText(e.target.value)}
                     placeholder="SN-001, SN-002, SN-003"
-                    className="mt-1 w-full rounded-[8px] border border-[#E4E4E7] p-2.5 font-mono text-[12px]"
+                    className="mt-1 w-full rounded-[8px] border border-[var(--border-subtle)] p-2.5 font-mono text-[12px]"
                   />
                 </div>
               )}
@@ -1324,20 +1324,20 @@ function StockAndLocationsPageContent() {
       {/* Modal: Stock History Timeline, ZXing QR Barcode & Quality Tests */}
       {opModal && opModal.type === "inspect" && (
         <div className="ims-modal-backdrop">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[12px] border border-[#E4E4E7] bg-white p-6 shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[12px] border border-[var(--border-subtle)] bg-white p-6 shadow-xl">
             <div className="ims-modal-header">
               <div>
-                <h2 className="text-[16px] font-semibold text-[#18181B]">
+                <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">
                   Stock Ledger & Quality Inspection · {opModal.item.partIpn}
                 </h2>
-                <p className="font-mono text-[11px] text-[#63636B]">
+                <p className="font-mono text-[11px] text-[var(--text-muted)]">
                   ID: {opModal.item.id} · Qty: {opModal.item.quantity} {opModal.item.partUnit}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setOpModal(null)}
-                className="rounded p-1 text-[#63636B]"
+                className="rounded p-1 text-[var(--text-muted)]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1345,19 +1345,19 @@ function StockAndLocationsPageContent() {
 
             {/* ZXing QR Code Preview */}
             <FeatureGate feature="BARCODES">
-              <div className="mt-4 flex items-center justify-between rounded-[10px] border border-[#E4E4E7] bg-[#F7F7F8] p-3">
+              <div className="mt-4 flex items-center justify-between rounded-[10px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] p-3">
                 <div>
-                  <div className="text-[13px] font-semibold text-[#18181B]">
+                  <div className="text-[13px] font-semibold text-[var(--text-primary)]">
                     ZXing QR Label Payload
                   </div>
-                  <div className="font-mono text-[12px] text-[#1D4ED8]">
+                  <div className="font-mono text-[12px] text-[var(--brand-primary)]">
                     IMS:STOCK:{opModal.item.id}
                   </div>
                 </div>
                 <img
                   src={`/api/v1/barcode/image?code=${encodeURIComponent(`IMS:STOCK:${opModal.item.id}`)}&format=QR_CODE&width=96&height=96`}
                   alt="Stock QR Code"
-                  className="h-20 w-20 rounded border border-[#E4E4E7] bg-white p-1"
+                  className="h-20 w-20 rounded border border-[var(--border-subtle)] bg-white p-1"
                 />
               </div>
             </FeatureGate>
@@ -1365,7 +1365,7 @@ function StockAndLocationsPageContent() {
             {/* Quality Control Tests */}
             <FeatureGate feature="QUALITY_TESTS">
               <div className="mt-5">
-                <h3 className="text-[14px] font-semibold text-[#18181B]">
+                <h3 className="text-[14px] font-semibold text-[var(--text-primary)]">
                   Quality Inspection Results ({testResults.length})
                 </h3>
                 <form onSubmit={handleRecordTestResult} className="mt-2 flex flex-wrap gap-2">
@@ -1375,39 +1375,39 @@ function StockAndLocationsPageContent() {
                     value={newTestName}
                     onChange={(e) => setNewTestName(e.target.value)}
                     placeholder="Test name (e.g. Visual / Electrical)"
-                    className="h-8 flex-1 rounded-[8px] border border-[#E4E4E7] px-2.5 text-[12px]"
+                    className="h-8 flex-1 rounded-[8px] border border-[var(--border-subtle)] px-2.5 text-[12px]"
                   />
                   <input
                     type="text"
                     value={newTestValue}
                     onChange={(e) => setNewTestValue(e.target.value)}
                     placeholder="Measured value"
-                    className="h-8 w-36 rounded-[8px] border border-[#E4E4E7] px-2.5 font-mono text-[12px]"
+                    className="h-8 w-36 rounded-[8px] border border-[var(--border-subtle)] px-2.5 font-mono text-[12px]"
                   />
                   <select
                     value={newTestPassed ? "PASS" : "FAIL"}
                     onChange={(e) => setNewTestPassed(e.target.value === "PASS")}
-                    className="h-8 rounded-[8px] border border-[#E4E4E7] bg-white px-2 text-[12px]"
+                    className="h-8 rounded-[8px] border border-[var(--border-subtle)] bg-white px-2 text-[12px]"
                   >
                     <option value="PASS">PASS</option>
                     <option value="FAIL">FAIL</option>
                   </select>
                   <button
                     type="submit"
-                    className="h-8 rounded-[8px] bg-[#1D4ED8] px-3 text-[12px] font-medium text-white"
+                    className="h-8 rounded-[8px] bg-[var(--brand-primary)] px-3 text-[12px] font-medium text-white"
                   >
                     Record
                   </button>
                 </form>
 
                 {testResults.length > 0 && (
-                  <div className="mt-2 divide-y divide-[#E4E4E7] rounded-[8px] border border-[#E4E4E7] text-[12px]">
+                  <div className="mt-2 divide-y divide-[var(--border-subtle)] rounded-[8px] border border-[var(--border-subtle)] text-[12px]">
                     {testResults.map((tr) => (
                       <div key={tr.id} className="flex items-center justify-between px-3 py-2">
                         <div>
-                          <span className="font-medium text-[#18181B]">{tr.testName}</span>
+                          <span className="font-medium text-[var(--text-primary)]">{tr.testName}</span>
                           {tr.value && (
-                            <span className="ml-2 font-mono text-[#52525B]">({tr.value})</span>
+                            <span className="ml-2 font-mono text-[var(--text-secondary)]">({tr.value})</span>
                           )}
                         </div>
                         <StatusBadge
@@ -1423,10 +1423,10 @@ function StockAndLocationsPageContent() {
 
             {/* StockItemTracking Timeline */}
             <div className="mt-5">
-              <h3 className="text-[14px] font-semibold text-[#18181B]">
+              <h3 className="text-[14px] font-semibold text-[var(--text-primary)]">
                 Immutable Movement Ledger ({trackingList.length})
               </h3>
-              <div className="mt-2 divide-y divide-[#E4E4E7] rounded-[8px] border border-[#E4E4E7]">
+              <div className="mt-2 divide-y divide-[var(--border-subtle)] rounded-[8px] border border-[var(--border-subtle)]">
                 {trackingList.map((trk) => {
                   const sign =
                     trk.quantityDelta > 0 ? "+" : trk.quantityDelta < 0 ? "" : "→";
@@ -1436,28 +1436,28 @@ function StockAndLocationsPageContent() {
                       className="flex items-center justify-between px-3.5 py-2.5 text-[12px]"
                     >
                       <div>
-                        <span className="rounded bg-[#F4F4F5] px-1.5 py-0.5 font-mono text-[11px] font-semibold text-[#18181B]">
+                        <span className="rounded bg-[var(--bg-muted)] px-1.5 py-0.5 font-mono text-[11px] font-semibold text-[var(--text-primary)]">
                           {trk.trackingType}
                         </span>
                         {trk.locationPathString && (
-                          <span className="ml-2 text-[#52525B]">{trk.locationPathString}</span>
+                          <span className="ml-2 text-[var(--text-secondary)]">{trk.locationPathString}</span>
                         )}
-                        {trk.notes && <div className="mt-0.5 text-[#63636B]">{trk.notes}</div>}
+                        {trk.notes && <div className="mt-0.5 text-[var(--text-muted)]">{trk.notes}</div>}
                       </div>
                       <div className="text-right font-mono">
                         <div
                           className={
                             trk.quantityDelta > 0
-                              ? "font-semibold text-[#166534]"
+                              ? "font-semibold text-[var(--status-success-fg)]"
                               : trk.quantityDelta < 0
-                                ? "font-semibold text-[#991B1B]"
-                                : "text-[#1D4ED8]"
+                                ? "font-semibold text-[var(--status-danger-fg)]"
+                                : "text-[var(--brand-primary)]"
                           }
                         >
                           {sign}
                           {trk.quantityDelta} → {trk.quantityAfter}
                         </div>
-                        <div className="text-[10px] text-[#63636B]">
+                        <div className="text-[10px] text-[var(--text-muted)]">
                           {new Date(trk.createdAt).toLocaleString()}
                         </div>
                       </div>
@@ -1475,13 +1475,13 @@ function StockAndLocationsPageContent() {
         <div className="ims-modal-backdrop">
           <div className="ims-modal-panel max-w-md">
             <div className="ims-modal-header">
-              <h2 className="text-[16px] font-semibold text-[#18181B]">
+              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">
                 Barcode / QR Scan Resolver
               </h2>
               <button
                 type="button"
                 onClick={() => setShowScanner(false)}
-                className="rounded p-1 text-[#63636B]"
+                className="rounded p-1 text-[var(--text-muted)]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1495,36 +1495,36 @@ function StockAndLocationsPageContent() {
                 value={scanInput}
                 onChange={(e) => setScanInput(e.target.value)}
                 placeholder="Scan or type barcode (e.g. IMS:STOCK:..., LOC-..., or IPN)…"
-                className="h-10 w-full rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+                className="h-10 w-full rounded-[8px] border border-[var(--border-subtle)] px-3 font-mono text-[13px]"
               />
               <button
                 type="submit"
-                className="h-9 w-full rounded-[8px] bg-[#1D4ED8] text-[13px] font-medium text-white"
+                className="h-9 w-full rounded-[8px] bg-[var(--brand-primary)] text-[13px] font-medium text-white"
               >
                 Resolve Barcode
               </button>
             </form>
 
             {scanError && (
-              <div className="mt-3 rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 p-3 text-[12px] text-[#991B1B]">
+              <div className="mt-3 rounded-[8px] border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/60 p-3 text-[12px] text-[var(--status-danger-fg)]">
                 {scanError}
               </div>
             )}
 
             {scanResult && (
-              <div className="mt-4 rounded-[10px] border border-[#C7D2FE] bg-[#EEF2FF]/60 p-4">
+              <div className="mt-4 rounded-[10px] border border-[var(--border-brand)] bg-[var(--brand-tint)]/60 p-4">
                 <StatusBadge label={scanResult.matchedType} tone="primary" />
-                <div className="mt-2 text-[14px] font-semibold text-[#18181B]">
+                <div className="mt-2 text-[14px] font-semibold text-[var(--text-primary)]">
                   {scanResult.title}
                 </div>
-                <div className="text-[12px] text-[#52525B]">{scanResult.subtitle}</div>
+                <div className="text-[12px] text-[var(--text-secondary)]">{scanResult.subtitle}</div>
                 <button
                   type="button"
                   onClick={() => {
                     setShowScanner(false);
                     router.push(scanResult.href);
                   }}
-                  className="mt-3 h-8 rounded-[8px] bg-[#1D4ED8] px-3 text-[12px] font-medium text-white"
+                  className="mt-3 h-8 rounded-[8px] bg-[var(--brand-primary)] px-3 text-[12px] font-medium text-white"
                 >
                   Open Record →
                 </button>

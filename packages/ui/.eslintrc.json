@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "JSXAttribute[name.name='style']",
+        "message": "Inline style={{...}} is disallowed. Use Tailwind utility classes or CSS variables."
+      }
+    ]
+  }
+}

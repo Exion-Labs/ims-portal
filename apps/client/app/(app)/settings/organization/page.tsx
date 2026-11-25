@@ -49,15 +49,15 @@ export default function OrganizationSettingsPage() {
         onSubmit={handleSaveOrg}
         className="ims-card p-6"
       >
-        <h2 className="text-[15px] font-semibold text-[#18181B]">
+        <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
           Organization Profile
         </h2>
-        <p className="mt-0.5 text-[13px] text-[#52525B]">
+        <p className="mt-0.5 text-[13px] text-[var(--text-secondary)]">
           Updates to organization details are recorded in your tenant&apos;s immutable Audit Log.
         </p>
 
         {savedBanner && (
-          <div className="mt-4 rounded-[8px] border border-[#BBF7D0] bg-[#DCFCE7]/50 px-3 py-2 text-[13px] text-[#166534]">
+          <div className="mt-4 rounded-[8px] border border-[var(--border-success)] bg-[var(--status-success-bg)]/50 px-3 py-2 text-[13px] text-[var(--status-success-fg)]">
             Organization profile saved.
           </div>
         )}
@@ -84,7 +84,7 @@ export default function OrganizationSettingsPage() {
               type="text"
               disabled
               value={me?.tenantSlug ?? ""}
-              className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] px-3 font-mono text-[13px] text-[#63636B]"
+              className="mt-1 h-9 w-full rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-3 font-mono text-[13px] text-[var(--text-muted)]"
             />
           </div>
 
@@ -132,28 +132,28 @@ export default function OrganizationSettingsPage() {
 
       {/* Typed Key-Value Store Viewer */}
       <div className="ims-card p-6">
-        <h3 className="text-[15px] font-semibold text-[#18181B]">
+        <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">
           Typed Tenant Preferences (`TenantSetting`)
         </h3>
-        <p className="mt-0.5 text-[13px] text-[#52525B]">
+        <p className="mt-0.5 text-[13px] text-[var(--text-secondary)]">
           Key-value preferences scoped to this tenant and audited automatically by Hibernate.
         </p>
 
-        <div className="mt-4 divide-y divide-[#E4E4E7] rounded-[8px] border border-[#E4E4E7]">
+        <div className="mt-4 divide-y divide-[var(--border-subtle)] rounded-[8px] border border-[var(--border-subtle)]">
           {(kvSettings ?? []).map((item) => (
             <div
               key={item.id}
               className="flex items-center justify-between px-4 py-2.5 text-[13px]"
             >
               <div>
-                <span className="font-mono font-medium text-[#18181B]">
+                <span className="font-mono font-medium text-[var(--text-primary)]">
                   {item.settingKey}
                 </span>
-                <span className="ml-2 rounded bg-[#F4F4F5] px-1.5 py-0.5 font-mono text-[11px] text-[#63636B]">
+                <span className="ml-2 rounded bg-[var(--bg-muted)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--text-muted)]">
                   {item.valueType}
                 </span>
               </div>
-              <span className="font-mono text-[#52525B]">{item.settingValue}</span>
+              <span className="font-mono text-[var(--text-secondary)]">{item.settingValue}</span>
             </div>
           ))}
         </div>

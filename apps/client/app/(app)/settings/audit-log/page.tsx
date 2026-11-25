@@ -34,7 +34,7 @@ export default function AuditLogSettingsPage() {
       accessorKey: "occurredAt",
       header: "Timestamp",
       cell: ({ row }) => (
-        <span className="font-mono text-[12px] text-[#52525B] tabular-nums">
+        <span className="font-mono text-[12px] text-[var(--text-secondary)] tabular-nums">
           {new Date(row.original.occurredAt).toLocaleString()}
         </span>
       ),
@@ -44,7 +44,7 @@ export default function AuditLogSettingsPage() {
       header: "Actor",
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
-          <span className="font-medium text-[#18181B]">
+          <span className="font-medium text-[var(--text-primary)]">
             {row.original.actorName ?? "SYSTEM"}
           </span>
           {row.original.actorType === "PLATFORM_SUPPORT" && (
@@ -72,11 +72,11 @@ export default function AuditLogSettingsPage() {
       header: "Entity",
       cell: ({ row }) => (
         <div>
-          <span className="font-medium text-[#18181B]">
+          <span className="font-medium text-[var(--text-primary)]">
             {row.original.entityType}
           </span>
           {row.original.entityId && (
-            <div className="font-mono text-[11px] text-[#63636B]">
+            <div className="font-mono text-[11px] text-[var(--text-muted)]">
               {row.original.entityId.slice(0, 8)}…
             </div>
           )}
@@ -89,7 +89,7 @@ export default function AuditLogSettingsPage() {
       cell: ({ row }) => {
         const entries = Object.entries(row.original.changes ?? {});
         if (entries.length === 0) {
-          return <span className="text-[12px] text-[#63636B]">—</span>;
+          return <span className="text-[12px] text-[var(--text-muted)]">—</span>;
         }
         return (
           <div className="max-w-md space-y-1 font-mono text-[11px]">
@@ -102,12 +102,12 @@ export default function AuditLogSettingsPage() {
                 const d = val as { from: unknown; to: unknown };
                 return (
                   <div key={field} className="truncate">
-                    <span className="font-semibold text-[#18181B]">{field}:</span>{" "}
-                    <span className="text-[#991B1B]">
+                    <span className="font-semibold text-[var(--text-primary)]">{field}:</span>{" "}
+                    <span className="text-[var(--status-danger-fg)]">
                       {JSON.stringify(d.from)}
                     </span>{" "}
                     →{" "}
-                    <span className="text-[#166534]">
+                    <span className="text-[var(--status-success-fg)]">
                       {JSON.stringify(d.to)}
                     </span>
                   </div>
@@ -115,7 +115,7 @@ export default function AuditLogSettingsPage() {
               }
               return (
                 <div key={field} className="truncate">
-                  <span className="font-semibold text-[#18181B]">{field}:</span>{" "}
+                  <span className="font-semibold text-[var(--text-primary)]">{field}:</span>{" "}
                   <span>{JSON.stringify(val)}</span>
                 </div>
               );
@@ -138,7 +138,7 @@ export default function AuditLogSettingsPage() {
           <select
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
-            className="h-9 rounded-[8px] border border-[#E4E4E7] bg-white px-2.5 text-[12px]"
+            className="h-9 rounded-[8px] border border-[var(--border-subtle)] bg-white px-2.5 text-[12px]"
           >
             <option value="">All Actions</option>
             <option value="CREATE">CREATE</option>
@@ -156,7 +156,7 @@ export default function AuditLogSettingsPage() {
           <select
             value={entityFilter}
             onChange={(e) => setEntityFilter(e.target.value)}
-            className="h-9 rounded-[8px] border border-[#E4E4E7] bg-white px-2.5 text-[12px]"
+            className="h-9 rounded-[8px] border border-[var(--border-subtle)] bg-white px-2.5 text-[12px]"
           >
             <option value="">All Entities</option>
             <option value="Tenant">Tenant</option>

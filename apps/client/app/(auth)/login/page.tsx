@@ -37,29 +37,29 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#F7F7F8] px-4">
-      <div className="w-full max-w-md rounded-[12px] border border-[#E4E4E7] bg-white p-8 shadow-xs">
+    <div className="flex min-h-screen items-center justify-center bg-[var(--bg-canvas)] px-4">
+      <div className="ims-auth-card">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-[#1D4ED8] text-white">
+          <div className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-[var(--brand-primary)] text-white">
             <Boxes className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-[18px] font-semibold text-[#18181B]">Sign in to IMS</h1>
-            <p className="text-[12px] text-[#63636B]">
+            <h1 className="text-[18px] font-semibold text-[var(--text-primary)]">Sign in to IMS</h1>
+            <p className="text-[12px] text-[var(--text-muted)]">
               Multi-Tenant Inventory & Manufacturing Console
             </p>
           </div>
         </div>
 
         {error && (
-          <div className="mt-4 rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-3 py-2 text-[13px] text-[#991B1B]">
+          <div className="mt-4 rounded-[8px] border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/60 px-3 py-2 text-[13px] text-[var(--status-danger-fg)]">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
-            <label className="block text-[12px] font-medium text-[#18181B]">
+            <label className="block text-[12px] font-medium text-[var(--text-primary)]">
               Work Email
             </label>
             <input
@@ -67,18 +67,18 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] text-[#18181B] focus:border-[#1D4ED8] focus:outline-hidden"
+              className="mt-1 h-9 w-full rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px] text-[var(--text-primary)] focus:border-[var(--brand-primary)] focus:outline-hidden"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between">
-              <label className="block text-[12px] font-medium text-[#18181B]">
+              <label className="block text-[12px] font-medium text-[var(--text-primary)]">
                 Password
               </label>
               <Link
                 href="/forgot-password"
-                className="text-[12px] text-[#1D4ED8] hover:underline"
+                className="text-[12px] text-[var(--brand-primary)] hover:underline"
               >
                 Forgot password?
               </Link>
@@ -88,21 +88,21 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] text-[#18181B] focus:border-[#1D4ED8] focus:outline-hidden"
+              className="mt-1 h-9 w-full rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px] text-[var(--text-primary)] focus:border-[var(--brand-primary)] focus:outline-hidden"
             />
           </div>
 
           <button
             type="submit"
             disabled={busy}
-            className="h-9 w-full rounded-[8px] bg-[#1D4ED8] text-[13px] font-medium text-white hover:bg-[#1E40AF] disabled:opacity-50"
+            className="h-9 w-full rounded-[8px] bg-[var(--brand-primary)] text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)] disabled:opacity-50"
           >
             {busy ? "Signing in…" : "Sign in"}
           </button>
         </form>
 
-        <div className="mt-6 rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] p-3 text-[12px] text-[#52525B]">
-          <div className="font-semibold text-[#18181B]">Demo Seeded Accounts (Dev Profile)</div>
+        <div className="mt-6 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] p-3 text-[12px] text-[var(--text-secondary)]">
+          <div className="font-semibold text-[var(--text-primary)]">Demo Seeded Accounts (Dev Profile)</div>
           <div className="mt-1 flex flex-col gap-1 font-mono text-[11px]">
             <button
               type="button"
@@ -110,7 +110,7 @@ export default function LoginPage() {
                 setEmail("admin@acme-robotics.dev");
                 setPassword("Password123!");
               }}
-              className="text-left text-[#1D4ED8] hover:underline"
+              className="text-left text-[var(--brand-primary)] hover:underline"
             >
               PRO Tenant: admin@acme-robotics.dev / Password123!
             </button>
@@ -120,7 +120,7 @@ export default function LoginPage() {
                 setEmail("admin@nordic-labs.dev");
                 setPassword("Password123!");
               }}
-              className="text-left text-[#1D4ED8] hover:underline"
+              className="text-left text-[var(--brand-primary)] hover:underline"
             >
               STARTER Tenant: admin@nordic-labs.dev / Password123!
             </button>

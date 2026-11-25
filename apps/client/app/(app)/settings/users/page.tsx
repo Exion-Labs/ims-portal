@@ -59,8 +59,8 @@ export default function UsersSettingsPage() {
       header: "User",
       cell: ({ row }) => (
         <div>
-          <div className="font-medium text-[#18181B]">{row.original.fullName}</div>
-          <div className="text-[12px] text-[#63636B]">{row.original.email}</div>
+          <div className="font-medium text-[var(--text-primary)]">{row.original.fullName}</div>
+          <div className="text-[12px] text-[var(--text-muted)]">{row.original.email}</div>
         </div>
       ),
     },
@@ -92,7 +92,7 @@ export default function UsersSettingsPage() {
       accessorKey: "lastLoginAt",
       header: "Last Sign-In",
       cell: ({ row }) => (
-        <span className="font-mono text-[12px] text-[#52525B]">
+        <span className="font-mono text-[12px] text-[var(--text-secondary)]">
           {row.original.lastLoginAt
             ? new Date(row.original.lastLoginAt).toLocaleString()
             : "Never"}
@@ -109,20 +109,20 @@ export default function UsersSettingsPage() {
         className="ims-card"
       >
         <div className="flex items-center gap-2">
-          <UserPlus className="h-4 w-4 text-[#1D4ED8]" />
-          <h2 className="text-[15px] font-semibold text-[#18181B]">
+          <UserPlus className="h-4 w-4 text-[var(--brand-primary)]" />
+          <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
             Invite Team Member
           </h2>
         </div>
 
         {error && (
-          <div className="mt-3 rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 px-3 py-2 text-[13px] text-[#991B1B]">
+          <div className="mt-3 rounded-[8px] border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/60 px-3 py-2 text-[13px] text-[var(--status-danger-fg)]">
             {error}
           </div>
         )}
 
         {lastInviteToken && (
-          <div className="mt-3 rounded-[8px] border border-[#BBF7D0] bg-[#DCFCE7]/50 p-3 text-[13px] text-[#166534]">
+          <div className="mt-3 rounded-[8px] border border-[var(--border-success)] bg-[var(--status-success-bg)]/50 p-3 text-[13px] text-[var(--status-success-fg)]">
             Invitation created! Dev acceptance token:{" "}
             <code className="rounded bg-white px-2 py-0.5 font-mono font-semibold">
               {lastInviteToken}
@@ -137,7 +137,7 @@ export default function UsersSettingsPage() {
             value={inviteName}
             onChange={(e) => setInviteName(e.target.value)}
             placeholder="Full Name"
-            className="h-9 rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+            className="h-9 rounded-[8px] border border-[var(--border-subtle)] px-3 text-[13px]"
           />
           <input
             type="email"
@@ -145,12 +145,12 @@ export default function UsersSettingsPage() {
             value={inviteEmail}
             onChange={(e) => setInviteEmail(e.target.value)}
             placeholder="colleague@company.com"
-            className="h-9 rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+            className="h-9 rounded-[8px] border border-[var(--border-subtle)] px-3 text-[13px]"
           />
           <select
             value={selectedRoleId}
             onChange={(e) => setSelectedRoleId(e.target.value)}
-            className="h-9 rounded-[8px] border border-[#E4E4E7] bg-white px-2.5 text-[13px]"
+            className="h-9 rounded-[8px] border border-[var(--border-subtle)] bg-white px-2.5 text-[13px]"
           >
             <option value="">Select Role…</option>
             {(roles ?? []).map((r) => (
@@ -161,7 +161,7 @@ export default function UsersSettingsPage() {
           </select>
           <button
             type="submit"
-            className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
+            className="h-9 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
           >
             Send Invite
           </button>

@@ -47,7 +47,7 @@ export default function ApiTokensSettingsPage() {
       accessorKey: "tokenPrefix",
       header: "Prefix",
       cell: ({ row }) => (
-        <code className="rounded bg-[#F4F4F5] px-2 py-0.5 font-mono text-[12px]">
+        <code className="rounded bg-[var(--bg-muted)] px-2 py-0.5 font-mono text-[12px]">
           {row.original.tokenPrefix}…
         </code>
       ),
@@ -66,7 +66,7 @@ export default function ApiTokensSettingsPage() {
       accessorKey: "createdAt",
       header: "Created",
       cell: ({ row }) => (
-        <span className="font-mono text-[12px] text-[#52525B]">
+        <span className="font-mono text-[12px] text-[var(--text-secondary)]">
           {new Date(row.original.createdAt).toLocaleString()}
         </span>
       ),
@@ -80,7 +80,7 @@ export default function ApiTokensSettingsPage() {
             type="button"
             onClick={() => handleRevoke(row.original.id)}
             aria-label="Revoke API token"
-            className="inline-flex items-center gap-1 rounded-[6px] border border-[#FECACA] px-2.5 py-1 text-[12px] font-medium text-[#991B1B] hover:bg-[#FEE2E2]/50"
+            className="inline-flex items-center gap-1 rounded-[6px] border border-[var(--border-danger)] px-2.5 py-1 text-[12px] font-medium text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]/50"
           >
             <Trash2 className="h-3.5 w-3.5" />
             <span>Revoke</span>
@@ -97,17 +97,17 @@ export default function ApiTokensSettingsPage() {
           className="ims-card"
         >
           <div className="flex items-center gap-2">
-            <KeyRound className="h-4 w-4 text-[#1D4ED8]" />
-            <h2 className="text-[15px] font-semibold text-[#18181B]">
+            <KeyRound className="h-4 w-4 text-[var(--brand-primary)]" />
+            <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
               Generate API Token
             </h2>
           </div>
-          <p className="mt-0.5 text-[12px] text-[#63636B]">
+          <p className="mt-0.5 text-[12px] text-[var(--text-muted)]">
             API tokens authenticate directly against Spring Boot using SHA-256 hash verification and per-token rate limiting.
           </p>
 
           {createdSecret && (
-            <div className="mt-4 rounded-[8px] border border-[#BBF7D0] bg-[#DCFCE7]/50 p-3 text-[13px] text-[#166534]">
+            <div className="mt-4 rounded-[8px] border border-[var(--border-success)] bg-[var(--status-success-bg)]/50 p-3 text-[13px] text-[var(--status-success-fg)]">
               <div className="font-semibold">
                 Copy your new API token now — it will never be shown again:
               </div>
@@ -124,11 +124,11 @@ export default function ApiTokensSettingsPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Token description (e.g. ERP Sync Worker)"
-              className="h-9 flex-1 rounded-[8px] border border-[#E4E4E7] px-3 text-[13px]"
+              className="h-9 flex-1 rounded-[8px] border border-[var(--border-subtle)] px-3 text-[13px]"
             />
             <button
               type="submit"
-              className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
+              className="h-9 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
             >
               Generate Token
             </button>

@@ -56,16 +56,16 @@ export function ListToolbar({
   }, [menuOpen]);
 
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-[#E4E4E7] bg-white p-3">
+    <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-white p-3">
       {onSearchChange !== undefined && (
         <div className="relative min-w-[140px] flex-1 basis-36">
-          <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-[#63636B]" />
+          <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-[var(--text-muted)]" />
           <input
             type="text"
             value={searchQuery ?? ""}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={searchPlaceholder}
-            className="h-9 w-full rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] pr-3 pl-9 text-[13px] text-[#18181B] placeholder:text-[#63636B] focus:border-[#1D4ED8] focus:bg-white focus:outline-hidden"
+            className="h-9 w-full rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] pr-3 pl-9 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--brand-primary)] focus:bg-white focus:outline-hidden"
           />
         </div>
       )}
@@ -83,7 +83,7 @@ export function ListToolbar({
                 aria-haspopup="menu"
                 aria-label="More actions"
                 title="Actions"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E4E4E7] bg-white text-[#52525B] hover:bg-[#F7F7F8] hover:text-[#18181B]"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[var(--border-subtle)] bg-white text-[var(--text-secondary)] hover:bg-[var(--bg-canvas)] hover:text-[var(--text-primary)]"
               >
                 <Menu className="h-4 w-4" />
               </button>
@@ -91,7 +91,7 @@ export function ListToolbar({
               {menuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 top-full z-40 mt-1.5 w-52 rounded-[10px] border border-[#E4E4E7] bg-white p-1.5 shadow-lg"
+                  className="absolute right-0 top-full z-40 mt-1.5 w-52 rounded-[10px] border border-[var(--border-subtle)] bg-white p-1.5 shadow-lg"
                 >
                   {menuItems.map((item) =>
                     item.href ? (
@@ -100,7 +100,7 @@ export function ListToolbar({
                         href={item.href}
                         role="menuitem"
                         onClick={() => setMenuOpen(false)}
-                        className="flex w-full items-center gap-2.5 rounded-[7px] px-2.5 py-2 text-[13px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
+                        className="flex w-full items-center gap-2.5 rounded-[7px] px-2.5 py-2 text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
                       >
                         {item.icon}
                         <span>{item.label}</span>
@@ -115,7 +115,7 @@ export function ListToolbar({
                           setMenuOpen(false);
                           item.onClick?.();
                         }}
-                        className="flex w-full items-center gap-2.5 rounded-[7px] px-2.5 py-2 text-left text-[13px] font-medium text-[#18181B] hover:bg-[#F7F7F8] disabled:opacity-50"
+                        className="flex w-full items-center gap-2.5 rounded-[7px] px-2.5 py-2 text-left text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)] disabled:opacity-50"
                       >
                         {item.icon}
                         <span>{item.label}</span>
@@ -133,7 +133,7 @@ export function ListToolbar({
             <button
               type="button"
               onClick={primaryAction.onClick}
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[8px] bg-[#1D4ED8] px-3.5 text-[13px] font-medium text-white hover:bg-[#1E40AF]"
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[8px] bg-[var(--brand-primary)] px-3.5 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
             >
               {primaryAction.icon ?? <Plus className="h-4 w-4" />}
               <span>{primaryAction.label}</span>

@@ -19,15 +19,15 @@ export function EditModeHint({
 
   return (
     <div
-      className={`flex flex-wrap items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] bg-[#F7F7F8] px-2.5 py-1.5 text-[11px] text-[#63636B] ${className}`}
+      className={`flex flex-wrap items-center gap-1.5 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-2.5 py-1.5 text-[11px] text-[var(--text-muted)] ${className}`}
     >
-      <Lock className="h-3 w-3 shrink-0 text-[#63636B]" />
+      <Lock className="h-3 w-3 shrink-0 text-[var(--text-muted)]" />
       <span>
         Edits locked —{" "}
         <button
           type="button"
           onClick={() => setEditMode(true)}
-          className="font-medium text-[#1D4ED8] hover:underline"
+          className="font-medium text-[var(--brand-primary)] hover:underline"
         >
           Enable Edit Mode
         </button>{" "}

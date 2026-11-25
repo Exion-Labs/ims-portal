@@ -149,18 +149,18 @@ export default function CompaniesPage() {
             <div className="flex items-center gap-2">
               <Link
                 href={`/companies/${row.original.id}`}
-                className="text-[13px] font-semibold text-[#1D4ED8] hover:underline"
+                className="text-[13px] font-semibold text-[var(--brand-primary)] hover:underline"
               >
                 {row.original.name}
               </Link>
               {row.original.code && (
-                <span className="rounded bg-[#F4F4F5] px-1.5 py-0.5 font-mono text-[11px] text-[#52525B]">
+                <span className="rounded bg-[var(--bg-muted)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--text-secondary)]">
                   {row.original.code}
                 </span>
               )}
             </div>
             {row.original.description && (
-              <div className="mt-0.5 max-w-md truncate text-[12px] text-[#63636B]">
+              <div className="mt-0.5 max-w-md truncate text-[12px] text-[var(--text-muted)]">
                 {row.original.description}
               </div>
             )}
@@ -190,7 +190,7 @@ export default function CompaniesPage() {
         accessorKey: "defaultCurrency",
         header: "Default Currency",
         cell: ({ row }) => (
-          <span className="rounded border border-[#E4E4E7] bg-[#F7F7F8] px-2 py-0.5 font-mono text-[12px] font-medium text-[#18181B]">
+          <span className="rounded border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-2 py-0.5 font-mono text-[12px] font-medium text-[var(--text-primary)]">
             {row.original.defaultCurrency}
           </span>
         ),
@@ -199,7 +199,7 @@ export default function CompaniesPage() {
         accessorKey: "email",
         header: "Contact / Website",
         cell: ({ row }) => (
-          <div className="text-[12px] text-[#52525B]">
+          <div className="text-[12px] text-[var(--text-secondary)]">
             {row.original.email ?? row.original.website ?? "—"}
           </div>
         ),
@@ -274,8 +274,8 @@ export default function CompaniesPage() {
                   }}
                   className={`h-8 rounded-full border px-3 text-[12px] font-medium ${
                     active
-                      ? "border-[#1D4ED8] bg-[#EEF2FF] text-[#1D4ED8]"
-                      : "border-[#E4E4E7] bg-white text-[#52525B]"
+                      ? "border-[var(--brand-primary)] bg-[var(--brand-tint)] text-[var(--brand-primary)]"
+                      : "border-[var(--border-subtle)] bg-white text-[var(--text-secondary)]"
                   }`}
                 >
                   {chip.label}
@@ -290,14 +290,14 @@ export default function CompaniesPage() {
             items.push({
               key: "import",
               label: showImporter ? "Hide Importer" : "Import Supplier SKUs",
-              icon: <FileSpreadsheet className="h-4 w-4 text-[#1D4ED8]" />,
+              icon: <FileSpreadsheet className="h-4 w-4 text-[var(--brand-primary)]" />,
               onClick: () => setShowImporter((v) => !v),
             });
           }
           items.push({
             key: "rates",
             label: `Exchange Rates (${rates.length})`,
-            icon: <Coins className="h-4 w-4 text-[#1D4ED8]" />,
+            icon: <Coins className="h-4 w-4 text-[var(--brand-primary)]" />,
             onClick: () => setShowRatesModal(true),
           });
           return items;
@@ -323,7 +323,7 @@ export default function CompaniesPage() {
               <button
                 type="button"
                 onClick={() => setShowCreateModal(true)}
-                className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white"
+                className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white"
               >
                 <Plus className="h-4 w-4" />
                 <span>Create Company</span>
@@ -348,11 +348,11 @@ export default function CompaniesPage() {
         <div className="ims-modal-backdrop">
           <div className="ims-modal-panel">
             <div className="ims-modal-header">
-              <h2 className="text-[16px] font-semibold text-[#18181B]">New Company</h2>
+              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">New Company</h2>
               <button
                 type="button"
                 onClick={() => setShowCreateModal(false)}
-                className="rounded p-1 text-[#63636B]"
+                className="rounded p-1 text-[var(--text-muted)]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -427,7 +427,7 @@ export default function CompaniesPage() {
                 ].map((r) => (
                   <label
                     key={r.key}
-                    className="flex items-center gap-2 rounded-[8px] border border-[#E4E4E7] px-3 py-2 text-[12px]"
+                    className="flex items-center gap-2 rounded-[8px] border border-[var(--border-subtle)] px-3 py-2 text-[12px]"
                   >
                     <input
                       type="checkbox"
@@ -467,10 +467,10 @@ export default function CompaniesPage() {
           <div className="ims-modal-panel">
             <div className="ims-modal-header">
               <div>
-                <h2 className="text-[16px] font-semibold text-[#18181B]">
+                <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">
                   Exchange Rates (1 USD = X Target)
                 </h2>
-                <p className="text-[12px] text-[#52525B]">
+                <p className="text-[12px] text-[var(--text-secondary)]">
                   Tenant base currency:{" "}
                   <strong className="font-mono">{me?.baseCurrency ?? "USD"}</strong>
                 </p>
@@ -478,14 +478,14 @@ export default function CompaniesPage() {
               <button
                 type="button"
                 onClick={() => setShowRatesModal(false)}
-                className="rounded p-1 text-[#63636B]"
+                className="rounded p-1 text-[var(--text-muted)]"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             {rateError && (
-              <div className="mt-3 rounded-[8px] border border-[#FECACA] bg-[#FEE2E2]/60 p-2.5 text-[12px] text-[#991B1B]">
+              <div className="mt-3 rounded-[8px] border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/60 p-2.5 text-[12px] text-[var(--status-danger-fg)]">
                 {rateError}
               </div>
             )}
@@ -499,7 +499,7 @@ export default function CompaniesPage() {
                   value={rateCurrency}
                   onChange={(e) => setRateCurrency(e.target.value.toUpperCase())}
                   placeholder="EUR"
-                  className="h-9 w-24 rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+                  className="h-9 w-24 rounded-[8px] border border-[var(--border-subtle)] px-3 font-mono text-[13px]"
                 />
                 <input
                   type="number"
@@ -508,32 +508,32 @@ export default function CompaniesPage() {
                   value={rateValue}
                   onChange={(e) => setRateValue(e.target.value)}
                   placeholder="0.92"
-                  className="h-9 flex-1 rounded-[8px] border border-[#E4E4E7] px-3 font-mono text-[13px]"
+                  className="h-9 flex-1 rounded-[8px] border border-[var(--border-subtle)] px-3 font-mono text-[13px]"
                 />
                 <button
                   type="submit"
-                  className="h-9 rounded-[8px] bg-[#1D4ED8] px-4 text-[12px] font-medium text-white"
+                  className="h-9 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[12px] font-medium text-white"
                 >
                   Update Rate
                 </button>
               </form>
             </FeatureGate>
 
-            <div className="mt-4 max-h-64 overflow-y-auto rounded-[8px] border border-[#E4E4E7]">
+            <div className="mt-4 max-h-64 overflow-y-auto rounded-[8px] border border-[var(--border-subtle)]">
               <table className="w-full border-collapse text-left text-[12px]">
-                <thead className="bg-[#F7F7F8] text-[#52525B]">
-                  <tr className="border-b border-[#E4E4E7]">
+                <thead className="bg-[var(--bg-canvas)] text-[var(--text-secondary)]">
+                  <tr className="border-b border-[var(--border-subtle)]">
                     <th className="px-3 py-2 font-semibold">Pair</th>
                     <th className="px-3 py-2 text-right font-semibold">Rate</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E4E4E7]">
+                <tbody className="divide-y divide-[var(--border-subtle)]">
                   {rates.map((r) => (
                     <tr key={r.id}>
-                      <td className="px-3 py-2 font-mono font-medium text-[#18181B]">
+                      <td className="px-3 py-2 font-mono font-medium text-[var(--text-primary)]">
                         1 {r.baseCurrency} → {r.targetCurrency}
                       </td>
-                      <td className="px-3 py-2 text-right font-mono text-[#1D4ED8]">
+                      <td className="px-3 py-2 text-right font-mono text-[var(--brand-primary)]">
                         {Number(r.rate).toFixed(4)}
                       </td>
                     </tr>

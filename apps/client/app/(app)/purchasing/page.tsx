@@ -111,7 +111,7 @@ export default function PurchaseOrdersPage() {
         cell: ({ row }) => (
           <Link
             href={`/purchasing/${row.original.id}`}
-            className="font-mono text-[13px] font-semibold text-[#1D4ED8] hover:underline"
+            className="font-mono text-[13px] font-semibold text-[var(--brand-primary)] hover:underline"
           >
             {row.original.reference}
           </Link>
@@ -122,9 +122,9 @@ export default function PurchaseOrdersPage() {
         header: "Supplier",
         cell: ({ row }) => (
           <div>
-            <div className="font-medium text-[#18181B]">{row.original.supplierName}</div>
+            <div className="font-medium text-[var(--text-primary)]">{row.original.supplierName}</div>
             {row.original.description && (
-              <div className="max-w-xs truncate text-[12px] text-[#63636B]">
+              <div className="max-w-xs truncate text-[12px] text-[var(--text-muted)]">
                 {row.original.description}
               </div>
             )}
@@ -145,7 +145,7 @@ export default function PurchaseOrdersPage() {
         id: "lines",
         header: "Lines",
         cell: ({ row }) => (
-          <span className="font-mono text-[12px] text-[#52525B]">
+          <span className="font-mono text-[12px] text-[var(--text-secondary)]">
             {row.original.lines.length} line(s)
           </span>
         ),
@@ -155,11 +155,11 @@ export default function PurchaseOrdersPage() {
         header: () => <div className="text-right">Order Total</div>,
         cell: ({ row }) => (
           <div className="text-right font-mono text-[12px]">
-            <div className="font-semibold text-[#18181B]">
+            <div className="font-semibold text-[var(--text-primary)]">
               {Number(row.original.totalAmount).toLocaleString()} {row.original.currency}
             </div>
             {row.original.currency !== row.original.tenantBaseCurrency && (
-              <div className="text-[11px] text-[#63636B]">
+              <div className="text-[11px] text-[var(--text-muted)]">
                 ≈ {Number(row.original.totalAmountInBase).toLocaleString()}{" "}
                 {row.original.tenantBaseCurrency}
               </div>
@@ -171,7 +171,7 @@ export default function PurchaseOrdersPage() {
         accessorKey: "targetDate",
         header: "Target Date",
         cell: ({ row }) => (
-          <span className="font-mono text-[12px] text-[#52525B]">
+          <span className="font-mono text-[12px] text-[var(--text-secondary)]">
             {row.original.targetDate ?? "—"}
           </span>
         ),
@@ -224,7 +224,7 @@ export default function PurchaseOrdersPage() {
                 setStatusFilter(e.target.value);
                 setPageIndex(0);
               }}
-              className="h-9 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+              className="h-9 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px]"
             >
               <option value="">All Statuses</option>
               <option value="PENDING">PENDING</option>
@@ -264,7 +264,7 @@ export default function PurchaseOrdersPage() {
                 <button
                   type="button"
                   onClick={() => setShowCreate(true)}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[#1D4ED8] px-4 text-[13px] font-medium text-white"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white"
                 >
                   <Plus className="h-4 w-4" />
                   <span>Create Purchase Order</span>
@@ -288,11 +288,11 @@ export default function PurchaseOrdersPage() {
           <div className="ims-modal-backdrop">
             <div className="ims-modal-panel">
               <div className="ims-modal-header">
-                <h2 className="text-[16px] font-semibold text-[#18181B]">New Purchase Order</h2>
+                <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">New Purchase Order</h2>
                 <button
                   type="button"
                   onClick={() => setShowCreate(false)}
-                  className="rounded p-1 text-[#63636B]"
+                  className="rounded p-1 text-[var(--text-muted)]"
                 >
                   <X className="h-4 w-4" />
                 </button>

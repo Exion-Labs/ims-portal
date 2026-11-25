@@ -193,7 +193,7 @@ export default function ManufacturingPage() {
                 setStatusFilter(e.target.value);
                 setPageIndex(0);
               }}
-              className="h-9 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px]"
+              className="h-9 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px]"
             >
               <option value="">All Statuses</option>
               <option value="PENDING">PENDING</option>
@@ -232,7 +232,7 @@ export default function ManufacturingPage() {
         )}
 
         {showCreate && (
-          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="ims-modal-backdrop bg-black/50">
             <div className="bg-card border rounded-xl w-full max-w-lg p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Create Build Order</h2>

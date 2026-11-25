@@ -155,8 +155,8 @@ export default function TransfersAndReturnsPage() {
                 onClick={() => setTab("transfers")}
                 className={`inline-flex h-9 items-center gap-1.5 rounded-[8px] border px-3 text-[13px] font-medium transition-colors ${
                   tab === "transfers"
-                    ? "border-[#1D4ED8] bg-[#EEF2FF] text-[#1D4ED8]"
-                    : "border-[#E4E4E7] bg-white text-[#52525B] hover:bg-[#F7F7F8]"
+                    ? "border-[var(--brand-primary)] bg-[var(--brand-tint)] text-[var(--brand-primary)]"
+                    : "border-[var(--border-subtle)] bg-white text-[var(--text-secondary)] hover:bg-[var(--bg-canvas)]"
                 }`}
               >
                 <ArrowLeftRight className="h-4 w-4" />
@@ -168,8 +168,8 @@ export default function TransfersAndReturnsPage() {
                   onClick={() => setTab("returns")}
                   className={`inline-flex h-9 items-center gap-1.5 rounded-[8px] border px-3 text-[13px] font-medium transition-colors ${
                     tab === "returns"
-                      ? "border-[#1D4ED8] bg-[#EEF2FF] text-[#1D4ED8]"
-                      : "border-[#E4E4E7] bg-white text-[#52525B] hover:bg-[#F7F7F8]"
+                      ? "border-[var(--brand-primary)] bg-[var(--brand-tint)] text-[var(--brand-primary)]"
+                      : "border-[var(--border-subtle)] bg-white text-[var(--text-secondary)] hover:bg-[var(--bg-canvas)]"
                   }`}
                 >
                   <RotateCcw className="h-4 w-4" />
@@ -183,9 +183,9 @@ export default function TransfersAndReturnsPage() {
               <button
                 type="button"
                 onClick={() => setShowCreateReturn(true)}
-                className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[#E4E4E7] bg-white px-3 text-[13px] font-medium text-[#18181B] hover:bg-[#F7F7F8]"
+                className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
               >
-                <RotateCcw className="h-4 w-4 text-[#52525B]" />
+                <RotateCcw className="h-4 w-4 text-[var(--text-secondary)]" />
                 <span>New RMA</span>
               </button>
             ) : undefined
@@ -289,7 +289,7 @@ export default function TransfersAndReturnsPage() {
         )}
 
         {showCreateTransfer && (
-          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="ims-modal-backdrop bg-black/50">
             <div className="bg-card border rounded-xl w-full max-w-md p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">Create Transfer Order</h3>
@@ -374,7 +374,7 @@ export default function TransfersAndReturnsPage() {
         )}
 
         {showCreateReturn && (
-          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="ims-modal-backdrop bg-black/50">
             <div className="bg-card border rounded-xl w-full max-w-md p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">Create Return Order (RMA)</h3>
@@ -431,7 +431,7 @@ export default function TransfersAndReturnsPage() {
         )}
 
         {receivingRma && (
-          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="ims-modal-backdrop bg-black/50">
             <div className="bg-card border rounded-xl w-full max-w-md p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">Receive &amp; Disposition Return</h3>

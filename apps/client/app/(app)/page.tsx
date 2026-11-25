@@ -12,7 +12,7 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="h-8 w-64 animate-pulse rounded bg-[#E4E4E7]" />
+        <div className="h-8 w-64 animate-pulse rounded bg-[var(--border-subtle)]" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, idx) => (
             <div key={idx} className="h-24 animate-pulse rounded-[12px] bg-white" />
