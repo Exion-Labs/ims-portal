@@ -113,32 +113,32 @@ export function ImportWizard({
   }
 
   return (
-    <div className="rounded-[12px] border border-[var(--border-subtle),#E4E4E7] bg-white p-5">
-      <div className="flex items-center justify-between border-b border-[var(--border-subtle),#E4E4E7] pb-3">
+    <div className="rounded-[12px] border border-[var(--border-subtle)] bg-white p-5">
+      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
         <div className="flex items-center gap-2">
-          <FileSpreadsheet className="h-4 w-4 text-[var(--brand-primary),#1D4ED8]" />
-          <h3 className="text-[15px] font-semibold text-[var(--text-primary),#18181B]">
+          <FileSpreadsheet className="h-4 w-4 text-[var(--brand-primary)]" />
+          <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">
             Import {targetType} (CSV / XLSX)
           </h3>
         </div>
-        <div className="flex items-center gap-2 text-[12px] text-[var(--text-secondary),#52525B]">
+        <div className="flex items-center gap-2 text-[12px] text-[var(--text-secondary)]">
           <StatusBadge label={`Step · ${step}`} tone="primary" />
         </div>
       </div>
 
       {error && (
-        <div className="mt-3 rounded-[8px] border border-[var(--border-danger),#FECACA] bg-[var(--status-danger-bg),#FEE2E2]/60 px-3 py-2 text-[13px] text-[var(--status-danger-fg),#991B1B]">
+        <div className="mt-3 rounded-[8px] border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/60 px-3 py-2 text-[13px] text-[var(--status-danger-fg)]">
           {error}
         </div>
       )}
 
       {step === "UPLOAD" && (
-        <label className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-[12px] border-2 border-dashed border-[var(--border-subtle),#E4E4E7] bg-[var(--bg-canvas),#F7F7F8] px-6 py-10 text-center hover:border-[var(--brand-primary),#1D4ED8]">
-          <Upload className="h-6 w-6 text-[var(--text-secondary),#52525B]" />
-          <span className="mt-2 text-[13px] font-medium text-[var(--text-primary),#18181B]">
+        <label className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-[12px] border-2 border-dashed border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-6 py-10 text-center hover:border-[var(--brand-primary)]">
+          <Upload className="h-6 w-6 text-[var(--text-secondary)]" />
+          <span className="mt-2 text-[13px] font-medium text-[var(--text-primary)]">
             {busy ? "Parsing file…" : "Click to select a .csv or .xlsx file"}
           </span>
-          <span className="mt-1 text-[12px] text-[var(--text-muted),#63636B]">
+          <span className="mt-1 text-[12px] text-[var(--text-muted)]">
             Max 10 MB · Up to 10,000 rows · Zip-bomb and formula-injection protected
           </span>
           <input
@@ -156,24 +156,24 @@ export function ImportWizard({
 
       {step === "MAP" && session && (
         <div className="mt-4 space-y-4">
-          <div className="text-[13px] text-[var(--text-secondary),#52525B]">
-            Detected <strong className="font-mono text-[var(--text-primary),#18181B]">{session.totalRows}</strong> rows in{" "}
-            <span className="font-mono text-[var(--text-primary),#18181B]">{session.fileName}</span>. Map columns below:
+          <div className="text-[13px] text-[var(--text-secondary)]">
+            Detected <strong className="font-mono text-[var(--text-primary)]">{session.totalRows}</strong> rows in{" "}
+            <span className="font-mono text-[var(--text-primary)]">{session.fileName}</span>. Map columns below:
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
             {targetFields.map((tf) => (
-              <div key={tf.key} className="rounded-[8px] border border-[var(--border-subtle),#E4E4E7] p-3">
-                <label className="block text-[12px] font-medium text-[var(--text-primary),#18181B]">
+              <div key={tf.key} className="rounded-[8px] border border-[var(--border-subtle)] p-3">
+                <label className="block text-[12px] font-medium text-[var(--text-primary)]">
                   {tf.label}{" "}
-                  {tf.required && <span className="text-[var(--status-danger-fg),#991B1B]">*</span>}
+                  {tf.required && <span className="text-[var(--status-danger-fg)]">*</span>}
                 </label>
                 <select
                   value={mapping[tf.key] ?? ""}
                   onChange={(e) =>
                     setMapping((prev) => ({ ...prev, [tf.key]: e.target.value }))
                   }
-                  className="mt-1.5 h-9 w-full rounded-[8px] border border-[var(--border-subtle),#E4E4E7] bg-white px-2.5 text-[13px] text-[var(--text-primary),#18181B]"
+                  className="mt-1.5 h-9 w-full rounded-[8px] border border-[var(--border-subtle)] bg-white px-2.5 text-[13px] text-[var(--text-primary)]"
                 >
                   <option value="">— Select source column —</option>
                   {session.detectedColumns.map((col) => (
@@ -190,7 +190,7 @@ export function ImportWizard({
             <button
               type="button"
               onClick={() => setStep("UPLOAD")}
-              className="h-9 rounded-[8px] border border-[var(--border-subtle),#E4E4E7] px-3 text-[13px] font-medium text-[var(--text-secondary),#52525B]"
+              className="h-9 rounded-[8px] border border-[var(--border-subtle)] px-3 text-[13px] font-medium text-[var(--text-secondary)]"
             >
               Back
             </button>
@@ -198,7 +198,7 @@ export function ImportWizard({
               type="button"
               disabled={busy}
               onClick={handleDryRun}
-              className="h-9 rounded-[8px] bg-[var(--brand-primary),#1D4ED8] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover),#1E40AF]"
+              className="h-9 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
             >
               {busy ? "Validating…" : "Run Dry-Run Validation"}
             </button>
@@ -209,28 +209,28 @@ export function ImportWizard({
       {step === "DRY_RUN" && report && (
         <div className="mt-4 space-y-4">
           <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-[8px] border border-[var(--border-subtle),#E4E4E7] p-3">
-              <div className="text-[12px] text-[var(--text-secondary),#52525B]">Total Rows</div>
+            <div className="rounded-[8px] border border-[var(--border-subtle)] p-3">
+              <div className="text-[12px] text-[var(--text-secondary)]">Total Rows</div>
               <div className="mt-1 font-mono text-[18px] font-semibold tabular-nums">
                 {report.totalRows}
               </div>
             </div>
-            <div className="rounded-[8px] border border-[var(--border-success),#BBF7D0] bg-[var(--status-success-bg),#DCFCE7]/40 p-3">
-              <div className="text-[12px] text-[var(--status-success-fg),#166534]">Valid Rows</div>
-              <div className="mt-1 font-mono text-[18px] font-semibold text-[var(--status-success-fg),#166534] tabular-nums">
+            <div className="rounded-[8px] border border-[var(--border-success)] bg-[var(--status-success-bg)]/40 p-3">
+              <div className="text-[12px] text-[var(--status-success-fg)]">Valid Rows</div>
+              <div className="mt-1 font-mono text-[18px] font-semibold text-[var(--status-success-fg)] tabular-nums">
                 {report.validRows}
               </div>
             </div>
-            <div className="rounded-[8px] border border-[var(--border-danger),#FECACA] bg-[var(--status-danger-bg),#FEE2E2]/40 p-3">
-              <div className="text-[12px] text-[var(--status-danger-fg),#991B1B]">Invalid Rows</div>
-              <div className="mt-1 font-mono text-[18px] font-semibold text-[var(--status-danger-fg),#991B1B] tabular-nums">
+            <div className="rounded-[8px] border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/40 p-3">
+              <div className="text-[12px] text-[var(--status-danger-fg)]">Invalid Rows</div>
+              <div className="mt-1 font-mono text-[18px] font-semibold text-[var(--status-danger-fg)] tabular-nums">
                 {report.invalidRows}
               </div>
             </div>
           </div>
 
           {report.errors.length > 0 && (
-            <div className="max-h-48 overflow-y-auto rounded-[8px] border border-[var(--border-danger),#FECACA] bg-[var(--status-danger-bg),#FEE2E2]/30 p-3 text-[12px] text-[var(--status-danger-fg),#991B1B]">
+            <div className="max-h-48 overflow-y-auto rounded-[8px] border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/30 p-3 text-[12px] text-[var(--status-danger-fg)]">
               <div className="mb-1 flex items-center gap-1.5 font-semibold">
                 <AlertTriangle className="h-4 w-4" />
                 <span>Row Validation Errors</span>
@@ -249,7 +249,7 @@ export function ImportWizard({
             <button
               type="button"
               onClick={() => setStep("MAP")}
-              className="h-9 rounded-[8px] border border-[var(--border-subtle),#E4E4E7] px-3 text-[13px] font-medium text-[var(--text-secondary),#52525B]"
+              className="h-9 rounded-[8px] border border-[var(--border-subtle)] px-3 text-[13px] font-medium text-[var(--text-secondary)]"
             >
               Adjust Mapping
             </button>
@@ -257,7 +257,7 @@ export function ImportWizard({
               type="button"
               disabled={busy || report.invalidRows > 0}
               onClick={handleCommit}
-              className="h-9 rounded-[8px] bg-[var(--brand-primary),#1D4ED8] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover),#1E40AF] disabled:opacity-40"
+              className="h-9 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)] disabled:opacity-40"
             >
               {busy ? "Committing…" : `Commit ${report.validRows} Rows`}
             </button>
@@ -266,7 +266,7 @@ export function ImportWizard({
       )}
 
       {step === "DONE" && commitResult && (
-        <div className="mt-4 flex items-center justify-between rounded-[8px] border border-[var(--border-success),#BBF7D0] bg-[var(--status-success-bg),#DCFCE7]/50 p-4 text-[var(--status-success-fg),#166534]">
+        <div className="mt-4 flex items-center justify-between rounded-[8px] border border-[var(--border-success)] bg-[var(--status-success-bg)]/50 p-4 text-[var(--status-success-fg)]">
           <div className="flex items-center gap-2 text-[13px] font-medium">
             <CheckCircle2 className="h-5 w-5" />
             <span>
@@ -282,7 +282,7 @@ export function ImportWizard({
               setCommitResult(null);
               setStep("UPLOAD");
             }}
-            className="h-8 rounded-[8px] bg-white px-3 text-[12px] font-medium text-[var(--status-success-fg),#166534]"
+            className="h-8 rounded-[8px] bg-white px-3 text-[12px] font-medium text-[var(--status-success-fg)]"
           >
             Import Another File
           </button>

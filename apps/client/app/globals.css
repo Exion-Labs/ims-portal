@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "../../../packages/ui/src";
 
 :root {
   --bg-canvas: #F7F7F8;

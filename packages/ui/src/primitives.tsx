@@ -4,21 +4,21 @@ import { cn } from "./utils";
 export type BadgeTone = "success" | "warning" | "danger" | "neutral" | "primary" | "violet";
 
 const TONE_STYLES: Record<BadgeTone, string> = {
-  success: "bg-[var(--status-success-bg,#DCFCE7)] text-[var(--status-success-fg,#166534)] border-[var(--border-success,#BBF7D0)]",
-  warning: "bg-[var(--status-warning-bg,#FEF3C7)] text-[var(--status-warning-fg,#92400E)] border-[var(--border-warning,#FDE68A)]",
-  danger: "bg-[var(--status-danger-bg,#FEE2E2)] text-[var(--status-danger-fg,#991B1B)] border-[var(--border-danger,#FECACA)]",
-  neutral: "bg-[var(--bg-muted,#F4F4F5)] text-[var(--text-secondary,#52525B)] border-[var(--border-subtle,#E4E4E7)]",
-  primary: "bg-[var(--brand-tint,#EEF2FF)] text-[var(--brand-primary,#1D4ED8)] border-[var(--border-brand,#C7D2FE)]",
-  violet: "bg-[var(--status-violet-bg,#EDE9FE)] text-[var(--status-violet-fg,#6D28D9)] border-[var(--border-violet,#DDD6FE)]",
+  success: "bg-[var(--status-success-bg)] text-[var(--status-success-fg)] border-[var(--border-success)]",
+  warning: "bg-[var(--status-warning-bg)] text-[var(--status-warning-fg)] border-[var(--border-warning)]",
+  danger: "bg-[var(--status-danger-bg)] text-[var(--status-danger-fg)] border-[var(--border-danger)]",
+  neutral: "bg-[var(--bg-muted)] text-[var(--text-secondary)] border-[var(--border-subtle)]",
+  primary: "bg-[var(--brand-tint)] text-[var(--brand-primary)] border-[var(--border-brand)]",
+  violet: "bg-[var(--status-violet-bg)] text-[var(--status-violet-fg)] border-[var(--border-violet)]",
 };
 
 const DOT_STYLES: Record<BadgeTone, string> = {
-  success: "bg-[var(--status-success-fg,#166534)]",
-  warning: "bg-[var(--status-warning-fg,#92400E)]",
-  danger: "bg-[var(--status-danger-fg,#991B1B)]",
-  neutral: "bg-[var(--text-muted,#63636B)]",
-  primary: "bg-[var(--brand-primary,#1D4ED8)]",
-  violet: "bg-[var(--status-violet-fg,#6D28D9)]",
+  success: "bg-[var(--status-success-fg)]",
+  warning: "bg-[var(--status-warning-fg)]",
+  danger: "bg-[var(--status-danger-fg)]",
+  neutral: "bg-[var(--text-muted)]",
+  primary: "bg-[var(--brand-primary)]",
+  violet: "bg-[var(--status-violet-fg)]",
 };
 
 export function StatusBadge({
@@ -61,19 +61,19 @@ export function StatTile({
 }) {
   const valueColor =
     tone === "danger"
-      ? "text-[var(--status-danger-fg),#991B1B]"
+      ? "text-[var(--status-danger-fg)]"
       : tone === "warning"
-        ? "text-[var(--status-warning-fg),#92400E]"
+        ? "text-[var(--status-warning-fg)]"
         : tone === "success"
-          ? "text-[var(--status-success-fg),#166534]"
-          : "text-[var(--text-primary),#18181B]";
+          ? "text-[var(--status-success-fg)]"
+          : "text-[var(--text-primary)]";
 
   return (
     <div
       title={hint}
-      className="flex items-center justify-between gap-3 rounded-[8px] border border-[var(--border-subtle),#E4E4E7] bg-white px-3 py-2"
+      className="flex items-center justify-between gap-3 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 py-2"
     >
-      <span className="truncate text-[12px] font-medium text-[var(--text-secondary),#52525B]">{label}</span>
+      <span className="truncate text-[12px] font-medium text-[var(--text-secondary)]">{label}</span>
       <span
         className={cn(
           "max-w-[60%] shrink-0 truncate text-[14px] font-semibold tracking-tight tabular-nums",
@@ -97,9 +97,9 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-[12px] border border-dashed border-[var(--border-subtle),#E4E4E7] bg-white px-6 py-12 text-center">
-      <div className="text-[15px] font-semibold text-[var(--text-primary),#18181B]">{title}</div>
-      <p className="mt-1 max-w-md text-[13px] text-[var(--text-secondary),#52525B]">{description}</p>
+    <div className="flex flex-col items-center justify-center rounded-[12px] border border-dashed border-[var(--border-subtle)] bg-white px-6 py-12 text-center">
+      <div className="text-[15px] font-semibold text-[var(--text-primary)]">{title}</div>
+      <p className="mt-1 max-w-md text-[13px] text-[var(--text-secondary)]">{description}</p>
       {action && <div className="mt-4">{action}</div>}
     </div>
   );
@@ -115,14 +115,14 @@ export function ErrorState({
   onRetry?: () => void;
 }) {
   return (
-    <div className="rounded-[12px] border border-[var(--border-danger),#FECACA] bg-[var(--status-danger-bg),#FEE2E2]/50 p-6 text-[var(--status-danger-fg),#991B1B]">
+    <div className="rounded-[12px] border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/50 p-6 text-[var(--status-danger-fg)]">
       <div className="text-[15px] font-semibold">{title}</div>
       <p className="mt-1 text-[13px]">{message}</p>
       {onRetry && (
         <button
           type="button"
           onClick={onRetry}
-          className="mt-3 inline-flex h-9 items-center rounded-[8px] border border-[var(--status-danger-fg),#991B1B]/30 bg-white px-3 text-[13px] font-medium text-[var(--status-danger-fg),#991B1B] hover:bg-[var(--status-danger-bg),#FEE2E2]"
+          className="mt-3 inline-flex h-9 items-center rounded-[8px] border border-[var(--status-danger-fg)]/30 bg-white px-3 text-[13px] font-medium text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]"
         >
           Retry
         </button>
@@ -141,19 +141,19 @@ export function NotInPlan({
   description?: string;
 }) {
   return (
-    <div className="mx-auto my-12 max-w-lg rounded-[12px] border border-[var(--border-subtle),#E4E4E7] bg-white p-8 text-center shadow-xs">
+    <div className="mx-auto my-12 max-w-lg rounded-[12px] border border-[var(--border-subtle)] bg-white p-8 text-center shadow-xs">
       <StatusBadge label={`Feature · ${featureKey}`} tone="warning" />
-      <h2 className="mt-4 text-[18px] font-semibold text-[var(--text-primary),#18181B]">
+      <h2 className="mt-4 text-[18px] font-semibold text-[var(--text-primary)]">
         Not included in your current plan
       </h2>
-      <p className="mt-2 text-[13px] text-[var(--text-secondary),#52525B]">
+      <p className="mt-2 text-[13px] text-[var(--text-secondary)]">
         {description ??
           `This module requires the ${featureKey} capability, which is not enabled on your ${planName ?? "current"} subscription.`}
       </p>
       <div className="mt-6 flex items-center justify-center gap-3">
         <a
           href="/settings/plan"
-          className="inline-flex h-9 items-center rounded-[8px] bg-[var(--brand-primary),#1D4ED8] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover),#1E40AF]"
+          className="inline-flex h-9 items-center rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
         >
           View Plan & Features
         </a>
@@ -173,7 +173,7 @@ export function BulkActionBar({
 }) {
   if (selectedCount <= 0) return null;
   return (
-    <div className="fixed bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 rounded-full bg-[var(--text-primary),#18181B] px-4 py-2 text-[13px] text-white shadow-lg">
+    <div className="fixed bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 rounded-full bg-[var(--text-primary)] px-4 py-2 text-[13px] text-white shadow-lg">
       <span className="font-medium tabular-nums">{selectedCount} selected</span>
       <span className="h-4 w-px bg-white/20" />
       <div className="flex items-center gap-2">{children}</div>
@@ -197,7 +197,7 @@ export function Card({
   className?: string;
 }) {
   return (
-    <div className={`rounded-[12px] border border-[var(--border-subtle,#E4E4E7)] bg-[var(--bg-surface,#FFFFFF)] p-5 ${className}`}>
+    <div className={`rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 ${className}`}>
       {children}
     </div>
   );
@@ -224,15 +224,15 @@ export function Modal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
     >
       <div
-        className={`max-h-[90vh] w-full ${maxWidthClass} overflow-y-auto rounded-[12px] border border-[var(--border-subtle,#E4E4E7)] bg-[var(--bg-surface,#FFFFFF)] p-6 shadow-xl`}
+        className={`max-h-[90vh] w-full ${maxWidthClass} overflow-y-auto rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-xl`}
       >
-        <div className="flex items-center justify-between border-b border-[var(--border-subtle,#E4E4E7)] pb-3">
-          <h2 className="text-[16px] font-semibold text-[var(--text-primary,#18181B)]">{title}</h2>
+        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+          <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">{title}</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="rounded p-1 text-[var(--text-muted,#63636B)] hover:bg-[var(--bg-canvas,#F7F7F8)]"
+            className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-canvas)]"
           >
             ✕
           </button>
