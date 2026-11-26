@@ -1,7 +1,36 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { toast } from "@ims/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  toast,
+} from "@ims/ui";
 
 const PLATFORM_API_BASE = "/platform/api/platform/v1";
 
@@ -168,35 +197,43 @@ export default function PlatformConsolePage() {
 
   if (!authed) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100 p-4">
-        <form onSubmit={handleLogin} className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
-          <h1 className="text-xl font-bold">IMS Platform Admin Console</h1>
-          <p className="text-xs text-slate-400">Sign in with your operator account (platform@ims.dev).</p>
-          {loginError && <div className="p-2.5 rounded bg-red-950/60 text-red-300 text-xs">{loginError}</div>}
-          <div>
-            <label className="block text-xs font-medium mb-1">Email</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium mb-1">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm"
-            />
-          </div>
-          <button type="submit" className="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-sm font-semibold">
-            Sign In
-          </button>
-        </form>
+      <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-4">
+        <Card className="w-full max-w-sm p-6">
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <h1 className="text-xl font-bold">IMS Platform Admin Console</h1>
+              <p className="text-xs text-muted-foreground">
+                Sign in with your operator account (platform@ims.dev).
+              </p>
+            </div>
+            {loginError && (
+              <Alert variant="destructive">
+                <AlertDescription>{loginError}</AlertDescription>
+              </Alert>
+            )}
+            <div className="space-y-1">
+              <Label>Email</Label>
+              <Input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Password</Label>
+              <Input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Sign In
+            </Button>
+          </form>
+        </Card>
       </div>
     );
   }
@@ -209,19 +246,15 @@ export default function PlatformConsolePage() {
             <h1 className="text-2xl font-bold">IMS Platform Control Plane</h1>
             <p className="text-xs text-slate-400">Tenants, Plan Entitlements, Support Impersonation &amp; Outbox</p>
           </div>
-          <div className="flex gap-2">
-            {(["tenants", "plans", "outbox", "audit"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium uppercase ${
-                  tab === t ? "bg-blue-600 text-white" : "bg-slate-900 text-slate-300 hover:bg-slate-800"
-                }`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
+          <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
+            <TabsList>
+              {(["tenants", "plans", "outbox", "audit"] as const).map((t) => (
+                <TabsTrigger key={t} value={t} className="uppercase text-xs">
+                  {t}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
         </div>
 
         {message && (
@@ -268,10 +301,9 @@ export default function PlatformConsolePage() {
                     </td>
                     <td className="px-4 py-3 font-mono text-xs">{t.status}</td>
                     <td className="px-4 py-3">
-                      <select
+                      <Select
                         value={t.planCode}
-                        onChange={async (e) => {
-                          const planCode = e.target.value;
+                        onValueChange={async (planCode) => {
                           try {
                             const res = await fetch(`${PLATFORM_API_BASE}/tenants/${t.id}/plan`, {
                               method: "PUT",
@@ -290,14 +322,18 @@ export default function PlatformConsolePage() {
                             toast.error("Failed to update plan");
                           }
                         }}
-                        className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs"
                       >
-                        {plans.map((p) => (
-                          <option key={p.id} value={p.code}>
-                            {p.code}
-                          </option>
-                        ))}
-                      </select>
+                        <SelectTrigger className="h-8 w-[120px] text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {plans.map((p) => (
+                            <SelectItem key={p.id} value={p.code}>
+                              {p.code}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </td>
                     <td className="px-4 py-3 text-right font-mono">{t.userCount}</td>
                     <td className="px-4 py-3 text-right space-x-2">
@@ -391,15 +427,14 @@ export default function PlatformConsolePage() {
                   {p.features.map((f) => (
                     <label key={f.featureKey} className="flex items-center justify-between text-xs py-1 border-b border-slate-800/60">
                       <span className="font-mono">{f.featureKey}</span>
-                      <input
-                        type="checkbox"
+                      <Switch
                         checked={f.enabled}
-                        onChange={async (e) => {
+                        onCheckedChange={async (checked) => {
                           try {
                             const res = await fetch(`${PLATFORM_API_BASE}/plans/${p.id}/features/${f.featureKey}`, {
                               method: "PUT",
                               headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ enabled: e.target.checked, limitValue: f.limitValue }),
+                              body: JSON.stringify({ enabled: checked, limitValue: f.limitValue }),
                             });
                             if (!res.ok) {
                               const err = await res.json().catch(() => ({}));
@@ -473,32 +508,22 @@ export default function PlatformConsolePage() {
         )}
       </div>
 
-      {showRegisterModal && (
-        <div className="ims-platform-modal-backdrop">
-          <div className="ims-platform-modal-panel">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h2 className="text-base font-bold text-white">Register New Tenant</h2>
-              <button
-                type="button"
-                onClick={() => setShowRegisterModal(false)}
-                className="text-xs text-slate-400 hover:text-white"
-              >
-                Close
-              </button>
-            </div>
+        <Dialog open={showRegisterModal} onOpenChange={setShowRegisterModal}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Register New Tenant</DialogTitle>
+            </DialogHeader>
 
             {registerError && (
-              <div className="rounded-lg bg-red-950/60 border border-red-800 px-3 py-2 text-xs text-red-300">
-                {registerError}
-              </div>
+              <Alert variant="destructive">
+                <AlertDescription>{registerError}</AlertDescription>
+              </Alert>
             )}
 
             <form onSubmit={handleRegisterTenant} className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Organization Name *
-                </label>
-                <input
+              <div className="space-y-1">
+                <Label>Organization Name *</Label>
+                <Input
                   type="text"
                   required
                   value={tenantForm.tenantName}
@@ -516,121 +541,110 @@ export default function PlatformConsolePage() {
                     }));
                   }}
                   placeholder="Apex Precision Systems"
-                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white"
                 />
               </div>
 
               <div className="grid grid-cols-3 gap-2">
-                <div className="col-span-2">
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
-                    Tenant Slug *
-                  </label>
-                  <input
+                <div className="col-span-2 space-y-1">
+                  <Label>Tenant Slug *</Label>
+                  <Input
                     type="text"
                     required
                     value={tenantForm.tenantSlug}
                     onChange={(e) => setTenantForm({ ...tenantForm, tenantSlug: e.target.value })}
                     placeholder="apex-precision"
-                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm font-mono text-white"
+                    className="font-mono"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
-                    Currency
-                  </label>
-                  <select
+                <div className="space-y-1">
+                  <Label>Currency</Label>
+                  <Select
                     value={tenantForm.baseCurrency}
-                    onChange={(e) => setTenantForm({ ...tenantForm, baseCurrency: e.target.value })}
-                    className="w-full px-2 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white"
+                    onValueChange={(val) => setTenantForm({ ...tenantForm, baseCurrency: val })}
                   >
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                    <option value="GBP">GBP</option>
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                      <SelectItem value="GBP">GBP</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Plan</label>
-                <select
+              <div className="space-y-1">
+                <Label>Plan</Label>
+                <Select
                   value={tenantForm.planCode}
-                  onChange={(e) => setTenantForm({ ...tenantForm, planCode: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white"
+                  onValueChange={(val) => setTenantForm({ ...tenantForm, planCode: val })}
                 >
-                  {plans.length === 0 ? (
-                    <option value="TRIAL">TRIAL</option>
-                  ) : (
-                    plans.map((p) => (
-                      <option key={p.id} value={p.code}>
-                        {p.name} ({p.code})
-                      </option>
-                    ))
-                  )}
-                </select>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {plans.length === 0 ? (
+                      <SelectItem value="TRIAL">TRIAL</SelectItem>
+                    ) : (
+                      plans.map((p) => (
+                        <SelectItem key={p.id} value={p.code}>
+                          {p.name} ({p.code})
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Administrator Name *
-                </label>
-                <input
+              <div className="space-y-1">
+                <Label>Administrator Name *</Label>
+                <Input
                   type="text"
                   required
                   value={tenantForm.adminFullName}
                   onChange={(e) => setTenantForm({ ...tenantForm, adminFullName: e.target.value })}
                   placeholder="Jordan Chen"
-                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Administrator Email *
-                </label>
-                <input
+              <div className="space-y-1">
+                <Label>Administrator Email *</Label>
+                <Input
                   type="email"
                   required
                   value={tenantForm.adminEmail}
                   onChange={(e) => setTenantForm({ ...tenantForm, adminEmail: e.target.value })}
                   placeholder="jordan@apex-precision.com"
-                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Password (min 8 chars) *
-                </label>
-                <input
+              <div className="space-y-1">
+                <Label>Password (min 8 chars) *</Label>
+                <Input
                   type="password"
                   required
                   minLength={8}
                   value={tenantForm.adminPassword}
                   onChange={(e) => setTenantForm({ ...tenantForm, adminPassword: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-sm text-white"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
-                <button
+              <DialogFooter>
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setShowRegisterModal(false)}
-                  className="px-4 py-2 rounded-lg border border-slate-700 text-xs text-slate-300"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={registering}
-                  className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white disabled:opacity-50"
-                >
+                </Button>
+                <Button type="submit" disabled={registering}>
                   {registering ? "Provisioning…" : "Register Tenant"}
-                </button>
-              </div>
+                </Button>
+              </DialogFooter>
             </form>
-          </div>
-        </div>
-      )}
+          </DialogContent>
+        </Dialog>
     </div>
   );
 }

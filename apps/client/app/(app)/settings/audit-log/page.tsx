@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { apiFetch, AuditEventView, PageResponse } from "@ims/api-client";
-import { DataTable, StatusBadge, toast } from "@ims/ui";
+import { DataTable, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, StatusBadge, toast } from "@ims/ui";
 
 export default function AuditLogSettingsPage() {
   const [actionFilter, setActionFilter] = useState("");
@@ -136,37 +136,45 @@ export default function AuditLogSettingsPage() {
       onExportCsv={handleExportCsv}
       filterChips={
         <div className="flex items-center gap-2">
-          <select
-            value={actionFilter}
-            onChange={(e) => setActionFilter(e.target.value)}
-            className="h-9 rounded-[8px] border border-[var(--border-subtle)] bg-white px-2.5 text-[12px]"
+          <Select
+            value={actionFilter || "__all__"}
+            onValueChange={(val) => setActionFilter(val === "__all__" ? "" : val)}
           >
-            <option value="">All Actions</option>
-            <option value="CREATE">CREATE</option>
-            <option value="UPDATE">UPDATE</option>
-            <option value="DELETE">DELETE</option>
-            <option value="LOGIN">LOGIN</option>
-            <option value="LOGIN_FAILED">LOGIN_FAILED</option>
-            <option value="TOKEN_CREATED">TOKEN_CREATED</option>
-            <option value="TOKEN_REVOKED">TOKEN_REVOKED</option>
-            <option value="PERMISSION_CHANGED">PERMISSION_CHANGED</option>
-            <option value="IMPORT">IMPORT</option>
-            <option value="EXPORT">EXPORT</option>
-          </select>
+            <SelectTrigger className="w-[155px] text-[12px]">
+              <SelectValue placeholder="All Actions" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">All Actions</SelectItem>
+              <SelectItem value="CREATE">CREATE</SelectItem>
+              <SelectItem value="UPDATE">UPDATE</SelectItem>
+              <SelectItem value="DELETE">DELETE</SelectItem>
+              <SelectItem value="LOGIN">LOGIN</SelectItem>
+              <SelectItem value="LOGIN_FAILED">LOGIN_FAILED</SelectItem>
+              <SelectItem value="TOKEN_CREATED">TOKEN_CREATED</SelectItem>
+              <SelectItem value="TOKEN_REVOKED">TOKEN_REVOKED</SelectItem>
+              <SelectItem value="PERMISSION_CHANGED">PERMISSION_CHANGED</SelectItem>
+              <SelectItem value="IMPORT">IMPORT</SelectItem>
+              <SelectItem value="EXPORT">EXPORT</SelectItem>
+            </SelectContent>
+          </Select>
 
-          <select
-            value={entityFilter}
-            onChange={(e) => setEntityFilter(e.target.value)}
-            className="h-9 rounded-[8px] border border-[var(--border-subtle)] bg-white px-2.5 text-[12px]"
+          <Select
+            value={entityFilter || "__all__"}
+            onValueChange={(val) => setEntityFilter(val === "__all__" ? "" : val)}
           >
-            <option value="">All Entities</option>
-            <option value="Tenant">Tenant</option>
-            <option value="UserAccount">UserAccount</option>
-            <option value="Role">Role</option>
-            <option value="TenantSetting">TenantSetting</option>
-            <option value="ReferenceSequence">ReferenceSequence</option>
-            <option value="ApiToken">ApiToken</option>
-          </select>
+            <SelectTrigger className="w-[165px] text-[12px]">
+              <SelectValue placeholder="All Entities" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">All Entities</SelectItem>
+              <SelectItem value="Tenant">Tenant</SelectItem>
+              <SelectItem value="UserAccount">UserAccount</SelectItem>
+              <SelectItem value="Role">Role</SelectItem>
+              <SelectItem value="TenantSetting">TenantSetting</SelectItem>
+              <SelectItem value="ReferenceSequence">ReferenceSequence</SelectItem>
+              <SelectItem value="ApiToken">ApiToken</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       }
     />

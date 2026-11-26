@@ -13,8 +13,8 @@ export default function PlatformRootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="bg-[var(--platform-bg)] text-[var(--platform-fg)]">
+    <html lang="en" className="dark">
+      <body className="bg-background text-foreground antialiased">
         <div className="ims-platform-banner">
           Platform console · changes here affect customer tenants and are audited
         </div>

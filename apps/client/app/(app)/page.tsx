@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ImportWizard, StatTile, StatusBadge } from "@ims/ui";
+import { ImportWizard, Skeleton, StatTile, StatusBadge } from "@ims/ui";
 import { useEntitlements, FeatureGate } from "@/lib/entitlements";
 import { ShieldCheck, Users, KeyRound, History, Cpu } from "lucide-react";
 
@@ -12,10 +12,10 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="h-8 w-64 animate-pulse rounded bg-[var(--border-subtle)]" />
+        <Skeleton className="h-8 w-64" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, idx) => (
-            <div key={idx} className="h-24 animate-pulse rounded-[12px] bg-white" />
+            <Skeleton key={idx} className="h-24 rounded-[12px]" />
           ))}
         </div>
       </div>

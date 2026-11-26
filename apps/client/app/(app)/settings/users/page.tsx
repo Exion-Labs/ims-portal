@@ -8,7 +8,22 @@ import {
   RoleView,
   UserWithRolesView,
 } from "@ims/api-client";
-import { DataTable, StatusBadge, toast, toastApiError } from "@ims/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  DataTable,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  StatusBadge,
+  toast,
+  toastApiError,
+} from "@ims/ui";
 import { Copy, UserPlus } from "lucide-react";
 
 export default function UsersSettingsPage() {
@@ -147,40 +162,37 @@ export default function UsersSettingsPage() {
         )}
 
         <div className="mt-4 grid gap-3 sm:grid-cols-4">
-          <input
+          <Input
             type="text"
             required
             value={inviteName}
             onChange={(e) => setInviteName(e.target.value)}
             placeholder="Full Name"
-            className="h-9 rounded-[8px] border border-[var(--border-subtle)] px-3 text-[13px]"
           />
-          <input
+          <Input
             type="email"
             required
             value={inviteEmail}
             onChange={(e) => setInviteEmail(e.target.value)}
             placeholder="colleague@company.com"
-            className="h-9 rounded-[8px] border border-[var(--border-subtle)] px-3 text-[13px]"
           />
-          <select
-            value={selectedRoleId}
-            onChange={(e) => setSelectedRoleId(e.target.value)}
-            className="h-9 rounded-[8px] border border-[var(--border-subtle)] bg-white px-2.5 text-[13px]"
+          <Select
+            value={selectedRoleId || "__none__"}
+            onValueChange={(val) => setSelectedRoleId(val === "__none__" ? "" : val)}
           >
-            <option value="">Select Role…</option>
-            {(roles ?? []).map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name}
-              </option>
-            ))}
-          </select>
-          <button
-            type="submit"
-            className="h-9 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
-          >
-            Send Invite
-          </button>
+            <SelectTrigger>
+              <SelectValue placeholder="Select Role…" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">Select Role…</SelectItem>
+              {(roles ?? []).map((r) => (
+                <SelectItem key={r.id} value={r.id}>
+                  {r.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button type="submit">Send Invite</Button>
         </div>
       </form>
 

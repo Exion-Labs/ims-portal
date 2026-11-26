@@ -10,7 +10,33 @@ import {
   StockItemView,
   TransferOrderView,
 } from "@ims/api-client";
-import { EmptyState, ErrorState, StatusBadge, toast, toastApiError } from "@ims/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  Combobox,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  EmptyState,
+  ErrorState,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  StatusBadge,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  toast,
+  toastApiError,
+} from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { ListToolbar } from "@/components/list-toolbar";
 import { ArrowLeftRight, RotateCcw, X } from "lucide-react";
@@ -151,45 +177,31 @@ export default function TransfersAndReturnsPage() {
       <div className="space-y-6">
         <ListToolbar
           filters={
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setTab("transfers")}
-                className={`inline-flex h-9 items-center gap-1.5 rounded-[8px] border px-3 text-[13px] font-medium transition-colors ${
-                  tab === "transfers"
-                    ? "border-[var(--brand-primary)] bg-[var(--brand-tint)] text-[var(--brand-primary)]"
-                    : "border-[var(--border-subtle)] bg-white text-[var(--text-secondary)] hover:bg-[var(--bg-canvas)]"
-                }`}
-              >
-                <ArrowLeftRight className="h-4 w-4" />
-                <span>Transfer Orders ({transfers.length})</span>
-              </button>
-              {hasFeature("RETURNS") && (
-                <button
-                  type="button"
-                  onClick={() => setTab("returns")}
-                  className={`inline-flex h-9 items-center gap-1.5 rounded-[8px] border px-3 text-[13px] font-medium transition-colors ${
-                    tab === "returns"
-                      ? "border-[var(--brand-primary)] bg-[var(--brand-tint)] text-[var(--brand-primary)]"
-                      : "border-[var(--border-subtle)] bg-white text-[var(--text-secondary)] hover:bg-[var(--bg-canvas)]"
-                  }`}
-                >
-                  <RotateCcw className="h-4 w-4" />
-                  <span>Return Orders ({returns.length})</span>
-                </button>
-              )}
-            </div>
+            <Tabs value={tab} onValueChange={(v) => setTab(v as "transfers" | "returns")}>
+              <TabsList>
+                <TabsTrigger value="transfers">
+                  <ArrowLeftRight className="h-3.5 w-3.5" />
+                  <span>Transfer Orders ({transfers.length})</span>
+                </TabsTrigger>
+                {hasFeature("RETURNS") && (
+                  <TabsTrigger value="returns">
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    <span>Return Orders ({returns.length})</span>
+                  </TabsTrigger>
+                )}
+              </TabsList>
+            </Tabs>
           }
           secondaryAction={
             hasPermission("ORDER:CREATE") && hasFeature("RETURNS") ? (
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={() => setShowCreateReturn(true)}
-                className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
               >
-                <RotateCcw className="h-4 w-4 text-[var(--text-secondary)]" />
+                <RotateCcw className="h-4 w-4 text-muted-foreground" />
                 <span>New RMA</span>
-              </button>
+              </Button>
             ) : undefined
           }
           primaryAction={
@@ -202,7 +214,11 @@ export default function TransfersAndReturnsPage() {
           }
         />
 
-        {actionError && <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{actionError}</div>}
+        {actionError && (
+          <Alert variant="destructive">
+            <AlertDescription>{actionError}</AlertDescription>
+          </Alert>
+        )}
 
         {error ? (
           <ErrorState message={error} onRetry={loadData} />
@@ -302,157 +318,142 @@ export default function TransfersAndReturnsPage() {
           </div>
         )}
 
-        {showCreateTransfer && (
-          <div className="ims-modal-backdrop bg-black/50">
-            <div className="bg-card border rounded-xl w-full max-w-md p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Create Transfer Order</h3>
-                <button onClick={() => setShowCreateTransfer(false)}>
-                  <X className="w-5 h-5" />
-                </button>
+        <Dialog open={showCreateTransfer} onOpenChange={setShowCreateTransfer}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create Transfer Order</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleCreateTransfer} className="space-y-4">
+              <div className="space-y-1">
+                <Label>Source Location *</Label>
+                <Combobox
+                  value={trfForm.sourceLocationId}
+                  onValueChange={(val) => setTrfForm({ ...trfForm, sourceLocationId: val })}
+                  placeholder="Select source…"
+                  searchPlaceholder="Search locations…"
+                  options={locations.map((l) => ({ value: l.id, label: l.path }))}
+                />
               </div>
-              <form onSubmit={handleCreateTransfer} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Source Location *</label>
-                  <select
-                    required
-                    value={trfForm.sourceLocationId}
-                    onChange={(e) => setTrfForm({ ...trfForm, sourceLocationId: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                  >
-                    <option value="">Select source...</option>
-                    {locations.map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {l.path}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Destination Location *</label>
-                  <select
-                    required
-                    value={trfForm.destinationLocationId}
-                    onChange={(e) => setTrfForm({ ...trfForm, destinationLocationId: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                  >
-                    <option value="">Select destination...</option>
-                    {locations.map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {l.path}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Stock Item *</label>
-                  <select
-                    required
-                    value={trfForm.stockItemId}
-                    onChange={(e) => setTrfForm({ ...trfForm, stockItemId: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                  >
-                    <option value="">Select stock item...</option>
-                    {stockItems
-                      .filter((s) => !s.building && Number(s.quantity) > 0)
-                      .map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.partName} ({s.locationPathString ?? "Unassigned"}) · Qty: {s.quantity}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Quantity *</label>
-                  <input
-                    type="number"
-                    step="any"
-                    min="0.0001"
-                    required
-                    value={trfForm.quantity}
-                    onChange={(e) => setTrfForm({ ...trfForm, quantity: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <button type="button" onClick={() => setShowCreateTransfer(false)} className="px-4 py-2 text-sm border rounded-lg">
-                    Cancel
-                  </button>
-                  <button type="submit" className="px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground">
-                    Create Transfer
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+              <div className="space-y-1">
+                <Label>Destination Location *</Label>
+                <Combobox
+                  value={trfForm.destinationLocationId}
+                  onValueChange={(val) =>
+                    setTrfForm({ ...trfForm, destinationLocationId: val })
+                  }
+                  placeholder="Select destination…"
+                  searchPlaceholder="Search locations…"
+                  options={locations.map((l) => ({ value: l.id, label: l.path }))}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Stock Item *</Label>
+                <Combobox
+                  value={trfForm.stockItemId}
+                  onValueChange={(val) => setTrfForm({ ...trfForm, stockItemId: val })}
+                  placeholder="Select stock item…"
+                  searchPlaceholder="Search stock items…"
+                  options={stockItems
+                    .filter((s) => !s.building && Number(s.quantity) > 0)
+                    .map((s) => ({
+                      value: s.id,
+                      label: `${s.partName} (${s.locationPathString ?? "Unassigned"}) · Qty: ${s.quantity}`,
+                    }))}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Quantity *</Label>
+                <Input
+                  type="number"
+                  step="any"
+                  min="0.0001"
+                  required
+                  value={trfForm.quantity}
+                  onChange={(e) => setTrfForm({ ...trfForm, quantity: e.target.value })}
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowCreateTransfer(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={
+                    !trfForm.sourceLocationId ||
+                    !trfForm.destinationLocationId ||
+                    !trfForm.stockItemId
+                  }
+                >
+                  Create Transfer
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
 
-        {showCreateReturn && (
-          <div className="ims-modal-backdrop bg-black/50">
-            <div className="bg-card border rounded-xl w-full max-w-md p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Create Return Order (RMA)</h3>
-                <button onClick={() => setShowCreateReturn(false)}>
-                  <X className="w-5 h-5" />
-                </button>
+        <Dialog open={showCreateReturn} onOpenChange={setShowCreateReturn}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create Return Order (RMA)</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleCreateReturn} className="space-y-4">
+              <div className="space-y-1">
+                <Label>Customer *</Label>
+                <Combobox
+                  value={rmaForm.customerId}
+                  onValueChange={(val) => setRmaForm({ ...rmaForm, customerId: val })}
+                  placeholder="Select customer…"
+                  searchPlaceholder="Search customers…"
+                  options={customers.map((c) => ({ value: c.id, label: c.name }))}
+                />
               </div>
-              <form onSubmit={handleCreateReturn} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Customer *</label>
-                  <select
-                    required
-                    value={rmaForm.customerId}
-                    onChange={(e) => setRmaForm({ ...rmaForm, customerId: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                  >
-                    <option value="">Select customer...</option>
-                    {customers.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Shipped Stock Item *</label>
-                  <select
-                    required
-                    value={rmaForm.stockItemId}
-                    onChange={(e) => setRmaForm({ ...rmaForm, stockItemId: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                  >
-                    <option value="">Select shipped stock item...</option>
-                    {stockItems
-                      .filter((s) => s.customerId != null)
-                      .map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.partName} {s.serialNumber ? `SN:${s.serialNumber}` : `Qty:${s.quantity}`}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <button type="button" onClick={() => setShowCreateReturn(false)} className="px-4 py-2 text-sm border rounded-lg">
-                    Cancel
-                  </button>
-                  <button type="submit" className="px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground">
-                    Create RMA
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+              <div className="space-y-1">
+                <Label>Shipped Stock Item *</Label>
+                <Combobox
+                  value={rmaForm.stockItemId}
+                  onValueChange={(val) => setRmaForm({ ...rmaForm, stockItemId: val })}
+                  placeholder="Select shipped stock item…"
+                  searchPlaceholder="Search stock items…"
+                  options={stockItems
+                    .filter((s) => s.customerId != null)
+                    .map((s) => ({
+                      value: s.id,
+                      label: `${s.partName} ${s.serialNumber ? `SN:${s.serialNumber}` : `Qty:${s.quantity}`}`,
+                    }))}
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowCreateReturn(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!rmaForm.customerId || !rmaForm.stockItemId}
+                >
+                  Create RMA
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
 
-        {receivingRma && (
-          <div className="ims-modal-backdrop bg-black/50">
-            <div className="bg-card border rounded-xl w-full max-w-md p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Receive &amp; Disposition Return</h3>
-                <button onClick={() => setReceivingRma(null)}>
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+        <Dialog
+          open={Boolean(receivingRma)}
+          onOpenChange={(open) => !open && setReceivingRma(null)}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Receive &amp; Disposition Return</DialogTitle>
+            </DialogHeader>
+            {receivingRma && (
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -469,46 +470,49 @@ export default function TransfersAndReturnsPage() {
                 }}
                 className="space-y-4"
               >
-                <div>
-                  <label className="block text-sm font-medium mb-1">Outcome *</label>
-                  <select
-                    value={receiveOutcome}
-                    onChange={(e) => setReceiveOutcome(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                  >
-                    <option value="RESTOCK">RESTOCK (Status: OK)</option>
-                    <option value="REPAIR">QUARANTINE / REPAIR</option>
-                    <option value="SCRAP">SCRAP (Status: DAMAGED)</option>
-                    <option value="REJECTED">REJECTED</option>
-                  </select>
+                <div className="space-y-1">
+                  <Label>Outcome *</Label>
+                  <Select value={receiveOutcome} onValueChange={setReceiveOutcome}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="RESTOCK">RESTOCK (Status: OK)</SelectItem>
+                      <SelectItem value="REPAIR">QUARANTINE / REPAIR</SelectItem>
+                      <SelectItem value="SCRAP">SCRAP (Status: DAMAGED)</SelectItem>
+                      <SelectItem value="REJECTED">REJECTED</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Receiving / Quarantine Location</label>
-                  <select
+                <div className="space-y-1">
+                  <Label>Receiving / Quarantine Location</Label>
+                  <Combobox
                     value={receiveLocId}
-                    onChange={(e) => setReceiveLocId(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
+                    onValueChange={setReceiveLocId}
+                    placeholder="Select location…"
+                    searchPlaceholder="Search locations…"
+                    options={[
+                      { value: "", label: "Default location" },
+                      ...locations.map((l) => ({ value: l.id, label: l.path })),
+                    ]}
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setReceivingRma(null)}
                   >
-                    <option value="">Select location...</option>
-                    {locations.map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {l.path}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <button type="button" onClick={() => setReceivingRma(null)} className="px-4 py-2 text-sm border rounded-lg">
                     Cancel
-                  </button>
-                  <button type="submit" className="px-4 py-2 text-sm rounded-lg bg-emerald-600 text-white">
+                  </Button>
+                  <Button type="submit" className="bg-emerald-600 text-white hover:bg-emerald-700">
                     Confirm Receipt
-                  </button>
-                </div>
+                  </Button>
+                </DialogFooter>
               </form>
-            </div>
-          </div>
-        )}
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </FeatureGate>
   );

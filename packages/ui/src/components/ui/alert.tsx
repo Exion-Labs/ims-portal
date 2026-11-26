@@ -1,0 +1,63 @@
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "../../utils";
+
+const alertVariants = cva(
+  "relative w-full rounded-[10px] border px-4 py-3 text-[13px] grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
+  {
+    variants: {
+      variant: {
+        default: "bg-card text-card-foreground border-border",
+        destructive:
+          "border-[var(--border-danger)] bg-[var(--status-danger-bg)]/60 text-[var(--status-danger-fg)]",
+        warning:
+          "border-[var(--border-warning)] bg-[var(--status-warning-bg)]/70 text-[var(--status-warning-fg)]",
+        success:
+          "border-[var(--border-success)] bg-[var(--status-success-bg)]/60 text-[var(--status-success-fg)]",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+);
+
+function Alert({
+  className,
+  variant,
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
+  return (
+    <div
+      data-slot="alert"
+      role="alert"
+      className={cn(alertVariants({ variant }), className)}
+      {...props}
+    />
+  );
+}
+
+function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="alert-title"
+      className={cn("col-start-2 font-semibold tracking-tight", className)}
+      {...props}
+    />
+  );
+}
+
+function AlertDescription({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="alert-description"
+      className={cn("col-start-2 text-[12px] leading-relaxed", className)}
+      {...props}
+    />
+  );
+}
+
+export { Alert, AlertTitle, AlertDescription };

@@ -11,7 +11,7 @@ import {
   ManufacturerPartView,
   SupplierPartView,
 } from "@ims/api-client";
-import { ErrorState, StatTile, StatusBadge, toast, toastApiError } from "@ims/ui";
+import { Button, Card, ErrorState, Input, Skeleton, StatTile, StatusBadge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, toast, toastApiError } from "@ims/ui";
 import { useEntitlements } from "@/lib/entitlements";
 import { ArrowLeft, MapPin, Plus, UserCheck } from "lucide-react";
 
@@ -89,7 +89,7 @@ export default function CompanyDetailPage() {
   }
 
   if (loading) {
-    return <div className="h-40 animate-pulse rounded-[12px] bg-white" />;
+    return <Skeleton className="h-40 rounded-[12px]" />;
   }
   if (error || !company) {
     return <ErrorState message={error ?? "Company not found"} onRetry={loadAll} />;

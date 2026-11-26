@@ -21,6 +21,24 @@ import {
 } from "lucide-react";
 import { cn } from "./utils";
 import { EmptyState } from "./primitives";
+import { Button } from "./components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "./components/ui/dropdown-menu";
+import { Input } from "./components/ui/input";
+import { Skeleton } from "./components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./components/ui/table";
 
 export interface DataTableProps<TData> {
   columns: ColumnDef<TData, any>[];
@@ -64,7 +82,6 @@ export function DataTable<TData>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({});
-  const [showColumnChooser, setShowColumnChooser] = useState(false);
 
   const table = useReactTable({
     data,
@@ -93,178 +110,158 @@ export function DataTable<TData>({
   });
 
   return (
-    <div className="rounded-[12px] border border-[var(--border-subtle)] bg-white">
+    <div className="rounded-[12px] border border-border bg-card">
       {(onSearchChange || filterChips || onExportCsv || rightActions) && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-subtle)] px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
           <div className="flex flex-wrap items-center gap-2">
             {onSearchChange && (
-              <input
+              <Input
                 type="search"
                 value={searchValue ?? ""}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="h-9 w-64 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-3 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--brand-primary)] focus:bg-white focus:outline-hidden"
+                className="w-64 bg-background focus-visible:bg-card"
               />
             )}
             {filterChips}
           </div>
 
-          <div className="relative flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowColumnChooser((v) => !v)}
-              aria-label="Choose columns"
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
-            >
-              <SlidersHorizontal className="h-4 w-4 text-[var(--text-secondary)]" />
-              <span>Columns</span>
-            </button>
-
-            {showColumnChooser && (
-              <div className="absolute right-0 top-11 z-30 w-52 rounded-[12px] border border-[var(--border-subtle)] bg-white p-2 shadow-lg">
-                <div className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                  Visible Columns
-                </div>
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button type="button" variant="outline" aria-label="Choose columns">
+                  <SlidersHorizontal className="size-4 text-muted-foreground" />
+                  <span>Columns</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuLabel>Visible Columns</DropdownMenuLabel>
                 {table
                   .getAllLeafColumns()
                   .filter((col) => col.getCanHide())
                   .map((col) => (
-                    <label
+                    <DropdownMenuCheckboxItem
                       key={col.id}
-                      className="flex cursor-pointer items-center gap-2 rounded-[6px] px-2 py-1.5 text-[13px] text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
+                      checked={col.getIsVisible()}
+                      onCheckedChange={(checked) => col.toggleVisibility(Boolean(checked))}
                     >
-                      <input
-                        type="checkbox"
-                        checked={col.getIsVisible()}
-                        onChange={col.getToggleVisibilityHandler()}
-                        className="rounded border-[var(--border-subtle)]"
-                      />
                       <span className="truncate">{col.id}</span>
-                    </label>
+                    </DropdownMenuCheckboxItem>
                   ))}
-              </div>
-            )}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {onExportCsv && (
-              <button
-                type="button"
-                onClick={onExportCsv}
-                className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
-              >
-                <Download className="h-4 w-4 text-[var(--text-secondary)]" />
+              <Button type="button" variant="outline" onClick={onExportCsv}>
+                <Download className="size-4 text-muted-foreground" />
                 <span>Export</span>
-              </button>
+              </Button>
             )}
             {rightActions}
           </div>
         </div>
       )}
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left text-[13px]">
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b border-[var(--border-subtle)] bg-[var(--bg-canvas)]">
-                {headerGroup.headers.map((header) => {
-                  const canSort = header.column.getCanSort();
-                  const sorted = header.column.getIsSorted();
-                  return (
-                    <th
-                      key={header.id}
-                      className="whitespace-nowrap px-4 py-2.5 text-[12px] font-semibold text-[var(--text-secondary)]"
-                    >
-                      {header.isPlaceholder ? null : canSort ? (
-                        <button
-                          type="button"
-                          onClick={header.column.getToggleSortingHandler()}
-                          className="inline-flex items-center gap-1 hover:text-[var(--text-primary)]"
-                        >
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                          {sorted === "asc" ? (
-                            <ArrowUp className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
-                          ) : sorted === "desc" ? (
-                            <ArrowDown className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
-                          ) : (
-                            <ArrowUpDown className="h-3.5 w-3.5 text-[var(--text-muted)]/60" />
-                          )}
-                        </button>
-                      ) : (
-                        flexRender(header.column.columnDef.header, header.getContext())
-                      )}
-                    </th>
-                  );
-                })}
-              </tr>
-            ))}
-          </thead>
-          <tbody className="divide-y divide-[var(--border-subtle)]">
-            {isLoading ? (
-              Array.from({ length: 5 }).map((_, rIdx) => (
-                <tr key={rIdx} className="animate-pulse">
-                  {columns.map((_, cIdx) => (
-                    <td key={cIdx} className="px-4 py-3">
-                      <div className="h-4 w-24 rounded bg-[var(--border-subtle)]/70" />
-                    </td>
-                  ))}
-                </tr>
-              ))
-            ) : table.getRowModel().rows.length === 0 ? (
-              <tr>
-                <td colSpan={columns.length} className="p-6">
-                  <EmptyState title={emptyTitle} description={emptyDescription} />
-                </td>
-              </tr>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className={cn(
-                    "transition-colors hover:bg-[var(--bg-canvas)]/70",
-                    row.getIsSelected() && "bg-[var(--brand-tint)]/60"
-                  )}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="whitespace-nowrap px-4 py-2.5 text-[var(--text-primary)]">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id} className="hover:bg-transparent">
+              {headerGroup.headers.map((header) => {
+                const canSort = header.column.getCanSort();
+                const sorted = header.column.getIsSorted();
+                return (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder ? null : canSort ? (
+                      <button
+                        type="button"
+                        onClick={header.column.getToggleSortingHandler()}
+                        className="inline-flex items-center gap-1 hover:text-foreground"
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {sorted === "asc" ? (
+                          <ArrowUp className="h-3.5 w-3.5 text-primary" />
+                        ) : sorted === "desc" ? (
+                          <ArrowDown className="h-3.5 w-3.5 text-primary" />
+                        ) : (
+                          <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground/60" />
+                        )}
+                      </button>
+                    ) : (
+                      flexRender(header.column.columnDef.header, header.getContext())
+                    )}
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {isLoading ? (
+            Array.from({ length: 5 }).map((_, rIdx) => (
+              <TableRow key={rIdx} className="hover:bg-transparent">
+                {columns.map((_, cIdx) => (
+                  <TableCell key={cIdx}>
+                    <Skeleton className="h-4 w-24" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : table.getRowModel().rows.length === 0 ? (
+            <TableRow className="hover:bg-transparent">
+              <TableCell colSpan={columns.length} className="p-6">
+                <EmptyState title={emptyTitle} description={emptyDescription} />
+              </TableCell>
+            </TableRow>
+          ) : (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() ? "selected" : undefined}
+                className={cn(row.getIsSelected() && "bg-accent/60")}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id} className="whitespace-nowrap">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
 
       {onPageChange !== undefined && pageIndex !== undefined && totalCount !== undefined && (
-        <div className="flex items-center justify-between border-t border-[var(--border-subtle)] px-4 py-2.5 text-[12px] text-[var(--text-secondary)]">
+        <div className="flex items-center justify-between border-t border-border px-4 py-2.5 text-[12px] text-muted-foreground">
           <div>
             Showing{" "}
-            <span className="font-mono font-medium text-[var(--text-primary)]">
+            <span className="font-mono font-medium text-foreground">
               {totalCount === 0 ? 0 : pageIndex * pageSize + 1}
             </span>{" "}
             –{" "}
-            <span className="font-mono font-medium text-[var(--text-primary)]">
+            <span className="font-mono font-medium text-foreground">
               {Math.min((pageIndex + 1) * pageSize, totalCount)}
             </span>{" "}
-            of <span className="font-mono font-medium text-[var(--text-primary)]">{totalCount}</span>
+            of <span className="font-mono font-medium text-foreground">{totalCount}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="xs"
               disabled={pageIndex <= 0}
               onClick={() => onPageChange(pageIndex - 1)}
-              className="inline-flex h-7 items-center gap-1 rounded bg-white px-2.5 text-[12px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)] disabled:opacity-40"
             >
               <ChevronLeft className="h-3.5 w-3.5" />
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="outline"
+              size="xs"
               disabled={(pageIndex + 1) * pageSize >= totalCount}
               onClick={() => onPageChange(pageIndex + 1)}
-              className="inline-flex h-7 items-center gap-1 rounded bg-white px-2.5 text-[12px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)] disabled:opacity-40"
             >
               <ChevronRight className="h-3.5 w-3.5" />
-            </button>
+            </Button>
           </div>
         </div>
       )}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SETTINGS_NAV } from "@/lib/constants";
 import { useEntitlements } from "@/lib/entitlements";
+import { Card } from "@ims/ui";
 
 export default function SettingsLayout({
   children,
@@ -27,7 +28,7 @@ export default function SettingsLayout({
 
       <div className="flex flex-col gap-6 lg:flex-row">
         <aside className="w-full shrink-0 lg:w-56">
-          <nav className="space-y-1 rounded-[12px] border border-[var(--border-subtle)] bg-white p-2">
+          <Card className="space-y-1 p-2">
             {SETTINGS_NAV.map((item) => {
               if (item.feature && !hasFeature(item.feature)) {
                 return null;
@@ -40,8 +41,8 @@ export default function SettingsLayout({
                   href={item.href}
                   className={`flex h-9 items-center gap-2.5 rounded-[8px] px-3 text-[13px] font-medium transition-colors ${
                     active
-                      ? "bg-[var(--brand-tint)] text-[var(--brand-primary)]"
-                      : "text-[var(--text-secondary)] hover:bg-[var(--bg-canvas)] hover:text-[var(--text-primary)]"
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:bg-background hover:text-foreground"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -49,7 +50,7 @@ export default function SettingsLayout({
                 </Link>
               );
             })}
-          </nav>
+          </Card>
         </aside>
 
         <div className="min-w-0 flex-1">{children}</div>

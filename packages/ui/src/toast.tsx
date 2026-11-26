@@ -19,6 +19,7 @@ export function Toaster({ theme = "light" }: { theme?: "light" | "dark" }) {
         style: {
           borderRadius: "10px",
           fontSize: "13px",
+          borderColor: "var(--border)",
         },
       }}
     />

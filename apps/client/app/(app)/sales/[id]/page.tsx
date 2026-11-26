@@ -11,7 +11,37 @@ import {
   SalesOrderView,
   StockItemView,
 } from "@ims/api-client";
-import { ErrorState, StatTile, StatusBadge, toast, toastApiError } from "@ims/ui";
+import {
+  Alert,
+  AlertDescription,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  Button,
+  Combobox,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  ErrorState,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  StatTile,
+  StatusBadge,
+  toast,
+  toastApiError,
+} from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { ArrowLeft, CheckCircle2, Package, Plus, Send, Truck, X, XCircle } from "lucide-react";
 
@@ -46,6 +76,7 @@ export default function SalesOrderDetailPage() {
   const [allocStockId, setAllocStockId] = useState("");
   const [allocShipmentId, setAllocShipmentId] = useState("");
   const [allocQty, setAllocQty] = useState("1");
+  const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -163,19 +194,15 @@ export default function SalesOrderDetailPage() {
               >
                 <Truck className="w-4 h-4" /> New Shipment
               </button>
-              <button
+              <Button
+                type="button"
+                variant="outline"
                 disabled={busy}
-                onClick={() =>
-                  runAction(
-                    () => apiFetch(`/api/v1/sales-orders/${soId}/cancel`, { method: "POST" }),
-                    `Sales order ${so.reference} cancelled`,
-                    "info"
-                  )
-                }
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-destructive/40 text-destructive text-sm font-medium hover:bg-destructive/10"
+                onClick={() => setConfirmCancelOpen(true)}
+                className="border-destructive/40 text-destructive hover:bg-destructive/10"
               >
                 <XCircle className="w-4 h-4" /> Cancel
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -296,96 +323,82 @@ export default function SalesOrderDetailPage() {
           </div>
         </div>
 
-        {showAddLine && (
-          <div className="ims-modal-backdrop bg-black/50">
-            <div className="bg-card border rounded-xl w-full max-w-md p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Add Sales Order Line</h3>
-                <button onClick={() => setShowAddLine(false)}>
-                  <X className="w-5 h-5" />
-                </button>
+        <Dialog open={showAddLine} onOpenChange={setShowAddLine}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add Sales Order Line</DialogTitle>
+            </DialogHeader>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                runAction(async () => {
+                  await apiFetch(`/api/v1/sales-orders/${soId}/lines`, {
+                    method: "POST",
+                    body: JSON.stringify({
+                      partId: linePartId,
+                      quantity: Number(lineQty),
+                      salePrice: linePrice ? Number(linePrice) : null,
+                    }),
+                  });
+                  setShowAddLine(false);
+                }, "Line item added");
+              }}
+              className="space-y-4"
+            >
+              <div className="space-y-1">
+                <Label>Salable Part *</Label>
+                <Combobox
+                  value={linePartId}
+                  onValueChange={setLinePartId}
+                  placeholder="Select part…"
+                  searchPlaceholder="Search salable parts…"
+                  options={salableParts.map((p) => ({
+                    value: p.id,
+                    label: `${p.ipn ? `${p.ipn} — ` : ""}${p.name}`,
+                  }))}
+                />
               </div>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  runAction(async () => {
-                    await apiFetch(`/api/v1/sales-orders/${soId}/lines`, {
-                      method: "POST",
-                      body: JSON.stringify({
-                        partId: linePartId,
-                        quantity: Number(lineQty),
-                        salePrice: linePrice ? Number(linePrice) : null,
-                      }),
-                    });
-                    setShowAddLine(false);
-                  }, "Line item added");
-                }}
-                className="space-y-4"
-              >
-                <div>
-                  <label className="block text-sm font-medium mb-1">Salable Part *</label>
-                  <select
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Quantity *</Label>
+                  <Input
+                    type="number"
+                    step="any"
+                    min="0.0001"
                     required
-                    value={linePartId}
-                    onChange={(e) => setLinePartId(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                  >
-                    <option value="">Select part...</option>
-                    {salableParts.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.ipn ? `${p.ipn} — ` : ""}
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
+                    value={lineQty}
+                    onChange={(e) => setLineQty(e.target.value)}
+                  />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Quantity *</label>
-                    <input
-                      type="number"
-                      step="any"
-                      min="0.0001"
-                      required
-                      value={lineQty}
-                      onChange={(e) => setLineQty(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Unit Price</label>
-                    <input
-                      type="number"
-                      step="any"
-                      min="0"
-                      value={linePrice}
-                      onChange={(e) => setLinePrice(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                    />
-                  </div>
+                <div className="space-y-1">
+                  <Label>Unit Price</Label>
+                  <Input
+                    type="number"
+                    step="any"
+                    min="0"
+                    value={linePrice}
+                    onChange={(e) => setLinePrice(e.target.value)}
+                  />
                 </div>
-                <div className="flex justify-end gap-2">
-                  <button type="button" onClick={() => setShowAddLine(false)} className="px-4 py-2 text-sm border rounded-lg">
-                    Cancel
-                  </button>
-                  <button type="submit" className="px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground">
-                    Add Line
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {allocLine && (
-          <div className="ims-modal-backdrop bg-black/50">
-            <div className="bg-card border rounded-xl w-full max-w-md p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Allocate Stock: {allocLine.partName}</h3>
-                <button onClick={() => setAllocLine(null)}>
-                  <X className="w-5 h-5" />
-                </button>
               </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setShowAddLine(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={!linePartId}>
+                  Add Line
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={Boolean(allocLine)} onOpenChange={(open) => !open && setAllocLine(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Allocate Stock: {allocLine?.partName}</DialogTitle>
+            </DialogHeader>
+            {allocLine && (
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -404,64 +417,92 @@ export default function SalesOrderDetailPage() {
                 }}
                 className="space-y-4"
               >
-                <div>
-                  <label className="block text-sm font-medium mb-1">Shipment</label>
-                  <select
-                    value={allocShipmentId}
-                    onChange={(e) => setAllocShipmentId(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
+                <div className="space-y-1">
+                  <Label>Shipment</Label>
+                  <Select
+                    value={allocShipmentId || "__none__"}
+                    onValueChange={(val) =>
+                      setAllocShipmentId(val === "__none__" ? "" : val)
+                    }
                   >
-                    <option value="">Unassigned to shipment</option>
-                    {so.shipments
-                      .filter((s) => !s.shipped)
-                      .map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.reference}
-                        </option>
-                      ))}
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Unassigned to shipment" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">Unassigned to shipment</SelectItem>
+                      {so.shipments
+                        .filter((s) => !s.shipped)
+                        .map((s) => (
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.reference}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Stock Item *</label>
-                  <select
-                    required
+                <div className="space-y-1">
+                  <Label>Stock Item *</Label>
+                  <Combobox
                     value={allocStockId}
-                    onChange={(e) => setAllocStockId(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                  >
-                    <option value="">Select stock...</option>
-                    {availableStock.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.locationPathString ?? "Unassigned"} · Qty: {s.quantity}
-                        {s.serialNumber ? ` · SN:${s.serialNumber}` : ""}
-                      </option>
-                    ))}
-                  </select>
+                    onValueChange={setAllocStockId}
+                    placeholder="Select stock…"
+                    searchPlaceholder="Search stock lots…"
+                    options={availableStock.map((s) => ({
+                      value: s.id,
+                      label: `${s.locationPathString ?? "Unassigned"} · Qty: ${s.quantity}${s.serialNumber ? ` · SN:${s.serialNumber}` : ""}`,
+                    }))}
+                  />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Quantity *</label>
-                  <input
+                <div className="space-y-1">
+                  <Label>Quantity *</Label>
+                  <Input
                     type="number"
                     step="any"
                     min="0.0001"
                     required
                     value={allocQty}
                     onChange={(e) => setAllocQty(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
                   />
                 </div>
-                <div className="flex justify-end gap-2">
-                  <button type="button" onClick={() => setAllocLine(null)} className="px-4 py-2 text-sm border rounded-lg">
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setAllocLine(null)}>
                     Cancel
-                  </button>
-                  <button type="submit" className="px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground">
+                  </Button>
+                  <Button type="submit" disabled={!allocStockId}>
                     Allocate
-                  </button>
-                </div>
+                  </Button>
+                </DialogFooter>
               </form>
-            </div>
-          </div>
-        )}
+            )}
+          </DialogContent>
+        </Dialog>
+
+        <AlertDialog open={confirmCancelOpen} onOpenChange={setConfirmCancelOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Cancel sales order {so.reference}?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will cancel the sales order and release unshipped allocations.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Keep Order</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => {
+                  setConfirmCancelOpen(false);
+                  runAction(
+                    () => apiFetch(`/api/v1/sales-orders/${soId}/cancel`, { method: "POST" }),
+                    `Sales order ${so.reference} cancelled`,
+                    "info"
+                  );
+                }}
+              >
+                Cancel Order
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </FeatureGate>
   );

@@ -11,7 +11,31 @@ import {
   PageResponse,
   PurchaseOrderView,
 } from "@ims/api-client";
-import { DataTable, EmptyState, ErrorState, StatTile, StatusBadge, toast, toastApiError } from "@ims/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Combobox,
+  DataTable,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  EmptyState,
+  ErrorState,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  StatTile,
+  StatusBadge,
+  toast,
+  toastApiError,
+} from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { ListToolbar } from "@/components/list-toolbar";
 import { Plus, ShoppingCart, X } from "lucide-react";
@@ -220,22 +244,26 @@ export default function PurchaseOrdersPage() {
           }}
           searchPlaceholder="Search PO reference, description, or vendor reference…"
           filters={
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
+            <Select
+              value={statusFilter || "__all__"}
+              onValueChange={(val) => {
+                setStatusFilter(val === "__all__" ? "" : val);
                 setPageIndex(0);
               }}
-              className="h-9 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px]"
             >
-              <option value="">All Statuses</option>
-              <option value="PENDING">PENDING</option>
-              <option value="PLACED">PLACED</option>
-              <option value="IN_PROGRESS">IN_PROGRESS</option>
-              <option value="COMPLETE">COMPLETE</option>
-              <option value="ON_HOLD">ON_HOLD</option>
-              <option value="CANCELLED">CANCELLED</option>
-            </select>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">All Statuses</SelectItem>
+                <SelectItem value="PENDING">PENDING</SelectItem>
+                <SelectItem value="PLACED">PLACED</SelectItem>
+                <SelectItem value="IN_PROGRESS">IN_PROGRESS</SelectItem>
+                <SelectItem value="COMPLETE">COMPLETE</SelectItem>
+                <SelectItem value="ON_HOLD">ON_HOLD</SelectItem>
+                <SelectItem value="CANCELLED">CANCELLED</SelectItem>
+              </SelectContent>
+            </Select>
           }
           primaryAction={
             hasPermission("ORDER:CREATE")
@@ -286,117 +314,93 @@ export default function PurchaseOrdersPage() {
           />
         )}
 
-        {showCreate && (
-          <div className="ims-modal-backdrop">
-            <div className="ims-modal-panel">
-              <div className="ims-modal-header">
-                <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">New Purchase Order</h2>
-                <button
-                  type="button"
-                  onClick={() => setShowCreate(false)}
-                  className="rounded p-1 text-[var(--text-muted)]"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+        <Dialog open={showCreate} onOpenChange={setShowCreate}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>New Purchase Order</DialogTitle>
+            </DialogHeader>
+
+            <form onSubmit={handleCreatePo} className="space-y-3">
+              {formError && (
+                <Alert variant="destructive">
+                  <AlertDescription>{formError}</AlertDescription>
+                </Alert>
+              )}
+
+              <div className="space-y-1">
+                <Label>Supplier *</Label>
+                <Combobox
+                  value={form.supplierId}
+                  onValueChange={(val) => {
+                    const sup = suppliers.find((s) => s.id === val);
+                    setForm({
+                      ...form,
+                      supplierId: val,
+                      currency: sup?.defaultCurrency ?? form.currency,
+                    });
+                  }}
+                  placeholder="Select supplier…"
+                  searchPlaceholder="Search suppliers…"
+                  options={suppliers.map((s) => ({
+                    value: s.id,
+                    label: `${s.name} (${s.defaultCurrency})`,
+                  }))}
+                />
               </div>
 
-              <form onSubmit={handleCreatePo} className="mt-4 space-y-3">
-                {formError && (
-                  <div className="ims-alert-error">
-                    {formError}
-                  </div>
-                )}
-
-                <div>
-                  <label className="ims-label">Supplier *</label>
-                  <select
-                    required
-                    value={form.supplierId}
-                    onChange={(e) => {
-                      const sup = suppliers.find((s) => s.id === e.target.value);
-                      setForm({
-                        ...form,
-                        supplierId: e.target.value,
-                        currency: sup?.defaultCurrency ?? form.currency,
-                      });
-                    }}
-                    className="ims-select mt-1"
-                  >
-                    <option value="">Select supplier…</option>
-                    {suppliers.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name} ({s.defaultCurrency})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="ims-label">
-                      Currency
-                    </label>
-                    <input
-                      type="text"
-                      maxLength={3}
-                      value={form.currency}
-                      onChange={(e) => setForm({ ...form, currency: e.target.value.toUpperCase() })}
-                      className="ims-input mt-1 font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="ims-label">
-                      Default Receiving Bin
-                    </label>
-                    <select
-                      value={form.destinationLocationId}
-                      onChange={(e) => setForm({ ...form, destinationLocationId: e.target.value })}
-                      className="ims-select mt-1"
-                    >
-                      <option value="">Select bin at receive time</option>
-                      {locations
-                        .filter((l) => !l.structural)
-                        .map((l) => (
-                          <option key={l.id} value={l.id}>
-                            {l.pathString}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="ims-label">
-                    Description
-                  </label>
-                  <input
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Currency</Label>
+                  <Input
                     type="text"
-                    value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    placeholder="Monthly component replenishment"
-                    className="ims-input mt-1"
+                    maxLength={3}
+                    value={form.currency}
+                    onChange={(e) => setForm({ ...form, currency: e.target.value.toUpperCase() })}
+                    className="font-mono"
                   />
                 </div>
-
-                <div className="ims-modal-footer">
-                  <button
-                    type="button"
-                    onClick={() => setShowCreate(false)}
-                    className="ims-btn-secondary"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="ims-btn-primary"
-                  >
-                    Create PO
-                  </button>
+                <div className="space-y-1">
+                  <Label>Default Receiving Bin</Label>
+                  <Combobox
+                    value={form.destinationLocationId}
+                    onValueChange={(val) => setForm({ ...form, destinationLocationId: val })}
+                    placeholder="Select bin at receive time"
+                    searchPlaceholder="Search bins…"
+                    options={[
+                      { value: "", label: "Select bin at receive time" },
+                      ...locations
+                        .filter((l) => !l.structural)
+                        .map((l) => ({ value: l.id, label: l.pathString })),
+                    ]}
+                  />
                 </div>
-              </form>
-            </div>
-          </div>
-        )}
+              </div>
+
+              <div className="space-y-1">
+                <Label>Description</Label>
+                <Input
+                  type="text"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="Monthly component replenishment"
+                />
+              </div>
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowCreate(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={!form.supplierId}>
+                  Create PO
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </FeatureGate>
   );

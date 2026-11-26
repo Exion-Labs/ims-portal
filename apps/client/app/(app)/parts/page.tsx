@@ -12,12 +12,32 @@ import {
   StockSummaryView,
 } from "@ims/api-client";
 import {
+  Alert,
+  AlertDescription,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   BulkActionBar,
+  Button,
+  Card,
+  Checkbox,
+  Combobox,
   DataTable,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   EmptyState,
   ErrorState,
   ImportWizard,
-  StatTile,
+  Input,
+  Label,
   StatusBadge,
   toast,
   toastApiError,
@@ -67,6 +87,7 @@ function PartsCatalogPageContent() {
   const [showCategoryModal, setShowCategoryModal] = useState<
     null | { mode: "create" | "edit" | "move"; category?: CategoryView }
   >(null);
+  const [deleteCategoryTarget, setDeleteCategoryTarget] = useState<CategoryView | null>(null);
 
   // Item form state (simplified for small business, defaults to purchaseable + salable)
   const [partForm, setPartForm] = useState({
@@ -378,64 +399,45 @@ function PartsCatalogPageContent() {
 
   return (
     <div className="space-y-4">
-      {/* Modal: Import Wizard */}
-      {showImporter && (
-        <div
-          className="ims-modal-backdrop"
-          onClick={() => setShowImporter(false)}
-        >
-          <div
-            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[12px] border border-[var(--border-subtle)] bg-white p-6 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-4 flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">Import Items (CSV / XLSX)</h2>
-              <button
-                type="button"
-                onClick={() => setShowImporter(false)}
-                aria-label="Close importer"
-                className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-canvas)]"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <ImportWizard
-              targetType="PART"
-              targetFields={[
-                { key: "ipn", label: "SKU / Item Code", required: true },
-                { key: "name", label: "Item Name", required: true },
-                { key: "description", label: "Description", required: false },
-                { key: "category", label: "Category Name / Path", required: false },
-                { key: "unit", label: "Unit of Measure (pcs, box, kg)", required: false },
-                { key: "minimumStock", label: "Minimum Stock Alert", required: false },
-                { key: "purchaseable", label: "Can be Purchased (true/false)", required: false },
-                { key: "salable", label: "Can be Sold (true/false)", required: false },
-              ]}
-            />
-
-            <div className="mt-4 flex justify-end border-t border-[var(--border-subtle)] pt-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowImporter(false);
-                  loadParts();
-                  refetch();
-                }}
-                className="h-9 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
-              >
-                Done & Refresh Table
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Dialog: Import Wizard */}
+      <Dialog open={showImporter} onOpenChange={setShowImporter}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Import Items (CSV / XLSX)</DialogTitle>
+          </DialogHeader>
+          <ImportWizard
+            targetType="PART"
+            targetFields={[
+              { key: "ipn", label: "SKU / Item Code", required: true },
+              { key: "name", label: "Item Name", required: true },
+              { key: "description", label: "Description", required: false },
+              { key: "category", label: "Category Name / Path", required: false },
+              { key: "unit", label: "Unit of Measure (pcs, box, kg)", required: false },
+              { key: "minimumStock", label: "Minimum Stock Alert", required: false },
+              { key: "purchaseable", label: "Can be Purchased (true/false)", required: false },
+              { key: "salable", label: "Can be Sold (true/false)", required: false },
+            ]}
+          />
+          <DialogFooter>
+            <Button
+              type="button"
+              onClick={() => {
+                setShowImporter(false);
+                loadParts();
+                refetch();
+              }}
+            >
+              Done &amp; Refresh Table
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Split-Pane Layout: Left Category Tree + Right Items DataTable */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Left Pane: Category Tree (backed by PostgreSQL ltree) */}
         <div className="lg:col-span-3">
-          <div className="ims-card p-4">
+          <Card className="p-4">
             <div className="ims-modal-header">
               <div>
                 <div className="text-[14px] font-semibold text-[var(--text-primary)]">Categories</div>
@@ -574,7 +576,7 @@ function PartsCatalogPageContent() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDeleteCategory(selectedCategory)}
+                      onClick={() => setDeleteCategoryTarget(selectedCategory)}
                       className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/40 px-2 text-[11px] font-medium text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -586,7 +588,7 @@ function PartsCatalogPageContent() {
                 )}
               </div>
             )}
-          </div>
+          </Card>
         </div>
 
         {/* Right Pane: Search & Filters + Items DataTable */}
@@ -722,275 +724,254 @@ function PartsCatalogPageContent() {
         </a>
       </BulkActionBar>
 
-      {/* Modal: Create Item */}
-      {showCreatePart && (
-        <div className="ims-modal-backdrop">
-          <div className="ims-modal-panel">
-            <div className="ims-modal-header">
-              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">Add New Item</h2>
-              <button
-                type="button"
-                onClick={() => setShowCreatePart(false)}
-                className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-canvas)]"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+      {/* Dialog: Create Item */}
+      <Dialog open={showCreatePart} onOpenChange={setShowCreatePart}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add New Item</DialogTitle>
+          </DialogHeader>
 
-            <form onSubmit={handleCreatePart} className="mt-4 space-y-4">
-              {partFormError && (
-                <div className="ims-alert-error">
-                  {partFormError}
-                </div>
-              )}
+          <form onSubmit={handleCreatePart} className="space-y-4">
+            {partFormError && (
+              <Alert variant="destructive">
+                <AlertDescription>{partFormError}</AlertDescription>
+              </Alert>
+            )}
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <label className="ims-label">
-                    SKU / Item Code *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={partForm.ipn}
-                    onChange={(e) => setPartForm({ ...partForm, ipn: e.target.value })}
-                    placeholder="ITEM-001"
-                    className="ims-input mt-1 font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="ims-label">
-                    Category
-                  </label>
-                  <select
-                    value={partForm.categoryId}
-                    onChange={(e) => setPartForm({ ...partForm, categoryId: e.target.value })}
-                    className="ims-select mt-1"
-                  >
-                    <option value="">Uncategorized</option>
-                    {categories
-                      .filter((c) => !c.structural)
-                      .map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.pathString}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="ims-label">
-                  Item Name *
-                </label>
-                <input
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="space-y-1">
+                <Label>SKU / Item Code *</Label>
+                <Input
                   type="text"
                   required
-                  value={partForm.name}
-                  onChange={(e) => setPartForm({ ...partForm, name: e.target.value })}
-                  placeholder="e.g. Wireless Barcode Scanner"
-                  className="ims-input mt-1"
+                  value={partForm.ipn}
+                  onChange={(e) => setPartForm({ ...partForm, ipn: e.target.value })}
+                  placeholder="ITEM-001"
+                  className="font-mono"
                 />
               </div>
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <label className="ims-label">
-                    Unit of Measure
-                  </label>
-                  <input
-                    type="text"
-                    value={partForm.unit}
-                    onChange={(e) => setPartForm({ ...partForm, unit: e.target.value })}
-                    placeholder="pcs, box, kg, L"
-                    className="ims-input mt-1 font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="ims-label">
-                    Low Stock Alert Threshold
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    min="0"
-                    value={partForm.minimumStock}
-                    onChange={(e) => setPartForm({ ...partForm, minimumStock: e.target.value })}
-                    className="ims-input mt-1 font-mono"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="ims-label">
-                  Description (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={partForm.description}
-                  onChange={(e) => setPartForm({ ...partForm, description: e.target.value })}
-                  placeholder="Short notes or product details"
-                  className="ims-input mt-1"
+              <div className="space-y-1">
+                <Label>Category</Label>
+                <Combobox
+                  value={partForm.categoryId}
+                  onValueChange={(val) => setPartForm({ ...partForm, categoryId: val })}
+                  placeholder="Uncategorized"
+                  searchPlaceholder="Search categories…"
+                  options={[
+                    { value: "", label: "Uncategorized" },
+                    ...categories
+                      .filter((c) => !c.structural)
+                      .map((c) => ({ value: c.id, label: c.pathString })),
+                  ]}
                 />
               </div>
-
-              {/* Simplified Business Options */}
-              <div>
-                <div className="mb-1.5 text-[12px] font-medium text-[var(--text-primary)]">
-                  Item Options
-                </div>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                  <label className="flex items-center gap-2 rounded-[8px] border border-[var(--border-subtle)] px-3 py-2 text-[12px]">
-                    <input
-                      type="checkbox"
-                      checked={partForm.purchaseable}
-                      onChange={(e) =>
-                        setPartForm({ ...partForm, purchaseable: e.target.checked })
-                      }
-                    />
-                    <span>We buy this</span>
-                  </label>
-                  <label className="flex items-center gap-2 rounded-[8px] border border-[var(--border-subtle)] px-3 py-2 text-[12px]">
-                    <input
-                      type="checkbox"
-                      checked={partForm.salable}
-                      onChange={(e) => setPartForm({ ...partForm, salable: e.target.checked })}
-                    />
-                    <span>We sell this</span>
-                  </label>
-                  <label className="flex items-center gap-2 rounded-[8px] border border-[var(--border-subtle)] px-3 py-2 text-[12px]">
-                    <input
-                      type="checkbox"
-                      checked={partForm.trackable}
-                      onChange={(e) =>
-                        setPartForm({ ...partForm, trackable: e.target.checked })
-                      }
-                    />
-                    <span>Track serial numbers</span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="ims-modal-footer">
-                <button
-                  type="button"
-                  onClick={() => setShowCreatePart(false)}
-                  className="h-9 rounded-[8px] border border-[var(--border-subtle)] px-4 text-[13px] font-medium text-[var(--text-secondary)]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submittingPart}
-                  className="ims-btn-primary"
-                >
-                  {submittingPart ? "Saving…" : "Save Item"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal: Create / Edit / Move Category */}
-      {showCategoryModal && (
-        <div className="ims-modal-backdrop">
-          <div className="ims-modal-panel max-w-md">
-            <div className="ims-modal-header">
-              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">
-                {showCategoryModal.mode === "create"
-                  ? "New Category"
-                  : showCategoryModal.mode === "edit"
-                    ? `Rename Category · ${showCategoryModal.category?.name}`
-                    : `Move Category · ${showCategoryModal.category?.name}`}
-              </h2>
-              <button
-                type="button"
-                onClick={() => setShowCategoryModal(null)}
-                className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-canvas)]"
-              >
-                <X className="h-4 w-4" />
-              </button>
             </div>
 
-            <form onSubmit={handleSaveCategory} className="mt-4 space-y-4">
-              {catFormError && (
-                <div className="ims-alert-error">
-                  {catFormError}
-                </div>
-              )}
+            <div className="space-y-1">
+              <Label>Item Name *</Label>
+              <Input
+                type="text"
+                required
+                value={partForm.name}
+                onChange={(e) => setPartForm({ ...partForm, name: e.target.value })}
+                placeholder="e.g. Wireless Barcode Scanner"
+              />
+            </div>
 
-              {showCategoryModal.mode !== "move" && (
-                <>
-                  <div>
-                    <label className="ims-label">
-                      Category Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={catName}
-                      onChange={(e) => setCatName(e.target.value)}
-                      placeholder="e.g. Beverages, Electronics, Packaging"
-                      className="ims-input mt-1"
-                    />
-                  </div>
-                  <div>
-                    <label className="ims-label">
-                      Description (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      value={catDesc}
-                      onChange={(e) => setCatDesc(e.target.value)}
-                      placeholder="Optional notes about this category"
-                      className="ims-input mt-1"
-                    />
-                  </div>
-                </>
-              )}
-
-              {(showCategoryModal.mode === "create" || showCategoryModal.mode === "move") && (
-                <div>
-                  <label className="ims-label">
-                    Parent Category
-                  </label>
-                  <select
-                    value={catParentId}
-                    onChange={(e) => setCatParentId(e.target.value)}
-                    className="ims-select mt-1"
-                  >
-                    <option value="">(Top-level category)</option>
-                    {categories
-                      .filter((c) => c.id !== showCategoryModal.category?.id)
-                      .map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.pathString}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-              )}
-
-              <div className="ims-modal-footer">
-                <button
-                  type="button"
-                  onClick={() => setShowCategoryModal(null)}
-                  className="h-9 rounded-[8px] border border-[var(--border-subtle)] px-4 text-[13px] font-medium text-[var(--text-secondary)]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="h-9 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
-                >
-                  Save
-                </button>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="space-y-1">
+                <Label>Unit of Measure</Label>
+                <Input
+                  type="text"
+                  value={partForm.unit}
+                  onChange={(e) => setPartForm({ ...partForm, unit: e.target.value })}
+                  placeholder="pcs, box, kg, L"
+                  className="font-mono"
+                />
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+              <div className="space-y-1">
+                <Label>Low Stock Alert Threshold</Label>
+                <Input
+                  type="number"
+                  step="any"
+                  min="0"
+                  value={partForm.minimumStock}
+                  onChange={(e) => setPartForm({ ...partForm, minimumStock: e.target.value })}
+                  className="font-mono"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label>Description (Optional)</Label>
+              <Input
+                type="text"
+                value={partForm.description}
+                onChange={(e) => setPartForm({ ...partForm, description: e.target.value })}
+                placeholder="Short notes or product details"
+              />
+            </div>
+
+            <div>
+              <div className="mb-1.5 text-[12px] font-medium text-foreground">
+                Item Options
+              </div>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <label className="flex cursor-pointer items-center gap-2 rounded-[8px] border border-border px-3 py-2 text-[12px]">
+                  <Checkbox
+                    checked={partForm.purchaseable}
+                    onCheckedChange={(v) =>
+                      setPartForm({ ...partForm, purchaseable: Boolean(v) })
+                    }
+                  />
+                  <span>We buy this</span>
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 rounded-[8px] border border-border px-3 py-2 text-[12px]">
+                  <Checkbox
+                    checked={partForm.salable}
+                    onCheckedChange={(v) =>
+                      setPartForm({ ...partForm, salable: Boolean(v) })
+                    }
+                  />
+                  <span>We sell this</span>
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 rounded-[8px] border border-border px-3 py-2 text-[12px]">
+                  <Checkbox
+                    checked={partForm.trackable}
+                    onCheckedChange={(v) =>
+                      setPartForm({ ...partForm, trackable: Boolean(v) })
+                    }
+                  />
+                  <span>Track serial numbers</span>
+                </label>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCreatePart(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={submittingPart}>
+                {submittingPart ? "Saving…" : "Save Item"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog: Create / Edit / Move Category */}
+      <Dialog
+        open={Boolean(showCategoryModal)}
+        onOpenChange={(open) => !open && setShowCategoryModal(null)}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {showCategoryModal?.mode === "create"
+                ? "New Category"
+                : showCategoryModal?.mode === "edit"
+                  ? `Rename Category · ${showCategoryModal?.category?.name}`
+                  : `Move Category · ${showCategoryModal?.category?.name}`}
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveCategory} className="space-y-4">
+            {catFormError && (
+              <Alert variant="destructive">
+                <AlertDescription>{catFormError}</AlertDescription>
+              </Alert>
+            )}
+
+            {showCategoryModal?.mode !== "move" && (
+              <>
+                <div className="space-y-1">
+                  <Label>Category Name *</Label>
+                  <Input
+                    type="text"
+                    required
+                    value={catName}
+                    onChange={(e) => setCatName(e.target.value)}
+                    placeholder="e.g. Beverages, Electronics, Packaging"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Description (Optional)</Label>
+                  <Input
+                    type="text"
+                    value={catDesc}
+                    onChange={(e) => setCatDesc(e.target.value)}
+                    placeholder="Optional notes about this category"
+                  />
+                </div>
+              </>
+            )}
+
+            {(showCategoryModal?.mode === "create" || showCategoryModal?.mode === "move") && (
+              <div className="space-y-1">
+                <Label>Parent Category</Label>
+                <Combobox
+                  value={catParentId}
+                  onValueChange={setCatParentId}
+                  placeholder="(Top-level category)"
+                  searchPlaceholder="Search parent categories…"
+                  options={[
+                    { value: "", label: "(Top-level category)" },
+                    ...categories
+                      .filter((c) => c.id !== showCategoryModal?.category?.id)
+                      .map((c) => ({ value: c.id, label: c.pathString })),
+                  ]}
+                />
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCategoryModal(null)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Save</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Delete Category */}
+      <AlertDialog
+        open={Boolean(deleteCategoryTarget)}
+        onOpenChange={(open) => !open && setDeleteCategoryTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete category?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete{" "}
+              <strong className="text-foreground">{deleteCategoryTarget?.name}</strong>? Child
+              categories and items will be reparented.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteCategoryTarget) {
+                  handleDeleteCategory(deleteCategoryTarget);
+                  setDeleteCategoryTarget(null);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

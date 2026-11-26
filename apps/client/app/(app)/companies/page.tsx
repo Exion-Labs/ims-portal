@@ -10,12 +10,30 @@ import {
   PageResponse,
 } from "@ims/api-client";
 import {
+  Alert,
+  AlertDescription,
+  Button,
+  Checkbox,
   DataTable,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   EmptyState,
   ErrorState,
   ImportWizard,
+  Input,
+  Label,
   StatTile,
   StatusBadge,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   toast,
   toastApiError,
 } from "@ims/ui";
@@ -351,207 +369,169 @@ export default function CompaniesPage() {
         />
       )}
 
-      {/* Modal: Create Company */}
-      {showCreateModal && (
-        <div className="ims-modal-backdrop">
-          <div className="ims-modal-panel">
-            <div className="ims-modal-header">
-              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">New Company</h2>
-              <button
-                type="button"
-                onClick={() => setShowCreateModal(false)}
-                className="rounded p-1 text-[var(--text-muted)]"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+      {/* Dialog: Create Company */}
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>New Company</DialogTitle>
+          </DialogHeader>
 
-            <form onSubmit={handleCreateCompany} className="mt-4 space-y-3">
-              {formError && (
-                <div className="ims-alert-error">
-                  {formError}
-                </div>
-              )}
-
-              <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-2">
-                  <label className="ims-label">
-                    Company Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={companyForm.name}
-                    onChange={(e) => setCompanyForm({ ...companyForm, name: e.target.value })}
-                    placeholder="Mouser Electronics"
-                    className="ims-input mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="ims-label">
-                    Currency
-                  </label>
-                  <input
-                    type="text"
-                    maxLength={3}
-                    value={companyForm.defaultCurrency}
-                    onChange={(e) =>
-                      setCompanyForm({
-                        ...companyForm,
-                        defaultCurrency: e.target.value.toUpperCase(),
-                      })
-                    }
-                    className="ims-input mt-1 font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="ims-label">Email</label>
-                  <input
-                    type="email"
-                    value={companyForm.email}
-                    onChange={(e) => setCompanyForm({ ...companyForm, email: e.target.value })}
-                    className="ims-input mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="ims-label">Website</label>
-                  <input
-                    type="text"
-                    value={companyForm.website}
-                    onChange={(e) => setCompanyForm({ ...companyForm, website: e.target.value })}
-                    className="ims-input mt-1"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 pt-1">
-                {[
-                  { key: "supplier", label: "Supplier" },
-                  { key: "manufacturer", label: "Manufacturer" },
-                  { key: "customer", label: "Customer" },
-                ].map((r) => (
-                  <label
-                    key={r.key}
-                    className="flex items-center gap-2 rounded-[8px] border border-[var(--border-subtle)] px-3 py-2 text-[12px]"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={Boolean(companyForm[r.key as keyof typeof companyForm])}
-                      onChange={(e) =>
-                        setCompanyForm({ ...companyForm, [r.key]: e.target.checked })
-                      }
-                    />
-                    <span>{r.label}</span>
-                  </label>
-                ))}
-              </div>
-
-              <div className="ims-modal-footer">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="ims-btn-secondary"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="ims-btn-primary"
-                >
-                  Create Company
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal: Exchange Rates */}
-      {showRatesModal && (
-        <div className="ims-modal-backdrop">
-          <div className="ims-modal-panel">
-            <div className="ims-modal-header">
-              <div>
-                <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">
-                  Exchange Rates (1 USD = X Target)
-                </h2>
-                <p className="text-[12px] text-[var(--text-secondary)]">
-                  Tenant base currency:{" "}
-                  <strong className="font-mono">{me?.baseCurrency ?? "USD"}</strong>
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowRatesModal(false)}
-                className="rounded p-1 text-[var(--text-muted)]"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            {rateError && (
-              <div className="mt-3 rounded-[8px] border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/60 p-2.5 text-[12px] text-[var(--status-danger-fg)]">
-                {rateError}
-              </div>
+          <form onSubmit={handleCreateCompany} className="space-y-3">
+            {formError && (
+              <Alert variant="destructive">
+                <AlertDescription>{formError}</AlertDescription>
+              </Alert>
             )}
 
-            <FeatureGate feature="MULTI_CURRENCY">
-              <form onSubmit={handleSaveRate} className="mt-3 flex gap-2">
-                <input
+            <div className="grid grid-cols-3 gap-3">
+              <div className="col-span-2 space-y-1">
+                <Label>Company Name *</Label>
+                <Input
+                  type="text"
+                  required
+                  value={companyForm.name}
+                  onChange={(e) => setCompanyForm({ ...companyForm, name: e.target.value })}
+                  placeholder="Mouser Electronics"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Currency</Label>
+                <Input
                   type="text"
                   maxLength={3}
-                  required
-                  value={rateCurrency}
-                  onChange={(e) => setRateCurrency(e.target.value.toUpperCase())}
-                  placeholder="EUR"
-                  className="h-9 w-24 rounded-[8px] border border-[var(--border-subtle)] px-3 font-mono text-[13px]"
+                  value={companyForm.defaultCurrency}
+                  onChange={(e) =>
+                    setCompanyForm({
+                      ...companyForm,
+                      defaultCurrency: e.target.value.toUpperCase(),
+                    })
+                  }
+                  className="font-mono"
                 />
-                <input
-                  type="number"
-                  step="any"
-                  required
-                  value={rateValue}
-                  onChange={(e) => setRateValue(e.target.value)}
-                  placeholder="0.92"
-                  className="h-9 flex-1 rounded-[8px] border border-[var(--border-subtle)] px-3 font-mono text-[13px]"
-                />
-                <button
-                  type="submit"
-                  className="h-9 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[12px] font-medium text-white"
-                >
-                  Update Rate
-                </button>
-              </form>
-            </FeatureGate>
-
-            <div className="mt-4 max-h-64 overflow-y-auto rounded-[8px] border border-[var(--border-subtle)]">
-              <table className="w-full border-collapse text-left text-[12px]">
-                <thead className="bg-[var(--bg-canvas)] text-[var(--text-secondary)]">
-                  <tr className="border-b border-[var(--border-subtle)]">
-                    <th className="px-3 py-2 font-semibold">Pair</th>
-                    <th className="px-3 py-2 text-right font-semibold">Rate</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--border-subtle)]">
-                  {rates.map((r) => (
-                    <tr key={r.id}>
-                      <td className="px-3 py-2 font-mono font-medium text-[var(--text-primary)]">
-                        1 {r.baseCurrency} → {r.targetCurrency}
-                      </td>
-                      <td className="px-3 py-2 text-right font-mono text-[var(--brand-primary)]">
-                        {Number(r.rate).toFixed(4)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={companyForm.email}
+                  onChange={(e) => setCompanyForm({ ...companyForm, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Website</Label>
+                <Input
+                  type="text"
+                  value={companyForm.website}
+                  onChange={(e) => setCompanyForm({ ...companyForm, website: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 pt-1">
+              {[
+                { key: "supplier", label: "Supplier" },
+                { key: "manufacturer", label: "Manufacturer" },
+                { key: "customer", label: "Customer" },
+              ].map((r) => (
+                <label
+                  key={r.key}
+                  className="flex cursor-pointer items-center gap-2 rounded-[8px] border border-border px-3 py-2 text-[12px]"
+                >
+                  <Checkbox
+                    checked={Boolean(companyForm[r.key as keyof typeof companyForm])}
+                    onCheckedChange={(v) =>
+                      setCompanyForm({ ...companyForm, [r.key]: Boolean(v) })
+                    }
+                  />
+                  <span>{r.label}</span>
+                </label>
+              ))}
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCreateModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Create Company</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog: Exchange Rates */}
+      <Dialog open={showRatesModal} onOpenChange={setShowRatesModal}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Exchange Rates (1 USD = X Target)</DialogTitle>
+            <DialogDescription>
+              Tenant base currency:{" "}
+              <strong className="font-mono">{me?.baseCurrency ?? "USD"}</strong>
+            </DialogDescription>
+          </DialogHeader>
+
+          {rateError && (
+            <Alert variant="destructive">
+              <AlertDescription>{rateError}</AlertDescription>
+            </Alert>
+          )}
+
+          <FeatureGate feature="MULTI_CURRENCY">
+            <form onSubmit={handleSaveRate} className="flex gap-2">
+              <Input
+                type="text"
+                maxLength={3}
+                required
+                value={rateCurrency}
+                onChange={(e) => setRateCurrency(e.target.value.toUpperCase())}
+                placeholder="EUR"
+                className="w-24 font-mono"
+              />
+              <Input
+                type="number"
+                step="any"
+                required
+                value={rateValue}
+                onChange={(e) => setRateValue(e.target.value)}
+                placeholder="0.92"
+                className="flex-1 font-mono"
+              />
+              <Button type="submit" size="sm">
+                Update Rate
+              </Button>
+            </form>
+          </FeatureGate>
+
+          <div className="max-h-64 overflow-y-auto rounded-[8px] border border-border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Pair</TableHead>
+                  <TableHead className="text-right">Rate</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rates.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="font-mono font-medium">
+                      1 {r.baseCurrency} → {r.targetCurrency}
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-primary">
+                      {Number(r.rate).toFixed(4)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

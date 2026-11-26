@@ -2,7 +2,25 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "@ims/api-client";
-import { toast, toastApiError } from "@ims/ui";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  toast,
+  toastApiError,
+} from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { FileText, Plus, Radio, Trash2, Webhook } from "lucide-react";
 
@@ -44,6 +62,9 @@ export default function IntegrationsSettingsPage() {
   // SSE status
   const [sseStatus, setSseStatus] = useState<string>("Disconnected");
   const [sseEvents, setSseEvents] = useState<string[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<
+    null | { type: "template" | "webhook"; id: string; name: string }
+  >(null);
 
   const loadData = useCallback(async () => {
     setError(null);
@@ -127,16 +148,17 @@ export default function IntegrationsSettingsPage() {
                 placeholder="Template name"
                 className="px-3 py-2 border rounded-lg text-sm bg-background"
               />
-              <select
-                value={tplEntity}
-                onChange={(e) => setTplEntity(e.target.value)}
-                className="px-3 py-2 border rounded-lg text-sm bg-background"
-              >
-                <option value="PART">PART</option>
-                <option value="PURCHASE_ORDER">PURCHASE_ORDER</option>
-                <option value="BUILD_ORDER">BUILD_ORDER</option>
-                <option value="SALES_ORDER">SALES_ORDER</option>
-              </select>
+              <Select value={tplEntity} onValueChange={setTplEntity}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PART">PART</SelectItem>
+                  <SelectItem value="PURCHASE_ORDER">PURCHASE_ORDER</SelectItem>
+                  <SelectItem value="BUILD_ORDER">BUILD_ORDER</SelectItem>
+                  <SelectItem value="SALES_ORDER">SALES_ORDER</SelectItem>
+                </SelectContent>
+              </Select>
               <input
                 required
                 value={tplHtml}
@@ -160,15 +182,8 @@ export default function IntegrationsSettingsPage() {
                 </div>
                 {hasPermission("ADMIN:DELETE") && (
                   <button
-                    onClick={async () => {
-                      try {
-                        await apiFetch(`/api/v1/reports/templates/${t.id}`, { method: "DELETE" });
-                        toast.success("Report template deleted", { description: t.name });
-                        await loadData();
-                      } catch (err) {
-                        toastApiError(err, "Failed to delete report template");
-                      }
-                    }}
+                    type="button"
+                    onClick={() => setDeleteTarget({ type: "template", id: t.id, name: t.name })}
                     className="text-destructive hover:opacity-80"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -238,15 +253,8 @@ export default function IntegrationsSettingsPage() {
                 </div>
                 {hasPermission("ADMIN:DELETE") && (
                   <button
-                    onClick={async () => {
-                      try {
-                        await apiFetch(`/api/v1/webhooks/${w.id}`, { method: "DELETE" });
-                        toast.success("Webhook deleted", { description: w.name });
-                        await loadData();
-                      } catch (err) {
-                        toastApiError(err, "Failed to delete webhook");
-                      }
-                    }}
+                    type="button"
+                    onClick={() => setDeleteTarget({ type: "webhook", id: w.id, name: w.name })}
                     className="text-destructive hover:opacity-80"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -277,6 +285,47 @@ export default function IntegrationsSettingsPage() {
           )}
         </div>
       </FeatureGate>
+      <AlertDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Delete {deleteTarget?.type === "template" ? "report template" : "webhook"}{" "}
+              {deleteTarget?.name}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={async () => {
+                if (!deleteTarget) return;
+                const target = deleteTarget;
+                setDeleteTarget(null);
+                try {
+                  if (target.type === "template") {
+                    await apiFetch(`/api/v1/reports/templates/${target.id}`, { method: "DELETE" });
+                    toast.success("Report template deleted", { description: target.name });
+                  } else {
+                    await apiFetch(`/api/v1/webhooks/${target.id}`, { method: "DELETE" });
+                    toast.success("Webhook deleted", { description: target.name });
+                  }
+                  await loadData();
+                } catch (err) {
+                  toastApiError(err, "Delete failed");
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

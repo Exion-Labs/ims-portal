@@ -2,7 +2,21 @@
 
 import React, { useEffect, useState } from "react";
 import { apiFetch, TenantSettingView } from "@ims/api-client";
-import { toast, toastApiError } from "@ims/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  toast,
+  toastApiError,
+} from "@ims/ui";
 import { useEntitlements } from "@/lib/entitlements";
 import { useQuery } from "@tanstack/react-query";
 
@@ -49,90 +63,77 @@ export default function OrganizationSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <form
-        onSubmit={handleSaveOrg}
-        className="ims-card p-6"
-      >
-        <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
-          Organization Profile
-        </h2>
-        <p className="mt-0.5 text-[13px] text-[var(--text-secondary)]">
-          Updates to organization details are recorded in your tenant&apos;s immutable Audit Log.
-        </p>
+      <Card className="p-6">
+        <form onSubmit={handleSaveOrg}>
+          <h2 className="text-[15px] font-semibold text-foreground">
+            Organization Profile
+          </h2>
+          <p className="mt-0.5 text-[13px] text-muted-foreground">
+            Updates to organization details are recorded in your tenant&apos;s immutable Audit Log.
+          </p>
 
-        {savedBanner && (
-          <div className="mt-4 rounded-[8px] border border-[var(--border-success)] bg-[var(--status-success-bg)]/50 px-3 py-2 text-[13px] text-[var(--status-success-fg)]">
-            Organization profile saved.
+          {savedBanner && (
+            <Alert variant="success" className="mt-4">
+              <AlertDescription>Organization profile saved.</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1">
+              <Label>Organization Name</Label>
+              <Input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label>Tenant Slug (Read-only)</Label>
+              <Input
+                type="text"
+                disabled
+                value={me?.tenantSlug ?? ""}
+                className="bg-background font-mono text-muted-foreground"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label>Base Currency</Label>
+              <Select value={baseCurrency} onValueChange={setBaseCurrency}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="USD">USD — US Dollar</SelectItem>
+                  <SelectItem value="EUR">EUR — Euro</SelectItem>
+                  <SelectItem value="GBP">GBP — British Pound</SelectItem>
+                  <SelectItem value="SEK">SEK — Swedish Krona</SelectItem>
+                  <SelectItem value="JPY">JPY — Japanese Yen</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label>Default Timezone</Label>
+              <Input
+                type="text"
+                required
+                value={timezone}
+                onChange={(e) => setTimezone(e.target.value)}
+                className="font-mono"
+              />
+            </div>
           </div>
-        )}
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="ims-label">
-              Organization Name
-            </label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="ims-input mt-1"
-            />
+          <div className="mt-6 flex justify-end">
+            <Button type="submit" disabled={saving}>
+              {saving ? "Saving…" : "Save Changes"}
+            </Button>
           </div>
-
-          <div>
-            <label className="ims-label">
-              Tenant Slug (Read-only)
-            </label>
-            <input
-              type="text"
-              disabled
-              value={me?.tenantSlug ?? ""}
-              className="mt-1 h-9 w-full rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-3 font-mono text-[13px] text-[var(--text-muted)]"
-            />
-          </div>
-
-          <div>
-            <label className="ims-label">
-              Base Currency
-            </label>
-            <select
-              value={baseCurrency}
-              onChange={(e) => setBaseCurrency(e.target.value)}
-              className="ims-select mt-1"
-            >
-              <option value="USD">USD — US Dollar</option>
-              <option value="EUR">EUR — Euro</option>
-              <option value="GBP">GBP — British Pound</option>
-              <option value="SEK">SEK — Swedish Krona</option>
-              <option value="JPY">JPY — Japanese Yen</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="ims-label">
-              Default Timezone
-            </label>
-            <input
-              type="text"
-              required
-              value={timezone}
-              onChange={(e) => setTimezone(e.target.value)}
-              className="ims-input mt-1 font-mono"
-            />
-          </div>
-        </div>
-
-        <div className="mt-6 flex justify-end">
-          <button
-            type="submit"
-            disabled={saving}
-            className="ims-btn-primary"
-          >
-            {saving ? "Saving…" : "Save Changes"}
-          </button>
-        </div>
-      </form>
+        </form>
+      </Card>
 
       {/* Typed Key-Value Store Viewer */}
       <div className="ims-card p-6">

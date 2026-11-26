@@ -1,7 +1,15 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { Menu, Plus, Search } from "lucide-react";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  Input,
+} from "@ims/ui";
 
 export interface ListToolbarMenuItem {
   key: string;
@@ -38,34 +46,17 @@ export function ListToolbar({
   secondaryAction,
   primaryAction,
 }: ListToolbarProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    if (menuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [menuOpen]);
-
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-white p-3">
+    <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-border bg-card p-3">
       {onSearchChange !== undefined && (
         <div className="relative min-w-[140px] flex-1 basis-36">
-          <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-[var(--text-muted)]" />
-          <input
+          <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-muted-foreground" />
+          <Input
             type="text"
             value={searchQuery ?? ""}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={searchPlaceholder}
-            className="h-9 w-full rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] pr-3 pl-9 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--brand-primary)] focus:bg-white focus:outline-hidden"
+            className="bg-background pl-9 focus-visible:bg-card"
           />
         </div>
       )}
@@ -75,69 +66,49 @@ export function ListToolbar({
       {(menuItems.length > 0 || secondaryAction || primaryAction) && (
         <div className="ml-auto flex shrink-0 items-center gap-2">
           {menuItems.length > 0 && (
-            <div ref={menuRef} className="relative">
-              <button
-                type="button"
-                onClick={() => setMenuOpen((prev) => !prev)}
-                aria-expanded={menuOpen}
-                aria-haspopup="menu"
-                aria-label="More actions"
-                title="Actions"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[var(--border-subtle)] bg-white text-[var(--text-secondary)] hover:bg-[var(--bg-canvas)] hover:text-[var(--text-primary)]"
-              >
-                <Menu className="h-4 w-4" />
-              </button>
-
-              {menuOpen && (
-                <div
-                  role="menu"
-                  className="absolute right-0 top-full z-40 mt-1.5 w-52 rounded-[10px] border border-[var(--border-subtle)] bg-white p-1.5 shadow-lg"
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="More actions"
+                  title="Actions"
                 >
-                  {menuItems.map((item) =>
-                    item.href ? (
-                      <a
-                        key={item.key}
-                        href={item.href}
-                        role="menuitem"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex w-full items-center gap-2.5 rounded-[7px] px-2.5 py-2 text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
-                      >
+                  <Menu className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                {menuItems.map((item) =>
+                  item.href ? (
+                    <DropdownMenuItem key={item.key} asChild disabled={item.disabled}>
+                      <a href={item.href}>
                         {item.icon}
                         <span>{item.label}</span>
                       </a>
-                    ) : (
-                      <button
-                        key={item.key}
-                        type="button"
-                        role="menuitem"
-                        disabled={item.disabled}
-                        onClick={() => {
-                          setMenuOpen(false);
-                          item.onClick?.();
-                        }}
-                        className="flex w-full items-center gap-2.5 rounded-[7px] px-2.5 py-2 text-left text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)] disabled:opacity-50"
-                      >
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </button>
-                    )
-                  )}
-                </div>
-              )}
-            </div>
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem
+                      key={item.key}
+                      disabled={item.disabled}
+                      onSelect={() => item.onClick?.()}
+                    >
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </DropdownMenuItem>
+                  )
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
 
           {secondaryAction}
 
           {primaryAction && (
-            <button
-              type="button"
-              onClick={primaryAction.onClick}
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[8px] bg-[var(--brand-primary)] px-3.5 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
-            >
+            <Button type="button" onClick={primaryAction.onClick}>
               {primaryAction.icon ?? <Plus className="h-4 w-4" />}
               <span>{primaryAction.label}</span>
-            </button>
+            </Button>
           )}
         </div>
       )}

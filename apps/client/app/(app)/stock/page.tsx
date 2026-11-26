@@ -15,13 +15,44 @@ import {
   StockTrackingView,
 } from "@ims/api-client";
 import {
+  Alert,
+  AlertDescription,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   BulkActionBar,
+  Button,
+  Card,
+  Checkbox,
+  Combobox,
   DataTable,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   EmptyState,
   ErrorState,
   ImportWizard,
-  StatTile,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
   StatusBadge,
+  Textarea,
   toast,
   toastApiError,
 } from "@ims/ui";
@@ -102,6 +133,8 @@ function StockAndLocationsPageContent() {
   const [showLocationModal, setShowLocationModal] = useState<
     null | { mode: "create" | "edit" | "move"; location?: LocationView }
   >(null);
+  const [deleteLocationTarget, setDeleteLocationTarget] = useState<LocationView | null>(null);
+  const [confirmMergeOpen, setConfirmMergeOpen] = useState(false);
   const [locName, setLocName] = useState("");
   const [locDesc, setLocDesc] = useState("");
   const [locParentId, setLocParentId] = useState("");
@@ -626,23 +659,30 @@ function StockAndLocationsPageContent() {
       )}
 
       {showImporter && (
-        <ImportWizard
-          targetType="STOCK"
-          targetFields={[
-            { key: "ipn", label: "Part IPN", required: true },
-            { key: "quantity", label: "Quantity", required: true },
-            { key: "location", label: "Location Name or Path", required: false },
-            { key: "batchCode", label: "Batch / Lot Code", required: false },
-            { key: "serialNumber", label: "Serial Number", required: false },
-          ]}
-        />
+        <Dialog open={showImporter} onOpenChange={setShowImporter}>
+          <DialogContent className="sm:max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Import Stock (CSV / XLSX)</DialogTitle>
+            </DialogHeader>
+            <ImportWizard
+              targetType="STOCK"
+              targetFields={[
+                { key: "ipn", label: "Part IPN", required: true },
+                { key: "quantity", label: "Quantity", required: true },
+                { key: "location", label: "Location Name or Path", required: false },
+                { key: "batchCode", label: "Batch / Lot Code", required: false },
+                { key: "serialNumber", label: "Serial Number", required: false },
+              ]}
+            />
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* Split-Pane Layout: Left Warehouse Location Tree + Right Stock Items Table */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Left Pane: Locations Tree */}
         <div className="lg:col-span-3">
-          <div className="ims-card p-4">
+          <Card className="p-4">
             <div className="ims-modal-header">
               <div>
                 <div className="text-[14px] font-semibold text-[var(--text-primary)]">Locations</div>
@@ -786,7 +826,7 @@ function StockAndLocationsPageContent() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDeleteLocation(selectedLocation)}
+                      onClick={() => setDeleteLocationTarget(selectedLocation)}
                       className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/40 px-2 text-[11px] font-medium text-[var(--status-danger-fg)]"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -798,7 +838,7 @@ function StockAndLocationsPageContent() {
                 )}
               </div>
             )}
-          </div>
+          </Card>
         </div>
 
         {/* Right Pane: Stock Filters + DataTable */}
@@ -811,22 +851,26 @@ function StockAndLocationsPageContent() {
             }}
             searchPlaceholder="Search batch code, serial number, or custom barcode…"
             filters={
-              <select
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
+              <Select
+                value={statusFilter || "__all__"}
+                onValueChange={(val) => {
+                  setStatusFilter(val === "__all__" ? "" : val);
                   setPageIndex(0);
                 }}
-                className="h-9 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px]"
               >
-                <option value="">All Statuses</option>
-                <option value="OK">OK</option>
-                <option value="ATTENTION">ATTENTION</option>
-                <option value="QUARANTINED">QUARANTINED</option>
-                <option value="IN_TRANSIT">IN_TRANSIT</option>
-                <option value="DAMAGED">DAMAGED</option>
-                <option value="RETURNED">RETURNED</option>
-              </select>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">All Statuses</SelectItem>
+                  <SelectItem value="OK">OK</SelectItem>
+                  <SelectItem value="ATTENTION">ATTENTION</SelectItem>
+                  <SelectItem value="QUARANTINED">QUARANTINED</SelectItem>
+                  <SelectItem value="IN_TRANSIT">IN_TRANSIT</SelectItem>
+                  <SelectItem value="DAMAGED">DAMAGED</SelectItem>
+                  <SelectItem value="RETURNED">RETURNED</SelectItem>
+                </SelectContent>
+              </Select>
             }
             menuItems={(() => {
               const items: ListToolbarMenuItem[] = [];
@@ -938,325 +982,288 @@ function StockAndLocationsPageContent() {
       {/* Bulk Action Bar (Merge Selected Batches) */}
       <BulkActionBar selectedCount={selectedItems.length} onClear={() => setSelectedItems([])}>
         {selectedItems.length >= 2 && (
-          <button
+          <Button
             type="button"
-            onClick={handleMergeSelected}
-            className="inline-flex items-center gap-1 rounded-full bg-[var(--brand-primary)] px-3 py-1 text-[12px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
+            size="sm"
+            onClick={() => setConfirmMergeOpen(true)}
+            className="rounded-full"
           >
             <GitMerge className="h-3.5 w-3.5" />
             <span>Merge {selectedItems.length} Batches</span>
-          </button>
+          </Button>
         )}
       </BulkActionBar>
 
-      {/* Modal: Create Stock Item */}
-      {showCreateStock && (
-        <div className="ims-modal-backdrop">
-          <div className="ims-modal-panel">
-            <div className="ims-modal-header">
-              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">Create Stock Item</h2>
-              <button
-                type="button"
-                onClick={() => setShowCreateStock(false)}
-                className="rounded p-1 text-[var(--text-muted)]"
-              >
-                <X className="h-4 w-4" />
-              </button>
+      {/* Dialog: Create Stock Item */}
+      <Dialog open={showCreateStock} onOpenChange={setShowCreateStock}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Stock Item</DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleCreateStock} className="space-y-3">
+            {createStockError && (
+              <Alert variant="destructive">
+                <AlertDescription>{createStockError}</AlertDescription>
+              </Alert>
+            )}
+
+            <div className="space-y-1">
+              <Label>Part *</Label>
+              <Combobox
+                value={createStockForm.partId}
+                onValueChange={(val) =>
+                  setCreateStockForm({ ...createStockForm, partId: val })
+                }
+                placeholder="Select part…"
+                searchPlaceholder="Search parts by SKU or name…"
+                options={parts.map((p) => ({
+                  value: p.id,
+                  label: `${p.ipn} — ${p.name} (${p.unit}) ${p.trackable ? "[Trackable]" : ""}`,
+                }))}
+              />
             </div>
 
-            <form onSubmit={handleCreateStock} className="mt-4 space-y-3">
-              {createStockError && (
-                <div className="ims-alert-error">
-                  {createStockError}
-                </div>
-              )}
+            <div className="space-y-1">
+              <Label>Storage Location (Non-structural)</Label>
+              <Combobox
+                value={createStockForm.locationId}
+                onValueChange={(val) =>
+                  setCreateStockForm({ ...createStockForm, locationId: val })
+                }
+                placeholder="Unassigned"
+                searchPlaceholder="Search locations…"
+                options={[
+                  { value: "", label: "Unassigned" },
+                  ...locations.map((l) => ({
+                    value: l.id,
+                    label: `${l.pathString} (${l.locationType}) ${l.structural ? "[Structural]" : ""}`,
+                    disabled: l.structural,
+                  })),
+                ]}
+              />
+            </div>
 
-              <div>
-                <label className="ims-label">Part *</label>
-                <select
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Quantity *</Label>
+                <Input
+                  type="number"
+                  step="any"
                   required
-                  value={createStockForm.partId}
+                  value={createStockForm.quantity}
                   onChange={(e) =>
-                    setCreateStockForm({ ...createStockForm, partId: e.target.value })
+                    setCreateStockForm({ ...createStockForm, quantity: e.target.value })
                   }
-                  className="ims-select mt-1"
-                >
-                  <option value="">Select part…</option>
-                  {parts.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.ipn} — {p.name} ({p.unit}) {p.trackable ? "[Trackable]" : ""}
-                    </option>
-                  ))}
-                </select>
+                  className="font-mono"
+                />
               </div>
+              <div className="space-y-1">
+                <Label>Status</Label>
+                <Select
+                  value={createStockForm.status || "__default__"}
+                  onValueChange={(val) =>
+                    setCreateStockForm({
+                      ...createStockForm,
+                      status: val === "__default__" ? "" : val,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__default__">Select status…</SelectItem>
+                    <SelectItem value="OK">OK</SelectItem>
+                    <SelectItem value="ATTENTION">ATTENTION</SelectItem>
+                    <SelectItem value="QUARANTINED">QUARANTINED</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-              <div>
-                <label className="ims-label">
-                  Storage Location (Non-structural)
-                </label>
-                <select
-                  value={createStockForm.locationId}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Batch / Lot Code</Label>
+                <Input
+                  type="text"
+                  value={createStockForm.batchCode}
                   onChange={(e) =>
-                    setCreateStockForm({ ...createStockForm, locationId: e.target.value })
+                    setCreateStockForm({ ...createStockForm, batchCode: e.target.value })
                   }
-                  className="ims-select mt-1"
-                >
-                  <option value="">Unassigned</option>
-                  {locations.map((l) => (
-                    <option key={l.id} value={l.id} disabled={l.structural}>
-                      {l.pathString} ({l.locationType}) {l.structural ? "[Structural]" : ""}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="LOT-2026-11"
+                  className="font-mono"
+                />
               </div>
+              <div className="space-y-1">
+                <Label>Serial Number (Trackable only)</Label>
+                <Input
+                  type="text"
+                  value={createStockForm.serialNumber}
+                  onChange={(e) =>
+                    setCreateStockForm({ ...createStockForm, serialNumber: e.target.value })
+                  }
+                  placeholder="SN-0001"
+                  className="font-mono"
+                />
+              </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="ims-label">Quantity *</label>
-                  <input
-                    type="number"
-                    step="any"
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCreateStock(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!createStockForm.partId}>
+                Create Stock
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog: Location Create / Edit / Move */}
+      <Dialog
+        open={Boolean(showLocationModal)}
+        onOpenChange={(open) => !open && setShowLocationModal(null)}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {showLocationModal?.mode === "create"
+                ? "New Storage Location"
+                : showLocationModal?.mode === "edit"
+                  ? `Edit Location · ${showLocationModal?.location?.name}`
+                  : `Move Subtree · ${showLocationModal?.location?.name}`}
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveLocation} className="space-y-3">
+            {locError && (
+              <Alert variant="destructive">
+                <AlertDescription>{locError}</AlertDescription>
+              </Alert>
+            )}
+
+            {showLocationModal?.mode !== "move" && (
+              <>
+                <div className="space-y-1">
+                  <Label>Location Name *</Label>
+                  <Input
+                    type="text"
                     required
-                    value={createStockForm.quantity}
-                    onChange={(e) =>
-                      setCreateStockForm({ ...createStockForm, quantity: e.target.value })
-                    }
-                    className="ims-input mt-1 font-mono"
+                    value={locName}
+                    onChange={(e) => setLocName(e.target.value)}
+                    placeholder="Bin A-01"
                   />
                 </div>
-                <div>
-                  <label className="ims-label">Status</label>
-                  <select
-                    value={createStockForm.status}
-                    onChange={(e) =>
-                      setCreateStockForm({ ...createStockForm, status: e.target.value })
-                    }
-                    className="ims-select mt-1"
-                  >
-                    <option value="">Select status…</option>
-                    <option value="OK">OK</option>
-                    <option value="ATTENTION">ATTENTION</option>
-                    <option value="QUARANTINED">QUARANTINED</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="ims-label">
-                    Batch / Lot Code
-                  </label>
-                  <input
-                    type="text"
-                    value={createStockForm.batchCode}
-                    onChange={(e) =>
-                      setCreateStockForm({ ...createStockForm, batchCode: e.target.value })
-                    }
-                    placeholder="LOT-2026-11"
-                    className="ims-input mt-1 font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="ims-label">
-                    Serial Number (Trackable only)
-                  </label>
-                  <input
-                    type="text"
-                    value={createStockForm.serialNumber}
-                    onChange={(e) =>
-                      setCreateStockForm({ ...createStockForm, serialNumber: e.target.value })
-                    }
-                    placeholder="SN-0001"
-                    className="ims-input mt-1 font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="ims-modal-footer">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateStock(false)}
-                  className="ims-btn-secondary"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="ims-btn-primary"
-                >
-                  Create Stock
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal: Location Create / Edit / Move */}
-      {showLocationModal && (
-        <div className="ims-modal-backdrop">
-          <div className="ims-modal-panel max-w-md">
-            <div className="ims-modal-header">
-              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">
-                {showLocationModal.mode === "create"
-                  ? "New Storage Location"
-                  : showLocationModal.mode === "edit"
-                    ? `Edit Location · ${showLocationModal.location?.name}`
-                    : `Move Subtree · ${showLocationModal.location?.name}`}
-              </h2>
-              <button
-                type="button"
-                onClick={() => setShowLocationModal(null)}
-                className="rounded p-1 text-[var(--text-muted)]"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveLocation} className="mt-4 space-y-3">
-              {locError && (
-                <div className="ims-alert-error">
-                  {locError}
-                </div>
-              )}
-
-              {showLocationModal.mode !== "move" && (
-                <>
-                  <div>
-                    <label className="ims-label">
-                      Location Name *
-                    </label>
-                    <input
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label>Location Type</Label>
+                    <Select value={locType} onValueChange={setLocType}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="WAREHOUSE">WAREHOUSE</SelectItem>
+                        <SelectItem value="ROOM">ROOM</SelectItem>
+                        <SelectItem value="AISLE">AISLE</SelectItem>
+                        <SelectItem value="RACK">RACK</SelectItem>
+                        <SelectItem value="SHELF">SHELF</SelectItem>
+                        <SelectItem value="BIN">BIN</SelectItem>
+                        <SelectItem value="QUARANTINE">QUARANTINE</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Custom Barcode</Label>
+                    <Input
                       type="text"
-                      required
-                      value={locName}
-                      onChange={(e) => setLocName(e.target.value)}
-                      placeholder="Bin A-01"
-                      className="ims-input mt-1"
+                      value={locBarcode}
+                      onChange={(e) => setLocBarcode(e.target.value)}
+                      placeholder="LOC-A01"
+                      className="font-mono"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="ims-label">
-                        Location Type
-                      </label>
-                      <select
-                        value={locType}
-                        onChange={(e) => setLocType(e.target.value)}
-                        className="ims-select mt-1"
-                      >
-                        <option value="WAREHOUSE">WAREHOUSE</option>
-                        <option value="ROOM">ROOM</option>
-                        <option value="AISLE">AISLE</option>
-                        <option value="RACK">RACK</option>
-                        <option value="SHELF">SHELF</option>
-                        <option value="BIN">BIN</option>
-                        <option value="QUARANTINE">QUARANTINE</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="ims-label">
-                        Custom Barcode
-                      </label>
-                      <input
-                        type="text"
-                        value={locBarcode}
-                        onChange={(e) => setLocBarcode(e.target.value)}
-                        placeholder="LOC-A01"
-                        className="ims-input mt-1 font-mono"
-                      />
-                    </div>
-                  </div>
-                  <label className="flex items-center gap-2 rounded-[8px] border border-[var(--border-subtle)] p-2.5 text-[12px]">
-                    <input
-                      type="checkbox"
-                      checked={locStructural}
-                      onChange={(e) => setLocStructural(e.target.checked)}
-                    />
-                    <span>
-                      <strong>Structural location</strong> (cannot hold stock items directly)
-                    </span>
-                  </label>
-                </>
-              )}
-
-              {(showLocationModal.mode === "create" || showLocationModal.mode === "move") && (
-                <div>
-                  <label className="ims-label">
-                    Parent Location
-                  </label>
-                  <select
-                    value={locParentId}
-                    onChange={(e) => setLocParentId(e.target.value)}
-                    className="ims-select mt-1"
-                  >
-                    <option value="">(Root level)</option>
-                    {locations
-                      .filter((l) => l.id !== showLocationModal.location?.id)
-                      .map((l) => (
-                        <option key={l.id} value={l.id}>
-                          {l.pathString}
-                        </option>
-                      ))}
-                  </select>
                 </div>
-              )}
+                <label className="flex cursor-pointer items-center gap-2 rounded-[8px] border border-border p-2.5 text-[12px]">
+                  <Checkbox
+                    checked={locStructural}
+                    onCheckedChange={(v) => setLocStructural(Boolean(v))}
+                  />
+                  <span>
+                    <strong>Structural location</strong> (cannot hold stock items directly)
+                  </span>
+                </label>
+              </>
+            )}
 
-              <div className="ims-modal-footer">
-                <button
-                  type="button"
-                  onClick={() => setShowLocationModal(null)}
-                  className="ims-btn-secondary"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="ims-btn-primary"
-                >
-                  Save
-                </button>
+            {(showLocationModal?.mode === "create" || showLocationModal?.mode === "move") && (
+              <div className="space-y-1">
+                <Label>Parent Location</Label>
+                <Combobox
+                  value={locParentId}
+                  onValueChange={setLocParentId}
+                  placeholder="(Root level)"
+                  searchPlaceholder="Search parent locations…"
+                  options={[
+                    { value: "", label: "(Root level)" },
+                    ...locations
+                      .filter((l) => l.id !== showLocationModal?.location?.id)
+                      .map((l) => ({ value: l.id, label: l.pathString })),
+                  ]}
+                />
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+            )}
 
-      {/* Modal: Transfer / Count / Split / Serialize */}
-      {opModal && opModal.type !== "inspect" && (
-        <div className="ims-modal-backdrop">
-          <div className="ims-modal-panel max-w-md">
-            <div className="ims-modal-header">
-              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">
-                {opModal.type === "transfer"
-                  ? "Transfer Stock (Auto-splits if partial)"
-                  : opModal.type === "adjust"
-                    ? "Stocktake Count / Add / Remove"
-                    : opModal.type === "split"
-                      ? "Split Stock Batch"
-                      : "Serialize Batch into Tracked Units"}
-              </h2>
-              <button
+            <DialogFooter>
+              <Button
                 type="button"
-                onClick={() => setOpModal(null)}
-                className="rounded p-1 text-[var(--text-muted)]"
+                variant="outline"
+                onClick={() => setShowLocationModal(null)}
               >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+                Cancel
+              </Button>
+              <Button type="submit">Save</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-            <form onSubmit={handleRunStockOperation} className="mt-4 space-y-3">
+      {/* Dialog: Transfer / Count / Split / Serialize */}
+      <Dialog
+        open={Boolean(opModal && opModal.type !== "inspect")}
+        onOpenChange={(open) => !open && setOpModal(null)}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {opModal?.type === "transfer"
+                ? "Transfer Stock (Auto-splits if partial)"
+                : opModal?.type === "adjust"
+                  ? "Stocktake Count / Add / Remove"
+                  : opModal?.type === "split"
+                    ? "Split Stock Batch"
+                    : "Serialize Batch into Tracked Units"}
+            </DialogTitle>
+          </DialogHeader>
+
+          {opModal && opModal.type !== "inspect" && (
+            <form onSubmit={handleRunStockOperation} className="space-y-3">
               {opError && (
-                <div className="ims-alert-error">
-                  {opError}
-                </div>
+                <Alert variant="destructive">
+                  <AlertDescription>{opError}</AlertDescription>
+                </Alert>
               )}
 
-              <div className="rounded-[8px] bg-[var(--bg-canvas)] p-2.5 text-[12px]">
-                <div className="font-mono font-semibold text-[var(--text-primary)]">
+              <div className="rounded-[8px] bg-background p-2.5 text-[12px]">
+                <div className="font-mono font-semibold text-foreground">
                   {opModal.item.partIpn} — {opModal.item.partName}
                 </div>
-                <div className="text-[var(--text-secondary)]">
+                <div className="text-muted-foreground">
                   Current Qty: {opModal.item.quantity} {opModal.item.partUnit} ·{" "}
                   {opModal.item.locationPathString ?? "Unassigned"}
                 </div>
@@ -1265,46 +1272,42 @@ function StockAndLocationsPageContent() {
               {opModal.type === "adjust" && (
                 <div className="flex gap-1.5">
                   {(["count", "add", "remove"] as const).map((m) => (
-                    <button
+                    <Button
                       key={m}
                       type="button"
+                      size="sm"
+                      variant={opModal.mode === m ? "default" : "outline"}
                       onClick={() => setOpModal({ ...opModal, mode: m })}
-                      className={`flex-1 rounded-[8px] border py-1.5 text-[12px] font-medium capitalize ${
-                        opModal.mode === m
-                          ? "border-[var(--brand-primary)] bg-[var(--brand-tint)] text-[var(--brand-primary)]"
-                          : "border-[var(--border-subtle)] bg-white text-[var(--text-secondary)]"
-                      }`}
+                      className="flex-1"
                     >
                       {m === "count" ? "Set Count (=)" : m === "add" ? "Add (+)" : "Remove (−)"}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
 
               {opModal.type !== "serialize" ? (
-                <div>
-                  <label className="ims-label">Quantity *</label>
-                  <input
+                <div className="space-y-1">
+                  <Label>Quantity *</Label>
+                  <Input
                     type="number"
                     step="any"
                     required
                     value={opQty}
                     onChange={(e) => setOpQty(e.target.value)}
-                    className="ims-input mt-1 font-mono"
+                    className="font-mono"
                   />
                 </div>
               ) : (
-                <div>
-                  <label className="ims-label">
-                    Serial Numbers (comma or newline separated) *
-                  </label>
-                  <textarea
+                <div className="space-y-1">
+                  <Label>Serial Numbers (comma or newline separated) *</Label>
+                  <Textarea
                     rows={3}
                     required
                     value={opSerialsText}
                     onChange={(e) => setOpSerialsText(e.target.value)}
                     placeholder="SN-001, SN-002, SN-003"
-                    className="mt-1 w-full rounded-[8px] border border-[var(--border-subtle)] p-2.5 font-mono text-[12px]"
+                    className="font-mono text-[12px]"
                   />
                 </div>
               )}
@@ -1312,269 +1315,301 @@ function StockAndLocationsPageContent() {
               {(opModal.type === "transfer" ||
                 opModal.type === "split" ||
                 opModal.type === "serialize") && (
-                <div>
-                  <label className="ims-label">
-                    Destination Location
-                  </label>
-                  <select
-                    required={opModal.type === "transfer"}
+                <div className="space-y-1">
+                  <Label>Destination Location</Label>
+                  <Combobox
                     value={opTargetLocId}
-                    onChange={(e) => setOpTargetLocId(e.target.value)}
-                    className="ims-select mt-1"
-                  >
-                    <option value="">Select destination bin…</option>
-                    {locations.map((l) => (
-                      <option key={l.id} value={l.id} disabled={l.structural}>
-                        {l.pathString} {l.structural ? "[Structural]" : ""}
-                      </option>
-                    ))}
-                  </select>
+                    onValueChange={setOpTargetLocId}
+                    placeholder="Select destination bin…"
+                    searchPlaceholder="Search bins…"
+                    options={locations.map((l) => ({
+                      value: l.id,
+                      label: `${l.pathString} ${l.structural ? "[Structural]" : ""}`,
+                      disabled: l.structural,
+                    }))}
+                  />
                 </div>
               )}
 
-              <div>
-                <label className="ims-label">Notes</label>
-                <input
+              <div className="space-y-1">
+                <Label>Notes</Label>
+                <Input
                   type="text"
                   value={opNotes}
                   onChange={(e) => setOpNotes(e.target.value)}
                   placeholder="Audit note for StockItemTracking ledger"
-                  className="ims-input mt-1"
                 />
               </div>
 
-              <div className="ims-modal-footer">
-                <button
+              <DialogFooter>
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setOpModal(null)}
-                  className="ims-btn-secondary"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="ims-btn-primary"
-                >
-                  Confirm
-                </button>
-              </div>
+                </Button>
+                <Button type="submit">Confirm</Button>
+              </DialogFooter>
             </form>
-          </div>
-        </div>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
 
-      {/* Modal: Stock History Timeline, ZXing QR Barcode & Quality Tests */}
-      {opModal && opModal.type === "inspect" && (
-        <div className="ims-modal-backdrop">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[12px] border border-[var(--border-subtle)] bg-white p-6 shadow-xl">
-            <div className="ims-modal-header">
-              <div>
-                <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">
-                  Stock Ledger & Quality Inspection · {opModal.item.partIpn}
-                </h2>
-                <p className="font-mono text-[11px] text-[var(--text-muted)]">
+      {/* Sheet Drawer: Stock History Timeline, ZXing QR Barcode & Quality Tests */}
+      <Sheet
+        open={Boolean(opModal && opModal.type === "inspect")}
+        onOpenChange={(open) => !open && setOpModal(null)}
+      >
+        <SheetContent className="overflow-y-auto sm:max-w-2xl">
+          {opModal && opModal.type === "inspect" && (
+            <>
+              <SheetHeader>
+                <SheetTitle>
+                  Stock Ledger &amp; Quality Inspection · {opModal.item.partIpn}
+                </SheetTitle>
+                <SheetDescription className="font-mono text-[11px]">
                   ID: {opModal.item.id} · Qty: {opModal.item.quantity} {opModal.item.partUnit}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setOpModal(null)}
-                className="rounded p-1 text-[var(--text-muted)]"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+                </SheetDescription>
+              </SheetHeader>
 
-            {/* ZXing QR Code Preview */}
-            <FeatureGate feature="BARCODES">
-              <div className="mt-4 flex items-center justify-between rounded-[10px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] p-3">
-                <div>
-                  <div className="text-[13px] font-semibold text-[var(--text-primary)]">
-                    ZXing QR Label Payload
-                  </div>
-                  <div className="font-mono text-[12px] text-[var(--brand-primary)]">
-                    IMS:STOCK:{opModal.item.id}
-                  </div>
-                </div>
-                <img
-                  src={`/api/v1/barcode/image?code=${encodeURIComponent(`IMS:STOCK:${opModal.item.id}`)}&format=QR_CODE&width=96&height=96`}
-                  alt="Stock QR Code"
-                  className="h-20 w-20 rounded border border-[var(--border-subtle)] bg-white p-1"
-                />
-              </div>
-            </FeatureGate>
-
-            {/* Quality Control Tests */}
-            <FeatureGate feature="QUALITY_TESTS">
-              <div className="mt-5">
-                <h3 className="text-[14px] font-semibold text-[var(--text-primary)]">
-                  Quality Inspection Results ({testResults.length})
-                </h3>
-                <form onSubmit={handleRecordTestResult} className="mt-2 flex flex-wrap gap-2">
-                  <input
-                    type="text"
-                    required
-                    value={newTestName}
-                    onChange={(e) => setNewTestName(e.target.value)}
-                    placeholder="Test name (e.g. Visual / Electrical)"
-                    className="h-8 flex-1 rounded-[8px] border border-[var(--border-subtle)] px-2.5 text-[12px]"
-                  />
-                  <input
-                    type="text"
-                    value={newTestValue}
-                    onChange={(e) => setNewTestValue(e.target.value)}
-                    placeholder="Measured value"
-                    className="h-8 w-36 rounded-[8px] border border-[var(--border-subtle)] px-2.5 font-mono text-[12px]"
-                  />
-                  <select
-                    value={newTestPassed ? "PASS" : "FAIL"}
-                    onChange={(e) => setNewTestPassed(e.target.value === "PASS")}
-                    className="h-8 rounded-[8px] border border-[var(--border-subtle)] bg-white px-2 text-[12px]"
-                  >
-                    <option value="PASS">PASS</option>
-                    <option value="FAIL">FAIL</option>
-                  </select>
-                  <button
-                    type="submit"
-                    className="h-8 rounded-[8px] bg-[var(--brand-primary)] px-3 text-[12px] font-medium text-white"
-                  >
-                    Record
-                  </button>
-                </form>
-
-                {testResults.length > 0 && (
-                  <div className="mt-2 divide-y divide-[var(--border-subtle)] rounded-[8px] border border-[var(--border-subtle)] text-[12px]">
-                    {testResults.map((tr) => (
-                      <div key={tr.id} className="flex items-center justify-between px-3 py-2">
-                        <div>
-                          <span className="font-medium text-[var(--text-primary)]">{tr.testName}</span>
-                          {tr.value && (
-                            <span className="ml-2 font-mono text-[var(--text-secondary)]">({tr.value})</span>
-                          )}
-                        </div>
-                        <StatusBadge
-                          label={tr.passed ? "PASS" : "FAIL"}
-                          tone={tr.passed ? "success" : "danger"}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </FeatureGate>
-
-            {/* StockItemTracking Timeline */}
-            <div className="mt-5">
-              <h3 className="text-[14px] font-semibold text-[var(--text-primary)]">
-                Immutable Movement Ledger ({trackingList.length})
-              </h3>
-              <div className="mt-2 divide-y divide-[var(--border-subtle)] rounded-[8px] border border-[var(--border-subtle)]">
-                {trackingList.map((trk) => {
-                  const sign =
-                    trk.quantityDelta > 0 ? "+" : trk.quantityDelta < 0 ? "" : "→";
-                  return (
-                    <div
-                      key={trk.id}
-                      className="flex items-center justify-between px-3.5 py-2.5 text-[12px]"
-                    >
-                      <div>
-                        <span className="rounded bg-[var(--bg-muted)] px-1.5 py-0.5 font-mono text-[11px] font-semibold text-[var(--text-primary)]">
-                          {trk.trackingType}
-                        </span>
-                        {trk.locationPathString && (
-                          <span className="ml-2 text-[var(--text-secondary)]">{trk.locationPathString}</span>
-                        )}
-                        {trk.notes && <div className="mt-0.5 text-[var(--text-muted)]">{trk.notes}</div>}
-                      </div>
-                      <div className="text-right font-mono">
-                        <div
-                          className={
-                            trk.quantityDelta > 0
-                              ? "font-semibold text-[var(--status-success-fg)]"
-                              : trk.quantityDelta < 0
-                                ? "font-semibold text-[var(--status-danger-fg)]"
-                                : "text-[var(--brand-primary)]"
-                          }
-                        >
-                          {sign}
-                          {trk.quantityDelta} → {trk.quantityAfter}
-                        </div>
-                        <div className="text-[10px] text-[var(--text-muted)]">
-                          {new Date(trk.createdAt).toLocaleString()}
-                        </div>
-                      </div>
+              {/* ZXing QR Code Preview */}
+              <FeatureGate feature="BARCODES">
+                <div className="flex items-center justify-between rounded-[10px] border border-border bg-background p-3">
+                  <div>
+                    <div className="text-[13px] font-semibold text-foreground">
+                      ZXing QR Label Payload
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal: Unified Barcode Scan Resolver */}
-      {showScanner && (
-        <div className="ims-modal-backdrop">
-          <div className="ims-modal-panel max-w-md">
-            <div className="ims-modal-header">
-              <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">
-                Barcode / QR Scan Resolver
-              </h2>
-              <button
-                type="button"
-                onClick={() => setShowScanner(false)}
-                className="rounded p-1 text-[var(--text-muted)]"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleScanResolve} className="mt-4 space-y-3">
-              <input
-                type="text"
-                autoFocus
-                required
-                value={scanInput}
-                onChange={(e) => setScanInput(e.target.value)}
-                placeholder="Scan or type barcode (e.g. IMS:STOCK:..., LOC-..., or IPN)…"
-                className="h-10 w-full rounded-[8px] border border-[var(--border-subtle)] px-3 font-mono text-[13px]"
-              />
-              <button
-                type="submit"
-                className="h-9 w-full rounded-[8px] bg-[var(--brand-primary)] text-[13px] font-medium text-white"
-              >
-                Resolve Barcode
-              </button>
-            </form>
-
-            {scanError && (
-              <div className="mt-3 rounded-[8px] border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/60 p-3 text-[12px] text-[var(--status-danger-fg)]">
-                {scanError}
-              </div>
-            )}
-
-            {scanResult && (
-              <div className="mt-4 rounded-[10px] border border-[var(--border-brand)] bg-[var(--brand-tint)]/60 p-4">
-                <StatusBadge label={scanResult.matchedType} tone="primary" />
-                <div className="mt-2 text-[14px] font-semibold text-[var(--text-primary)]">
-                  {scanResult.title}
+                    <div className="font-mono text-[12px] text-primary">
+                      IMS:STOCK:{opModal.item.id}
+                    </div>
+                  </div>
+                  <img
+                    src={`/api/v1/barcode/image?code=${encodeURIComponent(`IMS:STOCK:${opModal.item.id}`)}&format=QR_CODE&width=96&height=96`}
+                    alt="Stock QR Code"
+                    className="h-20 w-20 rounded border border-border bg-card p-1"
+                  />
                 </div>
-                <div className="text-[12px] text-[var(--text-secondary)]">{scanResult.subtitle}</div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowScanner(false);
-                    router.push(scanResult.href);
-                  }}
-                  className="mt-3 h-8 rounded-[8px] bg-[var(--brand-primary)] px-3 text-[12px] font-medium text-white"
-                >
-                  Open Record →
-                </button>
+              </FeatureGate>
+
+              {/* Quality Control Tests */}
+              <FeatureGate feature="QUALITY_TESTS">
+                <div className="space-y-2">
+                  <h3 className="text-[14px] font-semibold text-foreground">
+                    Quality Inspection Results ({testResults.length})
+                  </h3>
+                  <form onSubmit={handleRecordTestResult} className="flex flex-wrap gap-2">
+                    <Input
+                      type="text"
+                      required
+                      value={newTestName}
+                      onChange={(e) => setNewTestName(e.target.value)}
+                      placeholder="Test name (e.g. Visual / Electrical)"
+                      className="h-8 flex-1 text-[12px]"
+                    />
+                    <Input
+                      type="text"
+                      value={newTestValue}
+                      onChange={(e) => setNewTestValue(e.target.value)}
+                      placeholder="Measured value"
+                      className="h-8 w-36 font-mono text-[12px]"
+                    />
+                    <Select
+                      value={newTestPassed ? "PASS" : "FAIL"}
+                      onValueChange={(val) => setNewTestPassed(val === "PASS")}
+                    >
+                      <SelectTrigger className="h-8 w-24 text-[12px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="PASS">PASS</SelectItem>
+                        <SelectItem value="FAIL">FAIL</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button type="submit" size="sm">
+                      Record
+                    </Button>
+                  </form>
+
+                  {testResults.length > 0 && (
+                    <div className="divide-y divide-border rounded-[8px] border border-border text-[12px]">
+                      {testResults.map((tr) => (
+                        <div key={tr.id} className="flex items-center justify-between px-3 py-2">
+                          <div>
+                            <span className="font-medium text-foreground">{tr.testName}</span>
+                            {tr.value && (
+                              <span className="ml-2 font-mono text-muted-foreground">({tr.value})</span>
+                            )}
+                          </div>
+                          <StatusBadge
+                            label={tr.passed ? "PASS" : "FAIL"}
+                            tone={tr.passed ? "success" : "danger"}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </FeatureGate>
+
+              {/* StockItemTracking Timeline */}
+              <div className="space-y-2">
+                <h3 className="text-[14px] font-semibold text-foreground">
+                  Immutable Movement Ledger ({trackingList.length})
+                </h3>
+                <div className="divide-y divide-border rounded-[8px] border border-border">
+                  {trackingList.map((trk) => {
+                    const sign =
+                      trk.quantityDelta > 0 ? "+" : trk.quantityDelta < 0 ? "" : "→";
+                    return (
+                      <div
+                        key={trk.id}
+                        className="flex items-center justify-between px-3.5 py-2.5 text-[12px]"
+                      >
+                        <div>
+                          <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] font-semibold text-foreground">
+                            {trk.trackingType}
+                          </span>
+                          {trk.locationPathString && (
+                            <span className="ml-2 text-muted-foreground">{trk.locationPathString}</span>
+                          )}
+                          {trk.notes && <div className="mt-0.5 text-muted-foreground">{trk.notes}</div>}
+                        </div>
+                        <div className="text-right font-mono">
+                          <div
+                            className={
+                              trk.quantityDelta > 0
+                                ? "font-semibold text-[var(--status-success-fg)]"
+                                : trk.quantityDelta < 0
+                                  ? "font-semibold text-[var(--status-danger-fg)]"
+                                  : "text-primary"
+                            }
+                          >
+                            {sign}
+                            {trk.quantityDelta} → {trk.quantityAfter}
+                          </div>
+                          <div className="text-[10px] text-muted-foreground">
+                            {new Date(trk.createdAt).toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-      )}
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
+
+      {/* Dialog: Unified Barcode Scan Resolver */}
+      <Dialog open={showScanner} onOpenChange={setShowScanner}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Barcode / QR Scan Resolver</DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleScanResolve} className="space-y-3">
+            <Input
+              type="text"
+              autoFocus
+              required
+              value={scanInput}
+              onChange={(e) => setScanInput(e.target.value)}
+              placeholder="Scan or type barcode (e.g. IMS:STOCK:..., LOC-..., or IPN)…"
+              className="h-10 font-mono"
+            />
+            <Button type="submit" className="w-full">
+              Resolve Barcode
+            </Button>
+          </form>
+
+          {scanError && (
+            <Alert variant="destructive">
+              <AlertDescription>{scanError}</AlertDescription>
+            </Alert>
+          )}
+
+          {scanResult && (
+            <div className="rounded-[10px] border border-[var(--border-brand)] bg-accent/60 p-4">
+              <StatusBadge label={scanResult.matchedType} tone="primary" />
+              <div className="mt-2 text-[14px] font-semibold text-foreground">
+                {scanResult.title}
+              </div>
+              <div className="text-[12px] text-muted-foreground">{scanResult.subtitle}</div>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => {
+                  setShowScanner(false);
+                  router.push(scanResult.href);
+                }}
+                className="mt-3"
+              >
+                Open Record →
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Delete Location */}
+      <AlertDialog
+        open={Boolean(deleteLocationTarget)}
+        onOpenChange={(open) => !open && setDeleteLocationTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete storage location?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete{" "}
+              <strong className="text-foreground">{deleteLocationTarget?.name}</strong>? Child
+              locations and stock items will be reparented.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteLocationTarget) {
+                  handleDeleteLocation(deleteLocationTarget);
+                  setDeleteLocationTarget(null);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirm Merge Batches */}
+      <AlertDialog open={confirmMergeOpen} onOpenChange={setConfirmMergeOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Merge {selectedItems.length} stock batches?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Selected stock lots will be combined into a single lot at{" "}
+              <strong className="text-foreground">
+                {selectedItems[0]?.locationPathString ?? "the primary location"}
+              </strong>
+              .
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setConfirmMergeOpen(false);
+                handleMergeSelected();
+              }}
+            >
+              Merge Batches
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

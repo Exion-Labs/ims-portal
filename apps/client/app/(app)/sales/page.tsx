@@ -5,7 +5,31 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { apiFetch, CompanyView, PageResponse, SalesOrderView } from "@ims/api-client";
-import { DataTable, EmptyState, ErrorState, StatTile, StatusBadge, toast, toastApiError } from "@ims/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Combobox,
+  DataTable,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  EmptyState,
+  ErrorState,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  StatTile,
+  StatusBadge,
+  toast,
+  toastApiError,
+} from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { ListToolbar } from "@/components/list-toolbar";
 import { X } from "lucide-react";
@@ -160,20 +184,24 @@ export default function SalesOrdersPage() {
           }}
           searchPlaceholder="Search SO reference or customer PO..."
           filters={
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
+            <Select
+              value={statusFilter || "__all__"}
+              onValueChange={(val) => {
+                setStatusFilter(val === "__all__" ? "" : val);
                 setPageIndex(0);
               }}
-              className="h-9 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px]"
             >
-              <option value="">All Statuses</option>
-              <option value="PENDING">PENDING</option>
-              <option value="IN_PROGRESS">IN_PROGRESS</option>
-              <option value="SHIPPED">SHIPPED</option>
-              <option value="CANCELLED">CANCELLED</option>
-            </select>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">All Statuses</SelectItem>
+                <SelectItem value="PENDING">PENDING</SelectItem>
+                <SelectItem value="IN_PROGRESS">IN_PROGRESS</SelectItem>
+                <SelectItem value="SHIPPED">SHIPPED</SelectItem>
+                <SelectItem value="CANCELLED">CANCELLED</SelectItem>
+              </SelectContent>
+            </Select>
           }
           primaryAction={
             hasPermission("ORDER:CREATE")
@@ -201,81 +229,71 @@ export default function SalesOrdersPage() {
           />
         )}
 
-        {showCreate && (
-          <div className="ims-modal-backdrop bg-black/50">
-            <div className="bg-card border rounded-xl w-full max-w-lg p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Create Sales Order</h2>
-                <button onClick={() => setShowCreate(false)}>
-                  <X className="w-5 h-5" />
-                </button>
+        <Dialog open={showCreate} onOpenChange={setShowCreate}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Sales Order</DialogTitle>
+            </DialogHeader>
+            {formError && (
+              <Alert variant="destructive">
+                <AlertDescription>{formError}</AlertDescription>
+              </Alert>
+            )}
+            <form onSubmit={handleCreate} className="space-y-4">
+              <div className="space-y-1">
+                <Label>Customer *</Label>
+                <Combobox
+                  value={form.customerId}
+                  onValueChange={(val) => setForm({ ...form, customerId: val })}
+                  placeholder="Select customer…"
+                  searchPlaceholder="Search customers…"
+                  options={customers.map((c) => ({ value: c.id, label: c.name }))}
+                />
               </div>
-              {formError && <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{formError}</div>}
-              <form onSubmit={handleCreate} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Customer *</label>
-                  <select
-                    required
-                    value={form.customerId}
-                    onChange={(e) => setForm({ ...form, customerId: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                  >
-                    <option value="">Select customer...</option>
-                    {customers.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Customer PO Ref</label>
-                    <input
-                      value={form.customerReference}
-                      onChange={(e) => setForm({ ...form, customerReference: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Currency</label>
-                    <input
-                      value={form.currency}
-                      maxLength={3}
-                      onChange={(e) => setForm({ ...form, currency: e.target.value.toUpperCase() })}
-                      className="w-full px-3 py-2 border rounded-lg bg-background text-sm font-mono"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Description</label>
-                  <input
-                    value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Customer PO Ref</Label>
+                  <Input
+                    value={form.customerReference}
+                    onChange={(e) => setForm({ ...form, customerReference: e.target.value })}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Target Ship Date</label>
-                  <input
-                    type="date"
-                    value={form.targetDate}
-                    onChange={(e) => setForm({ ...form, targetDate: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
+                <div className="space-y-1">
+                  <Label>Currency</Label>
+                  <Input
+                    value={form.currency}
+                    maxLength={3}
+                    onChange={(e) => setForm({ ...form, currency: e.target.value.toUpperCase() })}
+                    className="font-mono"
                   />
                 </div>
-                <div className="flex justify-end gap-2 pt-2">
-                  <button type="button" onClick={() => setShowCreate(false)} className="px-4 py-2 text-sm border rounded-lg">
-                    Cancel
-                  </button>
-                  <button type="submit" className="px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground font-medium">
-                    Create Order
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+              </div>
+              <div className="space-y-1">
+                <Label>Description</Label>
+                <Input
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Target Ship Date</Label>
+                <Input
+                  type="date"
+                  value={form.targetDate}
+                  onChange={(e) => setForm({ ...form, targetDate: e.target.value })}
+                />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setShowCreate(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={!form.customerId}>
+                  Create Order
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </FeatureGate>
   );

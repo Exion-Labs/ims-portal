@@ -10,7 +10,33 @@ import {
   PurchaseOrderView,
   SupplierPartView,
 } from "@ims/api-client";
-import { ErrorState, StatTile, StatusBadge, toast, toastApiError } from "@ims/ui";
+import {
+  Alert,
+  AlertDescription,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  Button,
+  Card,
+  Combobox,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  ErrorState,
+  Input,
+  Label,
+  StatTile,
+  StatusBadge,
+  toast,
+  toastApiError,
+} from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import {
   ArrowLeft,
@@ -53,6 +79,8 @@ export default function PurchaseOrderDetailPage() {
 
   // Printable Document preview
   const [docHtml, setDocHtml] = useState<string | null>(null);
+  const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
+  const [removeLineTarget, setRemoveLineTarget] = useState<PurchaseOrderLineView | null>(null);
 
   const loadAll = useCallback(async () => {
     setLoading(true);
@@ -243,14 +271,15 @@ export default function PurchaseOrderDetailPage() {
             {hasPermission("ORDER:UPDATE") &&
               po.status !== "COMPLETE" &&
               po.status !== "CANCELLED" && (
-                <button
+                <Button
                   type="button"
-                  onClick={() => handleTransition("cancel")}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/40 px-3 text-[13px] font-medium text-[var(--status-danger-fg)]"
+                  variant="outline"
+                  onClick={() => setConfirmCancelOpen(true)}
+                  className="border-[var(--border-danger)] bg-[var(--status-danger-bg)]/40 text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]"
                 >
                   <XCircle className="h-4 w-4" />
                   <span>Cancel</span>
-                </button>
+                </Button>
               )}
           </div>
         </div>
@@ -428,7 +457,7 @@ export default function PurchaseOrderDetailPage() {
                           {canEditLines && l.received === 0 && (
                             <button
                               type="button"
-                              onClick={() => handleRemoveLine(l.id)}
+                              onClick={() => setRemoveLineTarget(l)}
                               className="rounded p-1 text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -444,133 +473,165 @@ export default function PurchaseOrderDetailPage() {
           </div>
         </div>
 
-        {/* Modal: Receive Items into Stock */}
-        {receiveLine && (
-          <div className="ims-modal-backdrop">
-            <div className="ims-modal-panel max-w-md">
-              <div className="ims-modal-header">
-                <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">
-                  Receive into Stock · {receiveLine.partIpn}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setReceiveLine(null)}
-                  className="rounded p-1 text-[var(--text-muted)]"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
+        {/* Dialog: Receive Items into Stock */}
+        <Dialog
+          open={Boolean(receiveLine)}
+          onOpenChange={(open) => !open && setReceiveLine(null)}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Receive into Stock · {receiveLine?.partIpn}</DialogTitle>
+            </DialogHeader>
 
-              <form onSubmit={handleReceiveSubmit} className="mt-4 space-y-3">
+            {receiveLine && (
+              <form onSubmit={handleReceiveSubmit} className="space-y-3">
                 {recvError && (
-                  <div className="ims-alert-error">
-                    {recvError}
-                  </div>
+                  <Alert variant="destructive">
+                    <AlertDescription>{recvError}</AlertDescription>
+                  </Alert>
                 )}
 
-                <div className="rounded-[8px] bg-[var(--bg-canvas)] p-3 text-[12px]">
+                <div className="rounded-[8px] bg-background p-3 text-[12px]">
                   <div>
                     Remaining: <strong>{receiveLine.remaining}</strong> packs (×{" "}
                     {receiveLine.packQuantity} {receiveLine.partUnit}/pack)
                   </div>
-                  <div className="mt-0.5 font-mono text-[var(--brand-primary)]">
+                  <div className="mt-0.5 font-mono text-primary">
                     Receiving {Number(recvQtyPacks || 0) * receiveLine.packQuantity}{" "}
                     {receiveLine.partUnit} into warehouse stock
                   </div>
                 </div>
 
-                <div>
-                  <label className="ims-label">
-                    Quantity (Packs) *
-                  </label>
-                  <input
+                <div className="space-y-1">
+                  <Label>Quantity (Packs) *</Label>
+                  <Input
                     type="number"
                     step="any"
                     required
                     value={recvQtyPacks}
                     onChange={(e) => setRecvQtyPacks(e.target.value)}
-                    className="ims-input mt-1 font-mono"
+                    className="font-mono"
                   />
                 </div>
 
-                <div>
-                  <label className="ims-label">
-                    Destination Bin *
-                  </label>
-                  <select
-                    required
+                <div className="space-y-1">
+                  <Label>Destination Bin *</Label>
+                  <Combobox
                     value={recvLocationId}
-                    onChange={(e) => setRecvLocationId(e.target.value)}
-                    className="ims-select mt-1"
-                  >
-                    <option value="">Select warehouse bin…</option>
-                    {locations
+                    onValueChange={setRecvLocationId}
+                    placeholder="Select warehouse bin…"
+                    searchPlaceholder="Search bins…"
+                    options={locations
                       .filter((l) => !l.structural)
-                      .map((l) => (
-                        <option key={l.id} value={l.id}>
-                          {l.pathString}
-                        </option>
-                      ))}
-                  </select>
+                      .map((l) => ({ value: l.id, label: l.pathString }))}
+                  />
                 </div>
 
-                <div>
-                  <label className="ims-label">
-                    Batch / Lot Code
-                  </label>
-                  <input
+                <div className="space-y-1">
+                  <Label>Batch / Lot Code</Label>
+                  <Input
                     type="text"
                     value={recvBatchCode}
                     onChange={(e) => setRecvBatchCode(e.target.value)}
                     placeholder="LOT-RECV-01"
-                    className="ims-input mt-1 font-mono"
+                    className="font-mono"
                   />
                 </div>
 
-                <div className="ims-modal-footer">
-                  <button
+                <DialogFooter>
+                  <Button
                     type="button"
+                    variant="outline"
                     onClick={() => setReceiveLine(null)}
-                    className="ims-btn-secondary"
                   >
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="submit"
-                    className="h-9 rounded-[8px] bg-[var(--status-success-fg)] px-4 text-[13px] font-medium text-white"
+                    disabled={!recvLocationId}
+                    className="bg-[var(--status-success-fg)] text-white hover:opacity-90"
                   >
                     Confirm Receipt
-                  </button>
-                </div>
+                  </Button>
+                </DialogFooter>
               </form>
-            </div>
-          </div>
-        )}
+            )}
+          </DialogContent>
+        </Dialog>
 
-        {/* Modal: Printable PO Document Preview */}
-        {docHtml && (
-          <div className="ims-modal-backdrop bg-black/50">
-            <div className="flex max-h-[90vh] w-full max-w-4xl flex-col rounded-[12px] bg-white shadow-2xl">
-              <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-3">
-                <span className="text-[14px] font-semibold">
-                  Purchase Order Document · {po.reference}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setDocHtml(null)}
-                  className="rounded p-1 text-[var(--text-muted)]"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
+        {/* Dialog: Printable PO Document Preview */}
+        <Dialog open={Boolean(docHtml)} onOpenChange={(open) => !open && setDocHtml(null)}>
+          <DialogContent className="p-0 sm:max-w-4xl">
+            <DialogHeader className="px-5 pt-4 pb-3">
+              <DialogTitle>Purchase Order Document · {po.reference}</DialogTitle>
+            </DialogHeader>
+            {docHtml && (
               <iframe
                 title="PO Document"
                 srcDoc={docHtml}
                 className="h-[75vh] w-full border-0"
               />
-            </div>
-          </div>
-        )}
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Confirm Cancel PO */}
+        <AlertDialog open={confirmCancelOpen} onOpenChange={setConfirmCancelOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Cancel purchase order {po.reference}?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will mark the purchase order as CANCELLED. Received stock will not be
+                reversed.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Keep Order</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => {
+                  setConfirmCancelOpen(false);
+                  handleTransition("cancel");
+                }}
+              >
+                Cancel Order
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Confirm Remove Line */}
+        <AlertDialog
+          open={Boolean(removeLineTarget)}
+          onOpenChange={(open) => !open && setRemoveLineTarget(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove line item?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Remove{" "}
+                <strong className="text-foreground">
+                  {removeLineTarget?.partIpn} ({removeLineTarget?.supplierSku})
+                </strong>{" "}
+                from this purchase order?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => {
+                  if (removeLineTarget) {
+                    handleRemoveLine(removeLineTarget.id);
+                    setRemoveLineTarget(null);
+                  }
+                }}
+              >
+                Remove Line
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </FeatureGate>
   );

@@ -19,7 +19,42 @@ import {
   StockTrackingView,
   SupplierPartView,
 } from "@ims/api-client";
-import { Card, EmptyState, ErrorState, Modal, StatTile, StatusBadge, toast, toastApiError } from "@ims/ui";
+import {
+  Alert,
+  AlertDescription,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  Button,
+  Card,
+  Checkbox,
+  Combobox,
+  EmptyState,
+  ErrorState,
+  Input,
+  Label,
+  Modal,
+  Skeleton,
+  StatTile,
+  StatusBadge,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  Textarea,
+  toast,
+  toastApiError,
+} from "@ims/ui";
 import { useEntitlements } from "@/lib/entitlements";
 import { useEditMode } from "@/lib/edit-mode";
 import { EditModeHint } from "@/components/edit-mode-hint";
@@ -153,6 +188,9 @@ export default function PartDetailPage() {
   const [noteContent, setNoteContent] = useState("");
   const [attachmentFileName, setAttachmentFileName] = useState("");
   const [attachmentComment, setAttachmentComment] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState<
+    null | { type: "param" | "bom" | "note"; id: string; label: string }
+  >(null);
 
   const loadAll = useCallback(async () => {
     setLoading(true);
@@ -491,8 +529,8 @@ export default function PartDetailPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="h-8 w-64 animate-pulse rounded bg-[var(--border-subtle)]" />
-        <div className="h-40 animate-pulse rounded-[12px] bg-white" />
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-40 rounded-[12px]" />
       </div>
     );
   }
@@ -626,7 +664,7 @@ export default function PartDetailPage() {
 
       {/* Low Stock Alert */}
       {isLowStock && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[var(--border-warning)] bg-[var(--status-warning-bg)]/70 px-4 py-3 text-[13px] text-[var(--status-warning-fg)]">
+        <Alert variant="warning" className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 shrink-0" />
             <span>
@@ -635,14 +673,13 @@ export default function PartDetailPage() {
               {part.unit}).
             </span>
           </div>
-          <Link
-            href="/purchasing"
-            className="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--status-warning-fg)] px-3 py-1.5 text-[12px] font-medium text-white hover:opacity-90"
-          >
-            <ShoppingCart className="h-3.5 w-3.5" />
-            <span>Reorder Stock</span>
-          </Link>
-        </div>
+          <Button asChild size="sm" className="bg-[var(--status-warning-fg)] text-white hover:opacity-90">
+            <Link href="/purchasing">
+              <ShoppingCart className="h-3.5 w-3.5" />
+              <span>Reorder Stock</span>
+            </Link>
+          </Button>
+        </Alert>
       )}
 
       {/* Summary Strip */}
@@ -674,27 +711,19 @@ export default function PartDetailPage() {
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex items-center gap-1 overflow-x-auto border-b border-[var(--border-subtle)]">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const active = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`inline-flex shrink-0 items-center gap-2 border-b-2 px-4 py-2.5 text-[13px] font-medium transition-colors ${
-                active
-                  ? "border-[var(--brand-primary)] text-[var(--brand-primary)]"
-                  : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as DetailTab)}>
+        <TabsList className="w-full justify-start overflow-x-auto">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <TabsTrigger key={tab.id} value={tab.id}>
+                <Icon className="h-3.5 w-3.5" />
+                <span>{tab.label}</span>
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
+      </Tabs>
 
       {/* TAB: Overview */}
       {activeTab === "overview" && (
@@ -1076,39 +1105,34 @@ export default function PartDetailPage() {
           {hasPermission("PART:UPDATE") && (
             <form
               onSubmit={handleUpsertParameter}
-              className="flex flex-wrap items-center gap-2.5 rounded-[10px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] p-3"
+              className="flex flex-wrap items-center gap-2.5 rounded-[10px] border border-border bg-background p-3"
             >
-              <select
-                required
-                value={selectedTemplateId}
-                onChange={(e) => setSelectedTemplateId(e.target.value)}
-                className="h-9 min-w-[220px] rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px]"
-              >
-                <option value="">Select specification…</option>
-                {templates.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name} {t.units ? `(${t.units})` : t.checkbox ? "(Yes/No)" : ""}
-                  </option>
-                ))}
-              </select>
+              <div className="min-w-[220px] flex-1">
+                <Combobox
+                  value={selectedTemplateId}
+                  onValueChange={setSelectedTemplateId}
+                  placeholder="Select specification…"
+                  searchPlaceholder="Search specifications…"
+                  options={templates.map((t) => ({
+                    value: t.id,
+                    label: `${t.name} ${t.units ? `(${t.units})` : t.checkbox ? "(Yes/No)" : ""}`,
+                  }))}
+                />
+              </div>
 
-              <input
+              <Input
                 type="text"
                 required
                 value={paramValue}
                 onChange={(e) => setParamValue(e.target.value)}
                 placeholder="Enter value (e.g. Black, 12 V, 250 g)…"
-                className="h-9 min-w-[240px] flex-1 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px]"
+                className="min-w-[240px] flex-1"
               />
 
-              <button
-                type="submit"
-                disabled={savingParam}
-                className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)] disabled:opacity-50"
-              >
+              <Button type="submit" disabled={savingParam || !selectedTemplateId}>
                 <Plus className="h-4 w-4" />
                 <span>{savingParam ? "Saving…" : "Save Spec"}</span>
-              </button>
+              </Button>
             </form>
           )}
 
@@ -1145,7 +1169,13 @@ export default function PartDetailPage() {
                         {hasPermission("PART:UPDATE") && editMode && (
                           <button
                             type="button"
-                            onClick={() => handleDeleteParameter(pp.id)}
+                            onClick={() =>
+                              setConfirmDelete({
+                                type: "param",
+                                id: pp.id,
+                                label: pp.templateName,
+                              })
+                            }
                             className="text-[12px] text-[var(--status-danger-fg)] hover:underline"
                           >
                             Remove
@@ -1284,24 +1314,22 @@ export default function PartDetailPage() {
               <div className="text-[13px] font-semibold text-[var(--text-primary)]">Add Item to Kit</div>
               {bomError && <div className="text-[12px] text-red-600">{bomError}</div>}
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <select
-                  required
-                  value={bomSubPartId}
-                  onChange={(e) => setBomSubPartId(e.target.value)}
-                  className="sm:col-span-2 rounded-lg border border-[var(--border-subtle)] px-3 py-2 text-[13px]"
-                >
-                  <option value="">Select item...</option>
-                  {allParts
-                    .filter((ap) => ap.id !== partId)
-                    .map((ap) => (
-                      <option key={ap.id} value={ap.id}>
-                        {ap.ipn ? `${ap.ipn} — ` : ""}
-                        {ap.name}
-                      </option>
-                    ))}
-                </select>
+                <div className="sm:col-span-2">
+                  <Combobox
+                    value={bomSubPartId}
+                    onValueChange={setBomSubPartId}
+                    placeholder="Select item…"
+                    searchPlaceholder="Search parts by SKU or name…"
+                    options={allParts
+                      .filter((ap) => ap.id !== partId)
+                      .map((ap) => ({
+                        value: ap.id,
+                        label: `${ap.ipn ? `${ap.ipn} — ` : ""}${ap.name}`,
+                      }))}
+                  />
+                </div>
                 <div className="flex gap-2">
-                  <input
+                  <Input
                     type="number"
                     step="any"
                     min="0.0001"
@@ -1309,14 +1337,11 @@ export default function PartDetailPage() {
                     value={bomQuantity}
                     onChange={(e) => setBomQuantity(e.target.value)}
                     placeholder="Qty"
-                    className="flex-1 rounded-lg border border-[var(--border-subtle)] px-3 py-2 text-[13px]"
+                    className="flex-1"
                   />
-                  <button
-                    type="submit"
-                    className="rounded-lg bg-[var(--brand-primary)] px-4 py-2 text-[13px] font-medium text-white"
-                  >
+                  <Button type="submit" disabled={!bomSubPartId}>
                     Add
-                  </button>
+                  </Button>
                 </div>
               </div>
             </form>
@@ -1357,16 +1382,14 @@ export default function PartDetailPage() {
                         {hasPermission("PART:UPDATE") && editMode && (
                           <button
                             type="button"
-                            onClick={async () => {
-                              try {
-                                await apiFetch(`/api/v1/bom-items/${b.id}`, { method: "DELETE" });
-                                toast.success("Item removed from kit");
-                                await loadAll();
-                              } catch (err) {
-                                toastApiError(err, "Failed to remove item from kit");
-                              }
-                            }}
-                            className="text-[12px] text-red-600 hover:underline"
+                            onClick={() =>
+                              setConfirmDelete({
+                                type: "bom",
+                                id: b.id,
+                                label: b.subPartName,
+                              })
+                            }
+                            className="text-[12px] text-destructive hover:underline"
                           >
                             Remove
                           </button>
@@ -1503,7 +1526,13 @@ export default function PartDetailPage() {
                     {editMode && (
                       <button
                         type="button"
-                        onClick={() => handleDeleteNote(n.id)}
+                        onClick={() =>
+                          setConfirmDelete({
+                            type: "note",
+                            id: n.id,
+                            label: "this note",
+                          })
+                        }
                         className="text-[var(--status-danger-fg)] hover:underline"
                       >
                         Delete
@@ -1863,6 +1892,48 @@ export default function PartDetailPage() {
           </div>
         </form>
       </Modal>
+      {/* Confirm Delete Spec / BOM Item / Note */}
+      <AlertDialog
+        open={Boolean(confirmDelete)}
+        onOpenChange={(open) => !open && setConfirmDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm removal</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove{" "}
+              <strong className="text-foreground">{confirmDelete?.label}</strong>? This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={async () => {
+                if (!confirmDelete) return;
+                const target = confirmDelete;
+                setConfirmDelete(null);
+                if (target.type === "param") {
+                  await handleDeleteParameter(target.id);
+                } else if (target.type === "note") {
+                  await handleDeleteNote(target.id);
+                } else if (target.type === "bom") {
+                  try {
+                    await apiFetch(`/api/v1/bom-items/${target.id}`, { method: "DELETE" });
+                    toast.success("Item removed from kit");
+                    await loadAll();
+                  } catch (err) {
+                    toastApiError(err, "Failed to remove item from kit");
+                  }
+                }
+              }}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Lock } from "lucide-react";
+import { Alert, Button } from "@ims/ui";
 import { useEditMode } from "@/lib/edit-mode";
 
 export function EditModeHint({
@@ -18,21 +19,20 @@ export function EditModeHint({
   }
 
   return (
-    <div
-      className={`flex flex-wrap items-center gap-1.5 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-2.5 py-1.5 text-[11px] text-[var(--text-muted)] ${className}`}
-    >
-      <Lock className="h-3 w-3 shrink-0 text-[var(--text-muted)]" />
+    <Alert className={`flex items-center gap-1.5 rounded-[8px] bg-background px-2.5 py-1.5 text-[11px] text-muted-foreground ${className}`}>
+      <Lock className="h-3 w-3 shrink-0 text-muted-foreground" />
       <span>
         Edits locked —{" "}
-        <button
+        <Button
           type="button"
+          variant="link"
           onClick={() => setEditMode(true)}
-          className="font-medium text-[var(--brand-primary)] hover:underline"
+          className="h-auto p-0 text-[11px] font-medium"
         >
           Enable Edit Mode
-        </button>{" "}
+        </Button>{" "}
         to {actionDescription}.
       </span>
-    </div>
+    </Alert>
   );
 }

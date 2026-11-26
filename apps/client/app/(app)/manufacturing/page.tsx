@@ -11,7 +11,32 @@ import {
   PageResponse,
   PartView,
 } from "@ims/api-client";
-import { DataTable, EmptyState, ErrorState, StatTile, StatusBadge, toast, toastApiError } from "@ims/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Checkbox,
+  Combobox,
+  DataTable,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  EmptyState,
+  ErrorState,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  StatTile,
+  StatusBadge,
+  toast,
+  toastApiError,
+} from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { ListToolbar } from "@/components/list-toolbar";
 import { X } from "lucide-react";
@@ -189,20 +214,24 @@ export default function ManufacturingPage() {
           }}
           searchPlaceholder="Search BO reference, title, or assembly..."
           filters={
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
+            <Select
+              value={statusFilter || "__all__"}
+              onValueChange={(val) => {
+                setStatusFilter(val === "__all__" ? "" : val);
                 setPageIndex(0);
               }}
-              className="h-9 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px]"
             >
-              <option value="">All Statuses</option>
-              <option value="PENDING">PENDING</option>
-              <option value="PRODUCTION">PRODUCTION</option>
-              <option value="COMPLETE">COMPLETE</option>
-              <option value="CANCELLED">CANCELLED</option>
-            </select>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">All Statuses</SelectItem>
+                <SelectItem value="PENDING">PENDING</SelectItem>
+                <SelectItem value="PRODUCTION">PRODUCTION</SelectItem>
+                <SelectItem value="COMPLETE">COMPLETE</SelectItem>
+                <SelectItem value="CANCELLED">CANCELLED</SelectItem>
+              </SelectContent>
+            </Select>
           }
           primaryAction={
             hasPermission("BUILD:CREATE")
@@ -233,129 +262,107 @@ export default function ManufacturingPage() {
           />
         )}
 
-        {showCreate && (
-          <div className="ims-modal-backdrop bg-black/50">
-            <div className="bg-card border rounded-xl w-full max-w-lg p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Create Build Order</h2>
-                <button onClick={() => setShowCreate(false)}>
-                  <X className="w-5 h-5" />
-                </button>
+        <Dialog open={showCreate} onOpenChange={setShowCreate}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Build Order</DialogTitle>
+            </DialogHeader>
+            {formError && (
+              <Alert variant="destructive">
+                <AlertDescription>{formError}</AlertDescription>
+              </Alert>
+            )}
+            <form onSubmit={handleCreateBuild} className="space-y-4">
+              <div className="space-y-1">
+                <Label>Assembly Part *</Label>
+                <Combobox
+                  value={form.partId}
+                  onValueChange={(val) => setForm({ ...form, partId: val })}
+                  placeholder="Select assembly part…"
+                  searchPlaceholder="Search assemblies…"
+                  options={assemblyParts.map((p) => ({
+                    value: p.id,
+                    label: `${p.ipn ? `${p.ipn} — ` : ""}${p.name}`,
+                  }))}
+                />
               </div>
-              {formError && (
-                <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-                  {formError}
-                </div>
-              )}
-              <form onSubmit={handleCreateBuild} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Assembly Part *</label>
-                  <select
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Quantity *</Label>
+                  <Input
+                    type="number"
+                    step="any"
+                    min="0.0001"
                     required
-                    value={form.partId}
-                    onChange={(e) => setForm({ ...form, partId: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                  >
-                    <option value="">Select assembly part...</option>
-                    {assemblyParts.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.ipn ? `${p.ipn} — ` : ""}
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Quantity *</label>
-                    <input
-                      type="number"
-                      step="any"
-                      min="0.0001"
-                      required
-                      value={form.quantity}
-                      onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Target Date</label>
-                    <input
-                      type="date"
-                      value={form.targetDate}
-                      onChange={(e) => setForm({ ...form, targetDate: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Title</label>
-                  <input
-                    value={form.title}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    placeholder="Optional build batch title"
-                    className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
+                    value={form.quantity}
+                    onChange={(e) => setForm({ ...form, quantity: e.target.value })}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Source Location</label>
-                    <select
-                      value={form.sourceLocationId}
-                      onChange={(e) => setForm({ ...form, sourceLocationId: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                    >
-                      <option value="">Any location</option>
-                      {locations.map((l) => (
-                        <option key={l.id} value={l.id}>
-                          {l.path}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Destination Location</label>
-                    <select
-                      value={form.destinationLocationId}
-                      onChange={(e) => setForm({ ...form, destinationLocationId: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-lg bg-background text-sm"
-                    >
-                      <option value="">Select destination...</option>
-                      {locations.map((l) => (
-                        <option key={l.id} value={l.id}>
-                          {l.path}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={form.createChildBuilds}
-                    onChange={(e) => setForm({ ...form, createChildBuilds: e.target.checked })}
+                <div className="space-y-1">
+                  <Label>Target Date</Label>
+                  <Input
+                    type="date"
+                    value={form.targetDate}
+                    onChange={(e) => setForm({ ...form, targetDate: e.target.value })}
                   />
-                  Automatically create child build orders for sub-assemblies
-                </label>
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowCreate(false)}
-                    className="px-4 py-2 text-sm border rounded-lg"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground font-medium"
-                  >
-                    Create Build Order
-                  </button>
                 </div>
-              </form>
-            </div>
-          </div>
-        )}
+              </div>
+              <div className="space-y-1">
+                <Label>Title</Label>
+                <Input
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="Optional build batch title"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Source Location</Label>
+                  <Combobox
+                    value={form.sourceLocationId}
+                    onValueChange={(val) => setForm({ ...form, sourceLocationId: val })}
+                    placeholder="Any location"
+                    searchPlaceholder="Search locations…"
+                    options={[
+                      { value: "", label: "Any location" },
+                      ...locations.map((l) => ({ value: l.id, label: l.path })),
+                    ]}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Destination Location</Label>
+                  <Combobox
+                    value={form.destinationLocationId}
+                    onValueChange={(val) => setForm({ ...form, destinationLocationId: val })}
+                    placeholder="Select destination…"
+                    searchPlaceholder="Search locations…"
+                    options={[
+                      { value: "", label: "Unassigned" },
+                      ...locations.map((l) => ({ value: l.id, label: l.path })),
+                    ]}
+                  />
+                </div>
+              </div>
+              <label className="flex cursor-pointer items-center gap-2 text-[13px]">
+                <Checkbox
+                  checked={form.createChildBuilds}
+                  onCheckedChange={(v) =>
+                    setForm({ ...form, createChildBuilds: Boolean(v) })
+                  }
+                />
+                <span>Automatically create child build orders for sub-assemblies</span>
+              </label>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setShowCreate(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={!form.partId}>
+                  Create Build Order
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </FeatureGate>
   );

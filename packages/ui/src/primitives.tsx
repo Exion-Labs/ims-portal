@@ -1,23 +1,37 @@
 import React from "react";
+import { AlertCircle } from "lucide-react";
 import { cn } from "./utils";
+import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert";
+import { Badge } from "./components/ui/badge";
+import { Button } from "./components/ui/button";
+import { Card } from "./components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "./components/ui/dialog";
 
 export type BadgeTone = "success" | "warning" | "danger" | "neutral" | "primary" | "violet";
 
-const TONE_STYLES: Record<BadgeTone, string> = {
-  success: "bg-[var(--status-success-bg)] text-[var(--status-success-fg)] border-[var(--border-success)]",
-  warning: "bg-[var(--status-warning-bg)] text-[var(--status-warning-fg)] border-[var(--border-warning)]",
-  danger: "bg-[var(--status-danger-bg)] text-[var(--status-danger-fg)] border-[var(--border-danger)]",
-  neutral: "bg-[var(--bg-muted)] text-[var(--text-secondary)] border-[var(--border-subtle)]",
-  primary: "bg-[var(--brand-tint)] text-[var(--brand-primary)] border-[var(--border-brand)]",
-  violet: "bg-[var(--status-violet-bg)] text-[var(--status-violet-fg)] border-[var(--border-violet)]",
+const TONE_TO_VARIANT: Record<
+  BadgeTone,
+  "success" | "warning" | "destructive" | "secondary" | "primary" | "violet"
+> = {
+  success: "success",
+  warning: "warning",
+  danger: "destructive",
+  neutral: "secondary",
+  primary: "primary",
+  violet: "violet",
 };
 
 const DOT_STYLES: Record<BadgeTone, string> = {
   success: "bg-[var(--status-success-fg)]",
   warning: "bg-[var(--status-warning-fg)]",
   danger: "bg-[var(--status-danger-fg)]",
-  neutral: "bg-[var(--text-muted)]",
-  primary: "bg-[var(--brand-primary)]",
+  neutral: "bg-muted-foreground",
+  primary: "bg-primary",
   violet: "bg-[var(--status-violet-fg)]",
 };
 
@@ -33,16 +47,10 @@ export function StatusBadge({
   className?: string;
 }) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[12px] font-medium leading-4",
-        TONE_STYLES[tone],
-        className
-      )}
-    >
+    <Badge variant={TONE_TO_VARIANT[tone]} className={className}>
       {showDot && <span className={cn("h-1.5 w-1.5 rounded-full", DOT_STYLES[tone])} />}
       <span>{label}</span>
-    </span>
+    </Badge>
   );
 }
 
@@ -66,14 +74,14 @@ export function StatTile({
         ? "text-[var(--status-warning-fg)]"
         : tone === "success"
           ? "text-[var(--status-success-fg)]"
-          : "text-[var(--text-primary)]";
+          : "text-foreground";
 
   return (
-    <div
+    <Card
       title={hint}
-      className="flex items-center justify-between gap-3 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 py-2"
+      className="flex items-center justify-between gap-3 rounded-[8px] px-3 py-2"
     >
-      <span className="truncate text-[12px] font-medium text-[var(--text-secondary)]">{label}</span>
+      <span className="truncate text-[12px] font-medium text-muted-foreground">{label}</span>
       <span
         className={cn(
           "max-w-[60%] shrink-0 truncate text-[14px] font-semibold tracking-tight tabular-nums",
@@ -83,7 +91,7 @@ export function StatTile({
       >
         {value}
       </span>
-    </div>
+    </Card>
   );
 }
 
@@ -97,11 +105,11 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-[12px] border border-dashed border-[var(--border-subtle)] bg-white px-6 py-12 text-center">
-      <div className="text-[15px] font-semibold text-[var(--text-primary)]">{title}</div>
-      <p className="mt-1 max-w-md text-[13px] text-[var(--text-secondary)]">{description}</p>
+    <Card className="flex flex-col items-center justify-center border-dashed px-6 py-12 text-center">
+      <div className="text-[15px] font-semibold text-foreground">{title}</div>
+      <p className="mt-1 max-w-md text-[13px] text-muted-foreground">{description}</p>
       {action && <div className="mt-4">{action}</div>}
-    </div>
+    </Card>
   );
 }
 
@@ -115,19 +123,24 @@ export function ErrorState({
   onRetry?: () => void;
 }) {
   return (
-    <div className="rounded-[12px] border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/50 p-6 text-[var(--status-danger-fg)]">
-      <div className="text-[15px] font-semibold">{title}</div>
-      <p className="mt-1 text-[13px]">{message}</p>
-      {onRetry && (
-        <button
-          type="button"
-          onClick={onRetry}
-          className="mt-3 inline-flex h-9 items-center rounded-[8px] border border-[var(--status-danger-fg)]/30 bg-white px-3 text-[13px] font-medium text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]"
-        >
-          Retry
-        </button>
-      )}
-    </div>
+    <Alert variant="destructive" className="rounded-[12px] p-5">
+      <AlertCircle className="size-4" />
+      <AlertTitle className="text-[15px]">{title}</AlertTitle>
+      <AlertDescription className="mt-1 space-y-3">
+        <p>{message}</p>
+        {onRetry && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onRetry}
+            className="border-[var(--status-danger-fg)]/30 bg-card text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]"
+          >
+            Retry
+          </Button>
+        )}
+      </AlertDescription>
+    </Alert>
   );
 }
 
@@ -141,24 +154,21 @@ export function NotInPlan({
   description?: string;
 }) {
   return (
-    <div className="mx-auto my-12 max-w-lg rounded-[12px] border border-[var(--border-subtle)] bg-white p-8 text-center shadow-xs">
-      <StatusBadge label={`Feature · ${featureKey}`} tone="warning" />
-      <h2 className="mt-4 text-[18px] font-semibold text-[var(--text-primary)]">
+    <Card className="mx-auto my-12 max-w-lg p-8 text-center shadow-xs">
+      <StatusBadge label={`Feature · ${featureKey}`} tone="warning" className="mx-auto" />
+      <h2 className="mt-4 text-[18px] font-semibold text-foreground">
         Not included in your current plan
       </h2>
-      <p className="mt-2 text-[13px] text-[var(--text-secondary)]">
+      <p className="mt-2 text-[13px] text-muted-foreground">
         {description ??
           `This module requires the ${featureKey} capability, which is not enabled on your ${planName ?? "current"} subscription.`}
       </p>
       <div className="mt-6 flex items-center justify-center gap-3">
-        <a
-          href="/settings/plan"
-          className="inline-flex h-9 items-center rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
-        >
-          View Plan & Features
-        </a>
+        <Button asChild>
+          <a href="/settings/plan">View Plan &amp; Features</a>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -173,32 +183,18 @@ export function BulkActionBar({
 }) {
   if (selectedCount <= 0) return null;
   return (
-    <div className="fixed bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 rounded-full bg-[var(--text-primary)] px-4 py-2 text-[13px] text-white shadow-lg">
+    <div className="fixed bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 rounded-full bg-foreground px-4 py-2 text-[13px] text-background shadow-lg">
       <span className="font-medium tabular-nums">{selectedCount} selected</span>
-      <span className="h-4 w-px bg-white/20" />
+      <span className="h-4 w-px bg-background/20" />
       <div className="flex items-center gap-2">{children}</div>
-      <span className="h-4 w-px bg-white/20" />
+      <span className="h-4 w-px bg-background/20" />
       <button
         type="button"
         onClick={onClear}
-        className="rounded-full px-2.5 py-1 text-[12px] text-zinc-300 hover:bg-white/10 hover:text-white"
+        className="rounded-full px-2.5 py-1 text-[12px] opacity-80 hover:bg-background/10 hover:opacity-100"
       >
         Clear
       </button>
-    </div>
-  );
-}
-
-export function Card({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 ${className}`}>
-      {children}
     </div>
   );
 }
@@ -207,7 +203,7 @@ export function Modal({
   open,
   onClose,
   title,
-  maxWidthClass = "max-w-lg",
+  maxWidthClass = "sm:max-w-lg",
   children,
 }: {
   open: boolean;
@@ -216,29 +212,14 @@ export function Modal({
   maxWidthClass?: string;
   children: React.ReactNode;
 }) {
-  if (!open) return null;
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-    >
-      <div
-        className={`max-h-[90vh] w-full ${maxWidthClass} overflow-y-auto rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-xl`}
-      >
-        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-          <h2 className="text-[16px] font-semibold text-[var(--text-primary)]">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close modal"
-            className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--bg-canvas)]"
-          >
-            ✕
-          </button>
-        </div>
-        <div className="mt-4">{children}</div>
-      </div>
-    </div>
+    <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
+      <DialogContent className={maxWidthClass}>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <div>{children}</div>
+      </DialogContent>
+    </Dialog>
   );
 }

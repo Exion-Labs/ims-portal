@@ -8,13 +8,29 @@ import {
   ApiTokenView,
   CreatedApiTokenResponse,
 } from "@ims/api-client";
-import { DataTable, StatusBadge, toast, toastApiError } from "@ims/ui";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  Button,
+  DataTable,
+  Input,
+  StatusBadge,
+  toast,
+  toastApiError,
+} from "@ims/ui";
 import { FeatureGate } from "@/lib/entitlements";
 import { Copy, KeyRound, Trash2 } from "lucide-react";
 
 export default function ApiTokensSettingsPage() {
   const [name, setName] = useState("");
   const [createdSecret, setCreatedSecret] = useState<string | null>(null);
+  const [revokeTarget, setRevokeTarget] = useState<ApiTokenView | null>(null);
 
   const { data: tokens, isLoading, refetch } = useQuery({
     queryKey: ["settings-api-tokens"],
@@ -89,7 +105,7 @@ export default function ApiTokensSettingsPage() {
         !row.original.revoked && (
           <button
             type="button"
-            onClick={() => handleRevoke(row.original.id)}
+            onClick={() => setRevokeTarget(row.original)}
             aria-label="Revoke API token"
             className="inline-flex items-center gap-1 rounded-[6px] border border-[var(--border-danger)] px-2.5 py-1 text-[12px] font-medium text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]/50"
           >
@@ -140,20 +156,15 @@ export default function ApiTokensSettingsPage() {
           )}
 
           <div className="mt-4 flex gap-3">
-            <input
+            <Input
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Token description (e.g. ERP Sync Worker)"
-              className="h-9 flex-1 rounded-[8px] border border-[var(--border-subtle)] px-3 text-[13px]"
+              className="flex-1"
             />
-            <button
-              type="submit"
-              className="h-9 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
-            >
-              Generate Token
-            </button>
+            <Button type="submit">Generate Token</Button>
           </div>
         </form>
 
@@ -163,6 +174,36 @@ export default function ApiTokensSettingsPage() {
           isLoading={isLoading}
           emptyTitle="No API tokens generated"
         />
+
+        <AlertDialog
+          open={Boolean(revokeTarget)}
+          onOpenChange={(open) => !open && setRevokeTarget(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Revoke API token {revokeTarget?.name}?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Any integrations or scripts using prefix{" "}
+                <code className="font-mono">{revokeTarget?.tokenPrefix}…</code> will immediately
+                lose access. This cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => {
+                  if (revokeTarget) {
+                    handleRevoke(revokeTarget.id);
+                    setRevokeTarget(null);
+                  }
+                }}
+              >
+                Revoke Token
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </FeatureGate>
   );

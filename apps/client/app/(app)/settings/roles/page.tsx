@@ -3,7 +3,24 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch, RoleView } from "@ims/api-client";
-import { StatusBadge, toast, toastApiError } from "@ims/ui";
+import {
+  Alert,
+  AlertDescription,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  Button,
+  Card,
+  Input,
+  StatusBadge,
+  toast,
+  toastApiError,
+} from "@ims/ui";
 import { Plus, Trash2 } from "lucide-react";
 
 export default function RolesSettingsPage() {
@@ -11,6 +28,7 @@ export default function RolesSettingsPage() {
   const [description, setDescription] = useState("");
   const [selectedPerms, setSelectedPerms] = useState<Set<string>>(new Set(["PART:VIEW", "STOCK:VIEW"]));
   const [error, setError] = useState<string | null>(null);
+  const [deleteRoleTarget, setDeleteRoleTarget] = useState<RoleView | null>(null);
 
   const { data: roles, refetch } = useQuery({
     queryKey: ["settings-roles"],
@@ -87,20 +105,18 @@ export default function RolesSettingsPage() {
         )}
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <input
+          <Input
             type="text"
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Role Name (e.g. Quality Inspector)"
-            className="h-9 rounded-[8px] border border-[var(--border-subtle)] px-3 text-[13px]"
           />
-          <input
+          <Input
             type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Description"
-            className="h-9 rounded-[8px] border border-[var(--border-subtle)] px-3 text-[13px]"
           />
         </div>
 
@@ -152,9 +168,9 @@ export default function RolesSettingsPage() {
               {!role.systemRole && (
                 <button
                   type="button"
-                  onClick={() => handleDeleteRole(role.id)}
+                  onClick={() => setDeleteRoleTarget(role)}
                   aria-label={`Delete role ${role.name}`}
-                  className="rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--status-danger-bg)]/50 hover:text-[var(--status-danger-fg)]"
+                  className="rounded p-1.5 text-muted-foreground hover:bg-[var(--status-danger-bg)]/50 hover:text-[var(--status-danger-fg)]"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -176,6 +192,33 @@ export default function RolesSettingsPage() {
           </div>
         ))}
       </div>
+      <AlertDialog
+        open={Boolean(deleteRoleTarget)}
+        onOpenChange={(open) => !open && setDeleteRoleTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete role {deleteRoleTarget?.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Users assigned to this role will lose its permissions immediately.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteRoleTarget) {
+                  handleDeleteRole(deleteRoleTarget.id);
+                  setDeleteRoleTarget(null);
+                }
+              }}
+            >
+              Delete Role
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { StatusBadge } from "@ims/ui";
+import { Card, Progress, StatusBadge } from "@ims/ui";
 import { useEntitlements } from "@/lib/entitlements";
 
 export default function PlanAndFeaturesPage() {
@@ -68,10 +68,9 @@ export default function PlanAndFeaturesPage() {
                   </span>
                 </div>
                 <div className="mt-2">
-                  <progress
-                    value={used}
-                    max={limit > 0 ? limit : 1}
-                    className={`ims-progress ${nearLimit ? "ims-progress-warning" : ""}`}
+                  <Progress
+                    value={pct}
+                    indicatorClassName={nearLimit ? "bg-[var(--status-warning-fg)]" : undefined}
                   />
                 </div>
                 <div className="mt-1.5 flex items-center justify-between text-[11px] text-[var(--text-muted)]">

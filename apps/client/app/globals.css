@@ -1,32 +1,6 @@
 @import "tailwindcss";
+@import "../../../packages/ui/src/styles.css";
 @source "../../../packages/ui/src";
-
-:root {
-  --bg-canvas: #F7F7F8;
-  --bg-surface: #FFFFFF;
-  --bg-muted: #F4F4F5;
-  --border-subtle: #E4E4E7;
-  --border-strong: #D4D4D8;
-  --text-primary: #18181B;
-  --text-secondary: #52525B;
-  --text-muted: #63636B;
-  --brand-primary: #1D4ED8;
-  --brand-primary-hover: #1E40AF;
-  --brand-tint: #EEF2FF;
-  --border-brand: #C7D2FE;
-  --status-success-bg: #DCFCE7;
-  --status-success-fg: #166534;
-  --border-success: #BBF7D0;
-  --status-warning-bg: #FEF3C7;
-  --status-warning-fg: #92400E;
-  --border-warning: #FDE68A;
-  --status-danger-bg: #FEE2E2;
-  --status-danger-fg: #991B1B;
-  --border-danger: #FECACA;
-  --status-violet-bg: #EDE9FE;
-  --status-violet-fg: #6D28D9;
-  --border-violet: #DDD6FE;
-}
 
 body {
   background-color: var(--bg-canvas);
@@ -138,32 +112,5 @@ body {
 
   .ims-alert-warning {
     @apply rounded-[10px] border border-[#FDE68A] bg-[#FEF3C7]/70 px-4 py-3 text-[13px] text-[var(--status-warning-fg)];
-  }
-
-  .ims-progress {
-    @apply h-2 w-full overflow-hidden rounded-full appearance-none bg-[var(--bg-muted)];
-  }
-
-  .ims-progress::-webkit-progress-bar {
-    background-color: var(--bg-muted);
-    border-radius: 9999px;
-  }
-
-  .ims-progress::-webkit-progress-value {
-    background-color: var(--brand-primary);
-    border-radius: 9999px;
-  }
-
-  .ims-progress::-moz-progress-bar {
-    background-color: var(--brand-primary);
-    border-radius: 9999px;
-  }
-
-  .ims-progress-warning::-webkit-progress-value {
-    background-color: var(--status-warning-fg);
-  }
-
-  .ims-progress-warning::-moz-progress-bar {
-    background-color: var(--status-warning-fg);
   }
 }
