@@ -10,7 +10,7 @@ import {
   PurchaseOrderView,
   SupplierPartView,
 } from "@ims/api-client";
-import { ErrorState, StatTile, StatusBadge } from "@ims/ui";
+import { ErrorState, StatTile, StatusBadge, toast, toastApiError } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import {
   ArrowLeft,
@@ -99,8 +99,10 @@ export default function PurchaseOrderDetailPage() {
       setPo(updated);
       setLineQty("1");
       setLinePrice("");
+      toast.success("Line item added");
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Failed to add line item");
+      toastApiError(err, "Failed to add line item");
     }
   }
 
@@ -113,8 +115,10 @@ export default function PurchaseOrderDetailPage() {
         { method: "DELETE" }
       );
       setPo(updated);
+      toast.success("Line item removed");
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Failed to remove line");
+      toastApiError(err, "Failed to remove line");
     }
   }
 
@@ -127,8 +131,12 @@ export default function PurchaseOrderDetailPage() {
         { method: "POST" }
       );
       setPo(updated);
+      if (action === "place") toast.success("Purchase order placed", { description: updated.reference });
+      else if (action === "cancel") toast.info("Purchase order cancelled", { description: updated.reference });
+      else toast.info("Purchase order put on hold", { description: updated.reference });
     } catch (err) {
       setActionError(err instanceof Error ? err.message : `Failed to ${action} order`);
+      toastApiError(err, `Failed to ${action} order`);
     }
   }
 
@@ -151,18 +159,29 @@ export default function PurchaseOrderDetailPage() {
           ],
         }),
       });
+      const partIpn = receiveLine.partIpn;
       setReceiveLine(null);
+      toast.success("Received into warehouse stock", { description: partIpn });
       await loadAll();
     } catch (err) {
       setRecvError(err instanceof Error ? err.message : "Receiving failed");
+      toastApiError(err, "Receiving failed");
     }
   }
 
   async function handleOpenDocument() {
     if (!po) return;
-    const res = await fetch(`/api/v1/purchase-orders/${po.id}/document`);
-    const html = await res.text();
-    setDocHtml(html);
+    try {
+      const res = await fetch(`/api/v1/purchase-orders/${po.id}/document`);
+      if (!res.ok) {
+        toast.error("Failed to load PO document");
+        return;
+      }
+      const html = await res.text();
+      setDocHtml(html);
+    } catch {
+      toast.error("Failed to load PO document");
+    }
   }
 
   if (loading) {

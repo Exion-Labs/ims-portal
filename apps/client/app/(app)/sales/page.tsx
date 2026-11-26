@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { apiFetch, CompanyView, PageResponse, SalesOrderView } from "@ims/api-client";
-import { DataTable, EmptyState, ErrorState, StatTile, StatusBadge } from "@ims/ui";
+import { DataTable, EmptyState, ErrorState, StatTile, StatusBadge, toast, toastApiError } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { ListToolbar } from "@/components/list-toolbar";
 import { X } from "lucide-react";
@@ -84,9 +84,11 @@ export default function SalesOrdersPage() {
         }),
       });
       setShowCreate(false);
+      toast.success("Sales order created", { description: created.reference });
       router.push(`/sales/${created.id}`);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Failed to create sales order");
+      toastApiError(err, "Failed to create sales order");
     }
   }
 

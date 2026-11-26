@@ -16,6 +16,8 @@ import {
   ImportWizard,
   StatTile,
   StatusBadge,
+  toast,
+  toastApiError,
 } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { ListToolbar, ListToolbarMenuItem } from "@/components/list-toolbar";
@@ -103,6 +105,7 @@ export default function CompaniesPage() {
         body: JSON.stringify(companyForm),
       });
       setShowCreateModal(false);
+      toast.success("Company created", { description: companyForm.name });
       setCompanyForm({
         name: "",
         code: "",
@@ -119,6 +122,7 @@ export default function CompaniesPage() {
       await loadCompanies();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Failed to create company");
+      toastApiError(err, "Failed to create company");
     }
   }
 
@@ -133,9 +137,13 @@ export default function CompaniesPage() {
           rate: Number(rateValue),
         }),
       });
+      toast.success("Exchange rate updated", {
+        description: `1 USD = ${rateValue} ${rateCurrency}`,
+      });
       await loadCompanies();
     } catch (err) {
       setRateError(err instanceof Error ? err.message : "Failed to update exchange rate");
+      toastApiError(err, "Failed to update exchange rate");
     }
   }
 

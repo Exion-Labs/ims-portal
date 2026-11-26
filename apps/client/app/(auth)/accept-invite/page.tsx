@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "@ims/ui";
 
 export default function AcceptInvitePage() {
   const router = useRouter();
@@ -24,12 +25,19 @@ export default function AcceptInvitePage() {
       });
       if (!res.ok) {
         const d = await res.json().catch(() => ({}));
-        setError(d.message ?? "Invalid invitation token");
+        const msg = d.message ?? "Invalid invitation token";
+        setError(msg);
+        toast.error("Invitation failed", { description: msg });
         return;
       }
+      toast.success("Account activated", {
+        description: "Please sign in with your new password.",
+      });
       router.push("/login");
     } catch (err: any) {
-      setError(err.message ?? "Failed to accept invite");
+      const msg = err.message ?? "Failed to accept invite";
+      setError(msg);
+      toast.error("Invitation failed", { description: msg });
     } finally {
       setBusy(false);
     }

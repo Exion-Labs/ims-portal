@@ -8,9 +8,9 @@ import {
   ApiTokenView,
   CreatedApiTokenResponse,
 } from "@ims/api-client";
-import { DataTable, StatusBadge } from "@ims/ui";
+import { DataTable, StatusBadge, toast, toastApiError } from "@ims/ui";
 import { FeatureGate } from "@/lib/entitlements";
-import { KeyRound, Trash2 } from "lucide-react";
+import { Copy, KeyRound, Trash2 } from "lucide-react";
 
 export default function ApiTokensSettingsPage() {
   const [name, setName] = useState("");
@@ -23,18 +23,29 @@ export default function ApiTokensSettingsPage() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    const res = await apiFetch<CreatedApiTokenResponse>("/api/v1/settings/api-tokens", {
-      method: "POST",
-      body: JSON.stringify({ name, scopes: [] }),
-    });
-    setName("");
-    setCreatedSecret(res.rawToken);
-    refetch();
+    try {
+      const res = await apiFetch<CreatedApiTokenResponse>("/api/v1/settings/api-tokens", {
+        method: "POST",
+        body: JSON.stringify({ name, scopes: [] }),
+      });
+      const tokenName = name;
+      setName("");
+      setCreatedSecret(res.rawToken);
+      toast.success("API token generated", { description: tokenName });
+      refetch();
+    } catch (err) {
+      toastApiError(err, "Failed to generate API token");
+    }
   }
 
   async function handleRevoke(id: string) {
-    await apiFetch(`/api/v1/settings/api-tokens/${id}`, { method: "DELETE" });
-    refetch();
+    try {
+      await apiFetch(`/api/v1/settings/api-tokens/${id}`, { method: "DELETE" });
+      toast.success("API token revoked");
+      refetch();
+    } catch (err) {
+      toastApiError(err, "Failed to revoke API token");
+    }
   }
 
   const columns: ColumnDef<ApiTokenView>[] = [
@@ -108,8 +119,19 @@ export default function ApiTokensSettingsPage() {
 
           {createdSecret && (
             <div className="mt-4 rounded-[8px] border border-[var(--border-success)] bg-[var(--status-success-bg)]/50 p-3 text-[13px] text-[var(--status-success-fg)]">
-              <div className="font-semibold">
-                Copy your new API token now — it will never be shown again:
+              <div className="flex items-center justify-between gap-2 font-semibold">
+                <span>Copy your new API token now — it will never be shown again:</span>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(createdSecret);
+                    toast.success("Token copied to clipboard");
+                  }}
+                  className="inline-flex items-center gap-1 rounded-[6px] border border-[var(--border-success)] bg-white px-2.5 py-1 text-[12px] font-medium text-[var(--status-success-fg)] hover:bg-[var(--status-success-bg)]"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  <span>Copy</span>
+                </button>
               </div>
               <code className="mt-1 block break-all rounded bg-white p-2 font-mono text-[12px] font-bold">
                 {createdSecret}

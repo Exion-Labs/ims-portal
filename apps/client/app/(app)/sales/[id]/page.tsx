@@ -11,7 +11,7 @@ import {
   SalesOrderView,
   StockItemView,
 } from "@ims/api-client";
-import { ErrorState, StatTile, StatusBadge } from "@ims/ui";
+import { ErrorState, StatTile, StatusBadge, toast, toastApiError } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { ArrowLeft, CheckCircle2, Package, Plus, Send, Truck, X, XCircle } from "lucide-react";
 
@@ -68,14 +68,23 @@ export default function SalesOrderDetailPage() {
     loadData();
   }, [loadData]);
 
-  async function runAction(fn: () => Promise<unknown>) {
+  async function runAction(
+    fn: () => Promise<unknown>,
+    successTitle?: string,
+    tone: "success" | "info" = "success"
+  ) {
     setActionError(null);
     setBusy(true);
     try {
       await fn();
+      if (successTitle) {
+        if (tone === "info") toast.info(successTitle);
+        else toast.success(successTitle);
+      }
       await loadData();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Action failed");
+      toastApiError(err, "Action failed");
     } finally {
       setBusy(false);
     }
@@ -127,7 +136,12 @@ export default function SalesOrderDetailPage() {
               {so.status === "PENDING" && (
                 <button
                   disabled={busy}
-                  onClick={() => runAction(() => apiFetch(`/api/v1/sales-orders/${soId}/issue`, { method: "POST" }))}
+                  onClick={() =>
+                    runAction(
+                      () => apiFetch(`/api/v1/sales-orders/${soId}/issue`, { method: "POST" }),
+                      `Sales order ${so.reference} issued`
+                    )
+                  }
                   className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
                 >
                   <Send className="w-4 h-4" /> Issue Order
@@ -136,11 +150,13 @@ export default function SalesOrderDetailPage() {
               <button
                 disabled={busy}
                 onClick={() =>
-                  runAction(() =>
-                    apiFetch(`/api/v1/sales-orders/${soId}/shipments`, {
-                      method: "POST",
-                      body: JSON.stringify({}),
-                    })
+                  runAction(
+                    () =>
+                      apiFetch(`/api/v1/sales-orders/${soId}/shipments`, {
+                        method: "POST",
+                        body: JSON.stringify({}),
+                      }),
+                    "Shipment created"
                   )
                 }
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium hover:bg-muted"
@@ -149,7 +165,13 @@ export default function SalesOrderDetailPage() {
               </button>
               <button
                 disabled={busy}
-                onClick={() => runAction(() => apiFetch(`/api/v1/sales-orders/${soId}/cancel`, { method: "POST" }))}
+                onClick={() =>
+                  runAction(
+                    () => apiFetch(`/api/v1/sales-orders/${soId}/cancel`, { method: "POST" }),
+                    `Sales order ${so.reference} cancelled`,
+                    "info"
+                  )
+                }
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-destructive/40 text-destructive text-sm font-medium hover:bg-destructive/10"
               >
                 <XCircle className="w-4 h-4" /> Cancel
@@ -253,11 +275,13 @@ export default function SalesOrderDetailPage() {
                       <button
                         disabled={busy}
                         onClick={() =>
-                          runAction(() =>
-                            apiFetch(`/api/v1/sales-orders/${soId}/shipments/${shp.id}/complete`, {
-                              method: "POST",
-                              body: JSON.stringify({}),
-                            })
+                          runAction(
+                            () =>
+                              apiFetch(`/api/v1/sales-orders/${soId}/shipments/${shp.id}/complete`, {
+                                method: "POST",
+                                body: JSON.stringify({}),
+                              }),
+                            `Shipment ${shp.reference} completed`
                           )
                         }
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium"
@@ -294,7 +318,7 @@ export default function SalesOrderDetailPage() {
                       }),
                     });
                     setShowAddLine(false);
-                  });
+                  }, "Line item added");
                 }}
                 className="space-y-4"
               >
@@ -376,7 +400,7 @@ export default function SalesOrderDetailPage() {
                       }),
                     });
                     setAllocLine(null);
-                  });
+                  }, "Stock allocated");
                 }}
                 className="space-y-4"
               >

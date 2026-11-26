@@ -14,7 +14,7 @@ import {
   Settings,
   User,
 } from "lucide-react";
-import { StatusBadge } from "@ims/ui";
+import { StatusBadge, toast } from "@ims/ui";
 import { NAV_GROUPS, SETTINGS_NAV } from "@/lib/constants";
 import { useEntitlements } from "@/lib/entitlements";
 import { useEditMode } from "@/lib/edit-mode";
@@ -65,8 +65,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   async function handleLogout() {
     setEditMode(false);
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      toast.info("Signed out");
+      router.push("/login");
+    } catch {
+      toast.error("Failed to sign out");
+    }
+  }
+
+  function handleToggleEditMode() {
+    const next = !editMode;
+    toggleEditMode();
+    toast.info(next ? "Edit Mode enabled" : "View Only mode enabled", {
+      description: next
+        ? "Structural edits and deletions are unlocked for this tab."
+        : "Structural edits are now locked.",
+    });
   }
 
   return (
@@ -221,7 +236,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {canUseEditMode && (
               <button
                 type="button"
-                onClick={toggleEditMode}
+                onClick={handleToggleEditMode}
                 title={
                   editMode
                     ? "Edit Mode is enabled — click to lock structural edits"
@@ -302,7 +317,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                           aria-checked={editMode}
                           aria-label="Toggle Edit Mode"
                           title={editMode ? "Edit Mode ON" : "Edit Mode OFF"}
-                          onClick={toggleEditMode}
+                          onClick={handleToggleEditMode}
                           className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors ${
                             editMode ? "bg-[var(--status-warning-fg)]" : "bg-[var(--border-strong)]"
                           }`}

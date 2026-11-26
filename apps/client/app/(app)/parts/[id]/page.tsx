@@ -19,7 +19,7 @@ import {
   StockTrackingView,
   SupplierPartView,
 } from "@ims/api-client";
-import { Card, EmptyState, ErrorState, Modal, StatTile, StatusBadge } from "@ims/ui";
+import { Card, EmptyState, ErrorState, Modal, StatTile, StatusBadge, toast, toastApiError } from "@ims/ui";
 import { useEntitlements } from "@/lib/entitlements";
 import { useEditMode } from "@/lib/edit-mode";
 import { EditModeHint } from "@/components/edit-mode-hint";
@@ -305,8 +305,10 @@ export default function PartDetailPage() {
       });
       setPart(updated);
       setShowEditModal(false);
+      toast.success("Item updated", { description: `${updated.ipn} saved` });
     } catch (err) {
       setEditError(err instanceof Error ? err.message : "Failed to update item");
+      toastApiError(err, "Failed to update item");
     }
   }
 
@@ -315,8 +317,9 @@ export default function PartDetailPage() {
     if (!part || !stockOp) return;
     setOpError(null);
     setOpSaving(true);
+    const opType = stockOp.type;
     try {
-      if (stockOp.type === "transfer") {
+      if (opType === "transfer") {
         await apiFetch(`/api/v1/stock-items/${stockOp.item.id}/transfer`, {
           method: "POST",
           body: JSON.stringify({
@@ -326,7 +329,7 @@ export default function PartDetailPage() {
           }),
         });
       } else {
-        await apiFetch(`/api/v1/stock-items/${stockOp.item.id}/${stockOp.type}`, {
+        await apiFetch(`/api/v1/stock-items/${stockOp.item.id}/${opType}`, {
           method: "POST",
           body: JSON.stringify({
             quantity: Number(opQty),
@@ -335,9 +338,20 @@ export default function PartDetailPage() {
         });
       }
       setStockOp(null);
+      toast.success(
+        opType === "add"
+          ? "Stock added"
+          : opType === "remove"
+            ? "Stock removed"
+            : opType === "count"
+              ? "Stock count updated"
+              : "Stock moved",
+        { description: `${opQty} ${part.unit} (${part.ipn})` }
+      );
       await loadAll();
     } catch (err) {
       setOpError(err instanceof Error ? err.message : "Stock operation failed");
+      toastApiError(err, "Stock operation failed");
     } finally {
       setOpSaving(false);
     }
@@ -357,9 +371,11 @@ export default function PartDetailPage() {
         }),
       });
       setParamValue("");
+      toast.success("Specification saved");
       await loadAll();
     } catch (err) {
       setParamError(err instanceof Error ? err.message : "Failed to save specification");
+      toastApiError(err, "Failed to save specification");
     } finally {
       setSavingParam(false);
     }
@@ -371,9 +387,11 @@ export default function PartDetailPage() {
       await apiFetch<void>(`/api/v1/parts/${part.id}/parameters/${parameterId}`, {
         method: "DELETE",
       });
+      toast.success("Specification removed");
       await loadAll();
     } catch (err) {
       setParamError(err instanceof Error ? err.message : "Failed to remove specification");
+      toastApiError(err, "Failed to remove specification");
     }
   }
 
@@ -403,53 +421,71 @@ export default function PartDetailPage() {
         }),
       });
       setShowVariantModal(false);
+      toast.success("Variant created", { description: created.ipn });
       router.push(`/parts/${created.id}`);
     } catch (err) {
       setVariantError(err instanceof Error ? err.message : "Failed to create variant");
+      toastApiError(err, "Failed to create variant");
     }
   }
 
   async function handleAddNote(e: React.FormEvent) {
     e.preventDefault();
     if (!part || !noteContent.trim()) return;
-    await apiFetch<NoteView>("/api/v1/notes", {
-      method: "POST",
-      body: JSON.stringify({
-        entityType: "Part",
-        entityId: part.id,
-        content: noteContent.trim(),
-      }),
-    });
-    setNoteContent("");
-    await loadAll();
+    try {
+      await apiFetch<NoteView>("/api/v1/notes", {
+        method: "POST",
+        body: JSON.stringify({
+          entityType: "Part",
+          entityId: part.id,
+          content: noteContent.trim(),
+        }),
+      });
+      setNoteContent("");
+      toast.success("Note added");
+      await loadAll();
+    } catch (err) {
+      toastApiError(err, "Failed to add note");
+    }
   }
 
   async function handleDeleteNote(noteId: string) {
-    await apiFetch<void>(`/api/v1/notes/${noteId}`, { method: "DELETE" });
-    await loadAll();
+    try {
+      await apiFetch<void>(`/api/v1/notes/${noteId}`, { method: "DELETE" });
+      toast.success("Note deleted");
+      await loadAll();
+    } catch (err) {
+      toastApiError(err, "Failed to delete note");
+    }
   }
 
   async function handleCreateAttachment(e: React.FormEvent) {
     e.preventDefault();
     if (!part || !attachmentFileName.trim()) return;
-    const res = await apiFetch<{ attachment: AttachmentView; uploadUrl: string }>(
-      "/api/v1/attachments/upload-url",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          entityType: "Part",
-          entityId: part.id,
-          fileName: attachmentFileName.trim(),
-          contentType: "application/pdf",
-          sizeBytes: 24576,
-          comment: attachmentComment || null,
-        }),
-      }
-    );
-    await apiFetch(`/api/v1/attachments/${res.attachment.id}/complete`, { method: "POST" });
-    setAttachmentFileName("");
-    setAttachmentComment("");
-    await loadAll();
+    try {
+      const res = await apiFetch<{ attachment: AttachmentView; uploadUrl: string }>(
+        "/api/v1/attachments/upload-url",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            entityType: "Part",
+            entityId: part.id,
+            fileName: attachmentFileName.trim(),
+            contentType: "application/pdf",
+            sizeBytes: 24576,
+            comment: attachmentComment || null,
+          }),
+        }
+      );
+      await apiFetch(`/api/v1/attachments/${res.attachment.id}/complete`, { method: "POST" });
+      const fileName = attachmentFileName.trim();
+      setAttachmentFileName("");
+      setAttachmentComment("");
+      toast.success("File attached", { description: fileName });
+      await loadAll();
+    } catch (err) {
+      toastApiError(err, "Failed to attach file");
+    }
   }
 
   if (loading) {
@@ -1236,9 +1272,11 @@ export default function PartDetailPage() {
                   });
                   setBomSubPartId("");
                   setBomQuantity("1");
+                  toast.success("Item added to kit");
                   await loadAll();
                 } catch (err) {
                   setBomError(err instanceof Error ? err.message : "Failed to add item");
+                  toastApiError(err, "Failed to add item to kit");
                 }
               }}
               className="space-y-3 rounded-[12px] border border-[var(--border-subtle)] bg-white p-4"
@@ -1320,8 +1358,13 @@ export default function PartDetailPage() {
                           <button
                             type="button"
                             onClick={async () => {
-                              await apiFetch(`/api/v1/bom-items/${b.id}`, { method: "DELETE" });
-                              await loadAll();
+                              try {
+                                await apiFetch(`/api/v1/bom-items/${b.id}`, { method: "DELETE" });
+                                toast.success("Item removed from kit");
+                                await loadAll();
+                              } catch (err) {
+                                toastApiError(err, "Failed to remove item from kit");
+                              }
                             }}
                             className="text-[12px] text-red-600 hover:underline"
                           >

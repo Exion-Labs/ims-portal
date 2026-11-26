@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { apiFetch, TenantSettingView } from "@ims/api-client";
+import { toast, toastApiError } from "@ims/ui";
 import { useEntitlements } from "@/lib/entitlements";
 import { useQuery } from "@tanstack/react-query";
 
@@ -38,6 +39,9 @@ export default function OrganizationSettingsPage() {
       refetch();
       refetchKv();
       setSavedBanner(true);
+      toast.success("Organization profile saved");
+    } catch (err) {
+      toastApiError(err, "Failed to save organization");
     } finally {
       setSaving(false);
     }

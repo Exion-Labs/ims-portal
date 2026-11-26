@@ -11,7 +11,7 @@ import {
   PageResponse,
   PurchaseOrderView,
 } from "@ims/api-client";
-import { DataTable, EmptyState, ErrorState, StatTile, StatusBadge } from "@ims/ui";
+import { DataTable, EmptyState, ErrorState, StatTile, StatusBadge, toast, toastApiError } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { ListToolbar } from "@/components/list-toolbar";
 import { Plus, ShoppingCart, X } from "lucide-react";
@@ -97,9 +97,11 @@ export default function PurchaseOrdersPage() {
         }),
       });
       setShowCreate(false);
+      toast.success("Purchase order created", { description: created.reference });
       router.push(`/purchasing/${created.id}`);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Failed to create purchase order");
+      toastApiError(err, "Failed to create purchase order");
     }
   }
 

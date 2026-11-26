@@ -3,6 +3,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch, ReferenceSequenceView } from "@ims/api-client";
+import { toast, toastApiError } from "@ims/ui";
 
 export default function SequencesSettingsPage() {
   const { data: sequences, refetch } = useQuery({
@@ -16,11 +17,23 @@ export default function SequencesSettingsPage() {
     padding: number,
     nextValue: number
   ) {
-    await apiFetch(`/api/v1/settings/sequences/${seq.sequenceKey}`, {
-      method: "PUT",
-      body: JSON.stringify({ prefix, padding, nextValue }),
-    });
-    refetch();
+    if (
+      prefix === seq.prefix &&
+      padding === seq.padding &&
+      nextValue === seq.nextValue
+    ) {
+      return;
+    }
+    try {
+      await apiFetch(`/api/v1/settings/sequences/${seq.sequenceKey}`, {
+        method: "PUT",
+        body: JSON.stringify({ prefix, padding, nextValue }),
+      });
+      toast.success("Sequence updated", { description: seq.sequenceKey });
+      refetch();
+    } catch (err) {
+      toastApiError(err, `Failed to update ${seq.sequenceKey}`);
+    }
   }
 
   return (

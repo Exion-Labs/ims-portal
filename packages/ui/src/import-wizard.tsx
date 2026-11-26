@@ -9,6 +9,7 @@ import {
 } from "@ims/api-client";
 import { CheckCircle2, FileSpreadsheet, Upload, AlertTriangle } from "lucide-react";
 import { StatusBadge } from "./primitives";
+import { toast, toastApiError } from "./toast";
 
 export interface TargetFieldSpec {
   key: string;
@@ -60,8 +61,12 @@ export function ImportWizard({
       setSession(created);
       setMapping(autoMap);
       setStep("MAP");
+      toast.success("File parsed", {
+        description: `${created.totalRows} rows detected in ${created.fileName}`,
+      });
     } catch (e: any) {
       setError(e.message ?? "Upload failed");
+      toastApiError(e, "Upload failed");
     } finally {
       setBusy(false);
     }
@@ -82,8 +87,18 @@ export function ImportWizard({
       );
       setReport(res);
       setStep("DRY_RUN");
+      if (res.invalidRows > 0) {
+        toast.warning("Validation found issues", {
+          description: `${res.invalidRows} row(s) have errors (${res.validRows} valid)`,
+        });
+      } else {
+        toast.success("Validation passed", {
+          description: `${res.validRows} rows ready to commit`,
+        });
+      }
     } catch (e: any) {
       setError(e.message ?? "Dry run validation failed");
+      toastApiError(e, "Dry run validation failed");
     } finally {
       setBusy(false);
     }
@@ -104,9 +119,13 @@ export function ImportWizard({
       );
       setCommitResult(res);
       setStep("DONE");
+      toast.success("Import complete", {
+        description: `Committed ${res.committedRows} rows`,
+      });
       onComplete?.(res);
     } catch (e: any) {
       setError(e.message ?? "Import commit failed");
+      toastApiError(e, "Import commit failed");
     } finally {
       setBusy(false);
     }

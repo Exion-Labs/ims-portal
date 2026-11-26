@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "@ims/api-client";
+import { toast, toastApiError } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { FileText, Plus, Radio, Trash2, Webhook } from "lucide-react";
 
@@ -71,13 +72,16 @@ export default function IntegrationsSettingsPage() {
       es.addEventListener("connected", (e) => {
         setSseStatus("Connected");
         setSseEvents((prev) => [`connected: ${(e as MessageEvent).data}`, ...prev.slice(0, 9)]);
+        toast.success("Connected to live event stream");
       });
       es.onerror = () => {
         setSseStatus("Error / Closed");
+        toast.error("Live event stream disconnected");
         es.close();
       };
     } catch (err) {
       setSseStatus(err instanceof Error ? err.message : "Failed to connect");
+      toastApiError(err, "Failed to connect live stream");
     }
   }
 
@@ -101,12 +105,18 @@ export default function IntegrationsSettingsPage() {
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
-                await apiFetch("/api/v1/reports/templates", {
-                  method: "POST",
-                  body: JSON.stringify({ name: tplName, entityType: tplEntity, templateHtml: tplHtml, pageSize: "A4" }),
-                });
-                setTplName("");
-                await loadData();
+                try {
+                  await apiFetch("/api/v1/reports/templates", {
+                    method: "POST",
+                    body: JSON.stringify({ name: tplName, entityType: tplEntity, templateHtml: tplHtml, pageSize: "A4" }),
+                  });
+                  const createdName = tplName;
+                  setTplName("");
+                  toast.success("Report template created", { description: createdName });
+                  await loadData();
+                } catch (err) {
+                  toastApiError(err, "Failed to create report template");
+                }
               }}
               className="grid grid-cols-1 md:grid-cols-4 gap-3"
             >
@@ -151,8 +161,13 @@ export default function IntegrationsSettingsPage() {
                 {hasPermission("ADMIN:DELETE") && (
                   <button
                     onClick={async () => {
-                      await apiFetch(`/api/v1/reports/templates/${t.id}`, { method: "DELETE" });
-                      await loadData();
+                      try {
+                        await apiFetch(`/api/v1/reports/templates/${t.id}`, { method: "DELETE" });
+                        toast.success("Report template deleted", { description: t.name });
+                        await loadData();
+                      } catch (err) {
+                        toastApiError(err, "Failed to delete report template");
+                      }
                     }}
                     className="text-destructive hover:opacity-80"
                   >
@@ -180,11 +195,14 @@ export default function IntegrationsSettingsPage() {
                     method: "POST",
                     body: JSON.stringify({ name: hookName, targetUrl: hookUrl, eventTypes: ["*"] }),
                   });
+                  const createdName = hookName;
                   setHookName("");
                   setHookUrl("");
+                  toast.success("Webhook subscribed", { description: createdName });
                   await loadData();
                 } catch (err) {
                   setError(err instanceof Error ? err.message : "Failed to create webhook");
+                  toastApiError(err, "Failed to create webhook");
                 }
               }}
               className="grid grid-cols-1 md:grid-cols-3 gap-3"
@@ -221,8 +239,13 @@ export default function IntegrationsSettingsPage() {
                 {hasPermission("ADMIN:DELETE") && (
                   <button
                     onClick={async () => {
-                      await apiFetch(`/api/v1/webhooks/${w.id}`, { method: "DELETE" });
-                      await loadData();
+                      try {
+                        await apiFetch(`/api/v1/webhooks/${w.id}`, { method: "DELETE" });
+                        toast.success("Webhook deleted", { description: w.name });
+                        await loadData();
+                      } catch (err) {
+                        toastApiError(err, "Failed to delete webhook");
+                      }
                     }}
                     className="text-destructive hover:opacity-80"
                   >

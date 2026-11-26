@@ -11,7 +11,7 @@ import {
   PageResponse,
   PartView,
 } from "@ims/api-client";
-import { DataTable, EmptyState, ErrorState, StatTile, StatusBadge } from "@ims/ui";
+import { DataTable, EmptyState, ErrorState, StatTile, StatusBadge, toast, toastApiError } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { ListToolbar } from "@/components/list-toolbar";
 import { X } from "lucide-react";
@@ -97,9 +97,11 @@ export default function ManufacturingPage() {
         }),
       });
       setShowCreate(false);
+      toast.success("Build order created", { description: created.reference });
       router.push(`/manufacturing/${created.id}`);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Failed to create build order");
+      toastApiError(err, "Failed to create build order");
     }
   }
 

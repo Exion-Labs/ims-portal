@@ -22,6 +22,8 @@ import {
   ImportWizard,
   StatTile,
   StatusBadge,
+  toast,
+  toastApiError,
 } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { useEditMode } from "@/lib/edit-mode";
@@ -216,9 +218,11 @@ function StockAndLocationsPageContent() {
         }),
       });
       setShowCreateStock(false);
+      toast.success("Stock item created");
       await Promise.all([loadStock(), loadMetadata()]);
     } catch (err) {
       setCreateStockError(err instanceof Error ? err.message : "Failed to create stock");
+      toastApiError(err, "Failed to create stock");
     }
   }
 
@@ -226,8 +230,9 @@ function StockAndLocationsPageContent() {
     e.preventDefault();
     if (!showLocationModal) return;
     setLocError(null);
+    const mode = showLocationModal.mode;
     try {
-      if (showLocationModal.mode === "create") {
+      if (mode === "create") {
         await apiFetch<LocationView>("/api/v1/stock-locations", {
           method: "POST",
           body: JSON.stringify({
@@ -240,7 +245,7 @@ function StockAndLocationsPageContent() {
             customBarcode: locBarcode || null,
           }),
         });
-      } else if (showLocationModal.mode === "edit" && showLocationModal.location) {
+      } else if (mode === "edit" && showLocationModal.location) {
         await apiFetch<LocationView>(`/api/v1/stock-locations/${showLocationModal.location.id}`, {
           method: "PUT",
           body: JSON.stringify({
@@ -252,7 +257,7 @@ function StockAndLocationsPageContent() {
             customBarcode: locBarcode,
           }),
         });
-      } else if (showLocationModal.mode === "move" && showLocationModal.location) {
+      } else if (mode === "move" && showLocationModal.location) {
         await apiFetch<LocationView>(
           `/api/v1/stock-locations/${showLocationModal.location.id}/move`,
           {
@@ -262,10 +267,19 @@ function StockAndLocationsPageContent() {
         );
       }
       setShowLocationModal(null);
+      toast.success(
+        mode === "create"
+          ? "Location created"
+          : mode === "edit"
+            ? "Location updated"
+            : "Location moved",
+        { description: mode === "move" ? showLocationModal.location?.name : locName }
+      );
       await Promise.all([loadMetadata(), loadStock()]);
       refetch();
     } catch (err) {
       setLocError(err instanceof Error ? err.message : "Location save failed");
+      toastApiError(err, "Location save failed");
     }
   }
 
@@ -275,10 +289,11 @@ function StockAndLocationsPageContent() {
         method: "DELETE",
       });
       if (selectedLocationId === loc.id) setSelectedLocationId(null);
+      toast.success("Location deleted", { description: loc.name });
       await Promise.all([loadMetadata(), loadStock()]);
       refetch();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete location");
+      toastApiError(err, "Failed to delete location");
     }
   }
 
@@ -286,9 +301,10 @@ function StockAndLocationsPageContent() {
     e.preventDefault();
     if (!opModal || opModal.type === "inspect") return;
     setOpError(null);
+    const modal = opModal;
     try {
-      if (opModal.type === "transfer") {
-        await apiFetch(`/api/v1/stock-items/${opModal.item.id}/transfer`, {
+      if (modal.type === "transfer") {
+        await apiFetch(`/api/v1/stock-items/${modal.item.id}/transfer`, {
           method: "POST",
           body: JSON.stringify({
             targetLocationId: opTargetLocId,
@@ -296,16 +312,16 @@ function StockAndLocationsPageContent() {
             notes: opNotes || null,
           }),
         });
-      } else if (opModal.type === "adjust") {
-        await apiFetch(`/api/v1/stock-items/${opModal.item.id}/${opModal.mode}`, {
+      } else if (modal.type === "adjust") {
+        await apiFetch(`/api/v1/stock-items/${modal.item.id}/${modal.mode}`, {
           method: "POST",
           body: JSON.stringify({
             quantity: Number(opQty),
             notes: opNotes || null,
           }),
         });
-      } else if (opModal.type === "split") {
-        await apiFetch(`/api/v1/stock-items/${opModal.item.id}/split`, {
+      } else if (modal.type === "split") {
+        await apiFetch(`/api/v1/stock-items/${modal.item.id}/split`, {
           method: "POST",
           body: JSON.stringify({
             splitQuantity: Number(opQty),
@@ -313,12 +329,12 @@ function StockAndLocationsPageContent() {
             notes: opNotes || null,
           }),
         });
-      } else if (opModal.type === "serialize") {
+      } else if (modal.type === "serialize") {
         const serials = opSerialsText
           .split(/[\n,]+/)
           .map((s) => s.trim())
           .filter(Boolean);
-        await apiFetch(`/api/v1/stock-items/${opModal.item.id}/serialize`, {
+        await apiFetch(`/api/v1/stock-items/${modal.item.id}/serialize`, {
           method: "POST",
           body: JSON.stringify({
             serialNumbers: serials,
@@ -328,14 +344,29 @@ function StockAndLocationsPageContent() {
         });
       }
       setOpModal(null);
+      const opTitle =
+        modal.type === "transfer"
+          ? "Stock transferred"
+          : modal.type === "split"
+            ? "Batch split"
+            : modal.type === "serialize"
+              ? "Batch serialized"
+              : modal.mode === "count"
+                ? "Stock count updated"
+                : modal.mode === "add"
+                  ? "Stock added"
+                  : "Stock removed";
+      toast.success(opTitle, { description: modal.item.partIpn });
       await Promise.all([loadStock(), loadMetadata()]);
     } catch (err) {
       setOpError(err instanceof Error ? err.message : "Stock operation failed");
+      toastApiError(err, "Stock operation failed");
     }
   }
 
   async function handleMergeSelected() {
     if (selectedItems.length < 2) return;
+    const count = selectedItems.length;
     try {
       await apiFetch("/api/v1/stock-items/merge", {
         method: "POST",
@@ -346,9 +377,10 @@ function StockAndLocationsPageContent() {
         }),
       });
       setSelectedItems([]);
+      toast.success(`Merged ${count} stock batches`);
       await Promise.all([loadStock(), loadMetadata()]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to merge selected items");
+      toastApiError(err, "Failed to merge selected batches");
     }
   }
 
@@ -364,11 +396,15 @@ function StockAndLocationsPageContent() {
           value: newTestValue || null,
         }),
       });
+      toast.success("Inspection result recorded", {
+        description: `${newTestName}: ${newTestPassed ? "PASS" : "FAIL"}`,
+      });
       setNewTestName("");
       setNewTestValue("");
       await openInspectModal(opModal.item);
     } catch (err) {
       setOpError(err instanceof Error ? err.message : "Failed to record test result");
+      toastApiError(err, "Failed to record test result");
     }
   }
 
@@ -382,8 +418,10 @@ function StockAndLocationsPageContent() {
         body: JSON.stringify({ barcode: scanInput }),
       });
       setScanResult(res);
+      toast.success("Barcode matched", { description: res.title });
     } catch (err) {
       setScanError(err instanceof Error ? err.message : "Barcode not recognized");
+      toastApiError(err, "Barcode not recognized");
     }
   }
 
@@ -395,11 +433,15 @@ function StockAndLocationsPageContent() {
         partsChecked: number;
         driftsFoundAndCorrected: number;
       }>("/api/v1/stock/reconcile", { method: "POST" });
-      setReconcileBanner(
-        `Reconciled ${res.partsChecked} parts · ${res.driftsFoundAndCorrected} counter drifts detected`
-      );
+      const summary = `${res.driftsFoundAndCorrected} counter drifts corrected`;
+      setReconcileBanner(`Reconciled ${res.partsChecked} parts · ${summary}`);
+      if (res.driftsFoundAndCorrected > 0) {
+        toast.warning(`Reconciled ${res.partsChecked} parts`, { description: summary });
+      } else {
+        toast.success(`Reconciled ${res.partsChecked} parts`, { description: "No drifts found" });
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Reconciliation failed");
+      toastApiError(err, "Reconciliation failed");
     } finally {
       setReconciling(false);
     }

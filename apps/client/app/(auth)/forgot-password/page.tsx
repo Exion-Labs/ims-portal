@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { toast } from "@ims/ui";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -9,12 +10,24 @@ export default function ForgotPasswordPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    await fetch("/api/v1/auth/forgot-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-    setSent(true);
+    try {
+      const res = await fetch("/api/v1/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        toast.error("Failed to request password reset", { description: d.message });
+        return;
+      }
+      setSent(true);
+      toast.success("Recovery link requested", { description: email });
+    } catch (err) {
+      toast.error("Failed to request password reset", {
+        description: err instanceof Error ? err.message : "Network error",
+      });
+    }
   }
 
   return (

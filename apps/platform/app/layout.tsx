@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Toaster } from "@ims/ui";
 
 export const metadata: Metadata = {
   title: "IMS Platform Operator Console",
@@ -18,6 +19,7 @@ export default function PlatformRootLayout({
           Platform console · changes here affect customer tenants and are audited
         </div>
         {children}
+        <Toaster theme="dark" />
       </body>
     </html>
   );

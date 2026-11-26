@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import { toast } from "@ims/ui";
 
 const PLATFORM_API_BASE = "/platform/api/platform/v1";
 
@@ -97,17 +98,24 @@ export default function PlatformConsolePage() {
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoginError(null);
-    const res = await fetch(`${PLATFORM_API_BASE}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    if (!res.ok) {
-      setLoginError("Invalid platform operator credentials");
-      return;
+    try {
+      const res = await fetch(`${PLATFORM_API_BASE}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) {
+        setLoginError("Invalid platform operator credentials");
+        toast.error("Invalid platform operator credentials");
+        return;
+      }
+      setAuthed(true);
+      toast.success("Signed in to Platform Console");
+      await loadAll();
+    } catch {
+      setLoginError("Unable to reach platform authentication server");
+      toast.error("Unable to reach platform authentication server");
     }
-    setAuthed(true);
-    await loadAll();
   }
 
   async function handleRegisterTenant(e: React.FormEvent) {
@@ -131,7 +139,9 @@ export default function PlatformConsolePage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setRegisterError(data.message ?? "Failed to register tenant");
+        const msg = data.message ?? "Failed to register tenant";
+        setRegisterError(msg);
+        toast.error("Failed to register tenant", { description: msg });
         return;
       }
       setShowRegisterModal(false);
@@ -145,9 +155,12 @@ export default function PlatformConsolePage() {
         adminPassword: "",
       });
       setMessage(`Registered tenant ${data.name} (${data.slug})`);
+      toast.success("Tenant provisioned", { description: `${data.name} (${data.slug})` });
       await loadAll();
     } catch (err) {
-      setRegisterError(err instanceof Error ? err.message : "Failed to register tenant");
+      const msg = err instanceof Error ? err.message : "Failed to register tenant";
+      setRegisterError(msg);
+      toast.error("Failed to register tenant", { description: msg });
     } finally {
       setRegistering(false);
     }
@@ -258,13 +271,24 @@ export default function PlatformConsolePage() {
                       <select
                         value={t.planCode}
                         onChange={async (e) => {
-                          await fetch(`${PLATFORM_API_BASE}/tenants/${t.id}/plan`, {
-                            method: "PUT",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ planCode: e.target.value }),
-                          });
-                          setMessage(`Updated ${t.slug} plan to ${e.target.value}`);
-                          await loadAll();
+                          const planCode = e.target.value;
+                          try {
+                            const res = await fetch(`${PLATFORM_API_BASE}/tenants/${t.id}/plan`, {
+                              method: "PUT",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ planCode }),
+                            });
+                            if (!res.ok) {
+                              const err = await res.json().catch(() => ({}));
+                              toast.error("Failed to update plan", { description: err.message });
+                              return;
+                            }
+                            setMessage(`Updated ${t.slug} plan to ${planCode}`);
+                            toast.success(`Updated ${t.slug} plan to ${planCode}`);
+                            await loadAll();
+                          } catch {
+                            toast.error("Failed to update plan");
+                          }
                         }}
                         className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs"
                       >
@@ -280,12 +304,21 @@ export default function PlatformConsolePage() {
                       <button
                         onClick={async () => {
                           const next = t.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
-                          await fetch(`${PLATFORM_API_BASE}/tenants/${t.id}/status`, {
-                            method: "PATCH",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ status: next }),
-                          });
-                          await loadAll();
+                          try {
+                            const res = await fetch(`${PLATFORM_API_BASE}/tenants/${t.id}/status`, {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ status: next }),
+                            });
+                            if (!res.ok) {
+                              toast.error("Failed to update tenant status");
+                              return;
+                            }
+                            toast.success(`Tenant ${t.slug} is now ${next}`);
+                            await loadAll();
+                          } catch {
+                            toast.error("Failed to update tenant status");
+                          }
                         }}
                         className="px-2.5 py-1 rounded border border-slate-700 text-xs hover:bg-slate-800"
                       >
@@ -293,9 +326,19 @@ export default function PlatformConsolePage() {
                       </button>
                       <button
                         onClick={async () => {
-                          const res = await fetch(`${PLATFORM_API_BASE}/tenants/${t.id}/usage-snapshots`, { method: "POST" });
-                          const snap = await res.json();
-                          setMessage(`Snapshot for ${t.slug}: ${snap.partsCount} parts, ${snap.locationsCount} locations`);
+                          try {
+                            const res = await fetch(`${PLATFORM_API_BASE}/tenants/${t.id}/usage-snapshots`, { method: "POST" });
+                            if (!res.ok) {
+                              toast.error("Failed to capture usage snapshot");
+                              return;
+                            }
+                            const snap = await res.json();
+                            const msg = `${snap.partsCount} parts, ${snap.locationsCount} locations`;
+                            setMessage(`Snapshot for ${t.slug}: ${msg}`);
+                            toast.success(`Snapshot for ${t.slug}`, { description: msg });
+                          } catch {
+                            toast.error("Failed to capture usage snapshot");
+                          }
                         }}
                         className="px-2.5 py-1 rounded border border-slate-700 text-xs hover:bg-slate-800"
                       >
@@ -303,14 +346,25 @@ export default function PlatformConsolePage() {
                       </button>
                       <button
                         onClick={async () => {
-                          const res = await fetch(`${PLATFORM_API_BASE}/tenants/${t.id}/support-sessions`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ reason: "Platform Console support check" }),
-                          });
-                          const sess = await res.json();
-                          setMessage(`Started support session ${sess.sessionId} for ${t.slug}`);
-                          await loadAll();
+                          try {
+                            const res = await fetch(`${PLATFORM_API_BASE}/tenants/${t.id}/support-sessions`, {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ reason: "Platform Console support check" }),
+                            });
+                            if (!res.ok) {
+                              toast.error("Failed to start support session");
+                              return;
+                            }
+                            const sess = await res.json();
+                            setMessage(`Started support session ${sess.sessionId} for ${t.slug}`);
+                            toast.warning("Support session started", {
+                              description: `Session ${sess.sessionId} for ${t.slug} (audited)`,
+                            });
+                            await loadAll();
+                          } catch {
+                            toast.error("Failed to start support session");
+                          }
                         }}
                         className="px-2.5 py-1 rounded bg-amber-600/20 text-amber-300 border border-amber-700/40 text-xs"
                       >
@@ -341,17 +395,24 @@ export default function PlatformConsolePage() {
                         type="checkbox"
                         checked={f.enabled}
                         onChange={async (e) => {
-                          const res = await fetch(`${PLATFORM_API_BASE}/plans/${p.id}/features/${f.featureKey}`, {
-                            method: "PUT",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ enabled: e.target.checked, limitValue: f.limitValue }),
-                          });
-                          if (!res.ok) {
-                            const err = await res.json();
-                            setMessage(err.message ?? "Feature dependency conflict");
-                            return;
+                          try {
+                            const res = await fetch(`${PLATFORM_API_BASE}/plans/${p.id}/features/${f.featureKey}`, {
+                              method: "PUT",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ enabled: e.target.checked, limitValue: f.limitValue }),
+                            });
+                            if (!res.ok) {
+                              const err = await res.json().catch(() => ({}));
+                              const msg = err.message ?? "Feature dependency conflict";
+                              setMessage(msg);
+                              toast.error("Feature dependency conflict", { description: msg });
+                              return;
+                            }
+                            toast.success(`Updated ${p.code} · ${f.featureKey}`);
+                            await loadAll();
+                          } catch {
+                            toast.error("Failed to update feature");
                           }
-                          await loadAll();
                         }}
                       />
                     </label>
@@ -375,8 +436,17 @@ export default function PlatformConsolePage() {
                   </div>
                   <button
                     onClick={async () => {
-                      await fetch(`${PLATFORM_API_BASE}/outbox/${ev.id}/retry`, { method: "POST" });
-                      await loadAll();
+                      try {
+                        const res = await fetch(`${PLATFORM_API_BASE}/outbox/${ev.id}/retry`, { method: "POST" });
+                        if (!res.ok) {
+                          toast.error("Failed to retry outbox event");
+                          return;
+                        }
+                        toast.success("Outbox retry queued", { description: ev.eventType });
+                        await loadAll();
+                      } catch {
+                        toast.error("Failed to retry outbox event");
+                      }
                     }}
                     className="px-3 py-1 rounded bg-blue-600 text-white"
                   >

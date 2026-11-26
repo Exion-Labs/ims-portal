@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Boxes } from "lucide-react";
+import { toast } from "@ims/ui";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,13 +25,18 @@ export default function LoginPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.message ?? "Invalid email or password");
+        const msg = data.message ?? "Invalid email or password";
+        setError(msg);
+        toast.error("Sign in failed", { description: msg });
         return;
       }
+      toast.success("Signed in");
       router.push("/");
       router.refresh();
     } catch (err: any) {
-      setError(err.message ?? "Unable to connect to authentication server");
+      const msg = err.message ?? "Unable to connect to authentication server";
+      setError(msg);
+      toast.error("Sign in failed", { description: msg });
     } finally {
       setBusy(false);
     }
@@ -109,6 +115,7 @@ export default function LoginPage() {
               onClick={() => {
                 setEmail("admin@acme-robotics.dev");
                 setPassword("Password123!");
+                toast.info("Demo credentials filled", { description: "admin@acme-robotics.dev" });
               }}
               className="text-left text-[var(--brand-primary)] hover:underline"
             >
@@ -119,6 +126,7 @@ export default function LoginPage() {
               onClick={() => {
                 setEmail("admin@nordic-labs.dev");
                 setPassword("Password123!");
+                toast.info("Demo credentials filled", { description: "admin@nordic-labs.dev" });
               }}
               className="text-left text-[var(--brand-primary)] hover:underline"
             >

@@ -11,7 +11,7 @@ import {
   PageResponse,
   StockItemView,
 } from "@ims/api-client";
-import { ErrorState, StatTile, StatusBadge } from "@ims/ui";
+import { ErrorState, StatTile, StatusBadge, toast, toastApiError } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import {
   ArrowLeft,
@@ -89,14 +89,23 @@ export default function BuildOrderDetailPage() {
     loadData();
   }, [loadData]);
 
-  async function runAction(fn: () => Promise<unknown>) {
+  async function runAction(
+    fn: () => Promise<unknown>,
+    successTitle?: string,
+    tone: "success" | "info" = "success"
+  ) {
     setActionError(null);
     setBusy(true);
     try {
       await fn();
+      if (successTitle) {
+        if (tone === "info") toast.info(successTitle);
+        else toast.success(successTitle);
+      }
       await loadData();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Operation failed");
+      toastApiError(err, "Operation failed");
     } finally {
       setBusy(false);
     }
@@ -130,7 +139,7 @@ export default function BuildOrderDetailPage() {
         }),
       });
       setAllocLine(null);
-    });
+    }, "Component allocated");
   }
 
   async function handleCreateOutput(e: React.FormEvent) {
@@ -150,7 +159,7 @@ export default function BuildOrderDetailPage() {
       });
       setShowOutputModal(false);
       setOutputSerials("");
-    });
+    }, "Build output created");
   }
 
   async function handleCompleteOutput(e: React.FormEvent) {
@@ -166,7 +175,7 @@ export default function BuildOrderDetailPage() {
         }),
       });
       setCompletingOutput(null);
-    });
+    }, "Build output completed");
   }
 
   if (loading) return <div className="p-8 text-sm text-muted-foreground">Loading build order...</div>;
@@ -205,7 +214,12 @@ export default function BuildOrderDetailPage() {
               {build.status === "PENDING" && (
                 <button
                   disabled={busy}
-                  onClick={() => runAction(() => apiFetch(`/api/v1/builds/${buildId}/start`, { method: "POST" }))}
+                  onClick={() =>
+                    runAction(
+                      () => apiFetch(`/api/v1/builds/${buildId}/start`, { method: "POST" }),
+                      `Build ${build.reference} started`
+                    )
+                  }
                   className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
                 >
                   <Play className="w-4 h-4" /> Start Build
@@ -214,7 +228,10 @@ export default function BuildOrderDetailPage() {
               <button
                 disabled={busy}
                 onClick={() =>
-                  runAction(() => apiFetch(`/api/v1/builds/${buildId}/auto-allocate`, { method: "POST" }))
+                  runAction(
+                    () => apiFetch(`/api/v1/builds/${buildId}/auto-allocate`, { method: "POST" }),
+                    "FIFO stock auto-allocated"
+                  )
                 }
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium hover:bg-muted"
               >
@@ -231,7 +248,13 @@ export default function BuildOrderDetailPage() {
               )}
               <button
                 disabled={busy}
-                onClick={() => runAction(() => apiFetch(`/api/v1/builds/${buildId}/cancel`, { method: "POST" }))}
+                onClick={() =>
+                  runAction(
+                    () => apiFetch(`/api/v1/builds/${buildId}/cancel`, { method: "POST" }),
+                    `Build ${build.reference} cancelled`,
+                    "info"
+                  )
+                }
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-destructive/40 text-destructive text-sm font-medium hover:bg-destructive/10"
               >
                 <XCircle className="w-4 h-4" /> Cancel

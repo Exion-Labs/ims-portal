@@ -10,7 +10,7 @@ import {
   StockItemView,
   TransferOrderView,
 } from "@ims/api-client";
-import { EmptyState, ErrorState, StatusBadge } from "@ims/ui";
+import { EmptyState, ErrorState, StatusBadge, toast, toastApiError } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { ListToolbar } from "@/components/list-toolbar";
 import { ArrowLeftRight, RotateCcw, X } from "lucide-react";
@@ -90,13 +90,15 @@ export default function TransfersAndReturnsPage() {
     loadData();
   }, [loadData]);
 
-  async function runAction(fn: () => Promise<unknown>) {
+  async function runAction(fn: () => Promise<unknown>, successTitle?: string) {
     setActionError(null);
     try {
       await fn();
+      if (successTitle) toast.success(successTitle);
       await loadData();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Action failed");
+      toastApiError(err, "Action failed");
     }
   }
 
@@ -121,7 +123,7 @@ export default function TransfersAndReturnsPage() {
         });
       }
       setShowCreateTransfer(false);
-    });
+    }, "Transfer order created");
   }
 
   async function handleCreateReturn(e: React.FormEvent) {
@@ -141,7 +143,7 @@ export default function TransfersAndReturnsPage() {
         });
       }
       setShowCreateReturn(false);
-    });
+    }, "Return order created");
   }
 
   return (
@@ -228,7 +230,10 @@ export default function TransfersAndReturnsPage() {
                       {trf.status === "PENDING" && (
                         <button
                           onClick={() =>
-                            runAction(() => apiFetch(`/api/v1/transfer-orders/${trf.id}/dispatch`, { method: "POST" }))
+                            runAction(
+                              () => apiFetch(`/api/v1/transfer-orders/${trf.id}/dispatch`, { method: "POST" }),
+                              `Transfer ${trf.reference} dispatched`
+                            )
                           }
                           className="px-3 py-1.5 text-xs rounded-lg border hover:bg-muted font-medium"
                         >
@@ -238,7 +243,10 @@ export default function TransfersAndReturnsPage() {
                       {(trf.status === "PENDING" || trf.status === "IN_TRANSIT") && (
                         <button
                           onClick={() =>
-                            runAction(() => apiFetch(`/api/v1/transfer-orders/${trf.id}/receive`, { method: "POST" }))
+                            runAction(
+                              () => apiFetch(`/api/v1/transfer-orders/${trf.id}/receive`, { method: "POST" }),
+                              `Transfer ${trf.reference} received`
+                            )
                           }
                           className="px-3 py-1.5 text-xs rounded-lg bg-emerald-600 text-white font-medium"
                         >
@@ -271,10 +279,16 @@ export default function TransfersAndReturnsPage() {
                   {hasPermission("ORDER:UPDATE") && rma.status !== "COMPLETE" && (
                     <button
                       onClick={async () => {
-                        const detail = await apiFetch<ReturnOrderView>(`/api/v1/return-orders/${rma.id}`);
-                        const pendingLine = detail.lines.find((l) => l.outcome === "PENDING");
-                        if (pendingLine) {
-                          setReceivingRma({ rmaId: rma.id, lineId: pendingLine.id });
+                        try {
+                          const detail = await apiFetch<ReturnOrderView>(`/api/v1/return-orders/${rma.id}`);
+                          const pendingLine = detail.lines.find((l) => l.outcome === "PENDING");
+                          if (pendingLine) {
+                            setReceivingRma({ rmaId: rma.id, lineId: pendingLine.id });
+                          } else {
+                            toast.warning("No pending return lines to receive");
+                          }
+                        } catch (err) {
+                          toastApiError(err, "Failed to load return order");
                         }
                       }}
                       className="px-3 py-1.5 text-xs rounded-lg bg-primary text-primary-foreground font-medium"
@@ -451,7 +465,7 @@ export default function TransfersAndReturnsPage() {
                       }),
                     });
                     setReceivingRma(null);
-                  });
+                  }, `Return received (${receiveOutcome})`);
                 }}
                 className="space-y-4"
               >

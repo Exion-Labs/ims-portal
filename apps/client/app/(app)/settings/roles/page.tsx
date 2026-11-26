@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch, RoleView } from "@ims/api-client";
-import { StatusBadge } from "@ims/ui";
+import { StatusBadge, toast, toastApiError } from "@ims/ui";
 import { Plus, Trash2 } from "lucide-react";
 
 export default function RolesSettingsPage() {
@@ -43,17 +43,25 @@ export default function RolesSettingsPage() {
           permissions: Array.from(selectedPerms),
         }),
       });
+      const createdName = name;
       setName("");
       setDescription("");
+      toast.success("Role created", { description: createdName });
       refetch();
     } catch (err: any) {
       setError(err.message ?? "Failed to create role");
+      toastApiError(err, "Failed to create role");
     }
   }
 
   async function handleDeleteRole(id: string) {
-    await apiFetch(`/api/v1/settings/roles/${id}`, { method: "DELETE" });
-    refetch();
+    try {
+      await apiFetch(`/api/v1/settings/roles/${id}`, { method: "DELETE" });
+      toast.success("Role deleted");
+      refetch();
+    } catch (err) {
+      toastApiError(err, "Failed to delete role");
+    }
   }
 
   return (

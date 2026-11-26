@@ -19,6 +19,8 @@ import {
   ImportWizard,
   StatTile,
   StatusBadge,
+  toast,
+  toastApiError,
 } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { useEditMode } from "@/lib/edit-mode";
@@ -191,6 +193,9 @@ function PartsCatalogPageContent() {
         }),
       });
       setShowCreatePart(false);
+      toast.success("Item created", {
+        description: `${partForm.ipn} — ${partForm.name}`,
+      });
       setPartForm({
         ipn: "",
         name: "",
@@ -206,6 +211,7 @@ function PartsCatalogPageContent() {
       refetch();
     } catch (err) {
       setPartFormError(err instanceof Error ? err.message : "Failed to create item");
+      toastApiError(err, "Failed to create item");
     } finally {
       setSubmittingPart(false);
     }
@@ -215,8 +221,9 @@ function PartsCatalogPageContent() {
     e.preventDefault();
     if (!showCategoryModal) return;
     setCatFormError(null);
+    const mode = showCategoryModal.mode;
     try {
-      if (showCategoryModal.mode === "create") {
+      if (mode === "create") {
         await apiFetch<CategoryView>("/api/v1/part-categories", {
           method: "POST",
           body: JSON.stringify({
@@ -226,7 +233,7 @@ function PartsCatalogPageContent() {
             structural: false,
           }),
         });
-      } else if (showCategoryModal.mode === "edit" && showCategoryModal.category) {
+      } else if (mode === "edit" && showCategoryModal.category) {
         await apiFetch<CategoryView>(`/api/v1/part-categories/${showCategoryModal.category.id}`, {
           method: "PUT",
           body: JSON.stringify({
@@ -235,7 +242,7 @@ function PartsCatalogPageContent() {
             structural: showCategoryModal.category.structural,
           }),
         });
-      } else if (showCategoryModal.mode === "move" && showCategoryModal.category) {
+      } else if (mode === "move" && showCategoryModal.category) {
         await apiFetch<CategoryView>(
           `/api/v1/part-categories/${showCategoryModal.category.id}/move`,
           {
@@ -247,9 +254,18 @@ function PartsCatalogPageContent() {
         );
       }
       setShowCategoryModal(null);
+      toast.success(
+        mode === "create"
+          ? "Category created"
+          : mode === "edit"
+            ? "Category renamed"
+            : "Category moved",
+        { description: mode === "move" ? showCategoryModal.category?.name : catName }
+      );
       await Promise.all([loadMetadata(), loadParts()]);
     } catch (err) {
       setCatFormError(err instanceof Error ? err.message : "Category operation failed");
+      toastApiError(err, "Category operation failed");
     }
   }
 
@@ -261,9 +277,10 @@ function PartsCatalogPageContent() {
       if (selectedCategoryId === category.id) {
         setSelectedCategoryId(null);
       }
+      toast.success("Category deleted", { description: category.name });
       await Promise.all([loadMetadata(), loadParts()]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete category");
+      toastApiError(err, "Failed to delete category");
     }
   }
 

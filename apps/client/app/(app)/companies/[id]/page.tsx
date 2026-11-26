@@ -11,7 +11,7 @@ import {
   ManufacturerPartView,
   SupplierPartView,
 } from "@ims/api-client";
-import { ErrorState, StatTile, StatusBadge } from "@ims/ui";
+import { ErrorState, StatTile, StatusBadge, toast, toastApiError } from "@ims/ui";
 import { useEntitlements } from "@/lib/entitlements";
 import { ArrowLeft, MapPin, Plus, UserCheck } from "lucide-react";
 
@@ -60,22 +60,32 @@ export default function CompanyDetailPage() {
 
   async function handleAddContact(e: React.FormEvent) {
     e.preventDefault();
-    await apiFetch(`/api/v1/companies/${companyId}/contacts`, {
-      method: "POST",
-      body: JSON.stringify({ ...contactForm, primaryContact: contacts.length === 0 }),
-    });
-    setContactForm({ name: "", roleTitle: "", email: "", phone: "" });
-    await loadAll();
+    try {
+      await apiFetch(`/api/v1/companies/${companyId}/contacts`, {
+        method: "POST",
+        body: JSON.stringify({ ...contactForm, primaryContact: contacts.length === 0 }),
+      });
+      toast.success("Contact added", { description: contactForm.name });
+      setContactForm({ name: "", roleTitle: "", email: "", phone: "" });
+      await loadAll();
+    } catch (err) {
+      toastApiError(err, "Failed to add contact");
+    }
   }
 
   async function handleAddAddress(e: React.FormEvent) {
     e.preventDefault();
-    await apiFetch(`/api/v1/companies/${companyId}/addresses`, {
-      method: "POST",
-      body: JSON.stringify({ ...addrForm, primaryShipping: true }),
-    });
-    setAddrForm({ label: "Warehouse", line1: "", city: "", country: "US" });
-    await loadAll();
+    try {
+      await apiFetch(`/api/v1/companies/${companyId}/addresses`, {
+        method: "POST",
+        body: JSON.stringify({ ...addrForm, primaryShipping: true }),
+      });
+      toast.success("Address added", { description: addrForm.label });
+      setAddrForm({ label: "Warehouse", line1: "", city: "", country: "US" });
+      await loadAll();
+    } catch (err) {
+      toastApiError(err, "Failed to add address");
+    }
   }
 
   if (loading) {

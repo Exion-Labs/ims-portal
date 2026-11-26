@@ -8,8 +8,8 @@ import {
   RoleView,
   UserWithRolesView,
 } from "@ims/api-client";
-import { DataTable, StatusBadge } from "@ims/ui";
-import { UserPlus } from "lucide-react";
+import { DataTable, StatusBadge, toast, toastApiError } from "@ims/ui";
+import { Copy, UserPlus } from "lucide-react";
 
 export default function UsersSettingsPage() {
   const [inviteEmail, setInviteEmail] = useState("");
@@ -44,12 +44,15 @@ export default function UsersSettingsPage() {
           }),
         }
       );
+      const invitedEmail = inviteEmail;
       setInviteEmail("");
       setInviteName("");
       setLastInviteToken(res.inviteToken);
+      toast.success("Invitation created", { description: invitedEmail });
       refetch();
     } catch (err: any) {
       setError(err.message ?? "Failed to invite user");
+      toastApiError(err, "Failed to invite user");
     }
   }
 
@@ -122,11 +125,24 @@ export default function UsersSettingsPage() {
         )}
 
         {lastInviteToken && (
-          <div className="mt-3 rounded-[8px] border border-[var(--border-success)] bg-[var(--status-success-bg)]/50 p-3 text-[13px] text-[var(--status-success-fg)]">
-            Invitation created! Dev acceptance token:{" "}
-            <code className="rounded bg-white px-2 py-0.5 font-mono font-semibold">
-              {lastInviteToken}
-            </code>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-[var(--border-success)] bg-[var(--status-success-bg)]/50 p-3 text-[13px] text-[var(--status-success-fg)]">
+            <div>
+              Invitation created! Dev acceptance token:{" "}
+              <code className="rounded bg-white px-2 py-0.5 font-mono font-semibold">
+                {lastInviteToken}
+              </code>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                await navigator.clipboard.writeText(lastInviteToken);
+                toast.success("Invite token copied to clipboard");
+              }}
+              className="inline-flex items-center gap-1 rounded-[6px] border border-[var(--border-success)] bg-white px-2.5 py-1 text-[12px] font-medium text-[var(--status-success-fg)] hover:bg-[var(--status-success-bg)]"
+            >
+              <Copy className="h-3.5 w-3.5" />
+              <span>Copy</span>
+            </button>
           </div>
         )}
 

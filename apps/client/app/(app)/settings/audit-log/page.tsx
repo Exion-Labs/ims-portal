@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { apiFetch, AuditEventView, PageResponse } from "@ims/api-client";
-import { DataTable, StatusBadge } from "@ims/ui";
+import { DataTable, StatusBadge, toast } from "@ims/ui";
 
 export default function AuditLogSettingsPage() {
   const [actionFilter, setActionFilter] = useState("");
@@ -26,6 +26,7 @@ export default function AuditLogSettingsPage() {
     const params = new URLSearchParams();
     if (actionFilter) params.set("action", actionFilter);
     if (entityFilter) params.set("entityType", entityFilter);
+    toast.info("Exporting audit log CSV…");
     window.location.href = `/api/v1/settings/audit-events/export?${params.toString()}`;
   }
 

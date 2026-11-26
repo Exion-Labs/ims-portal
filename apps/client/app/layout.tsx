@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AppQueryProvider } from "@/lib/entitlements";
+import { Toaster } from "@ims/ui";
 
 export const metadata: Metadata = {
   title: "IMS — Multi-Tenant Inventory Management",
@@ -15,7 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AppQueryProvider>{children}</AppQueryProvider>
+        <AppQueryProvider>
+          {children}
+          <Toaster theme="light" />
+        </AppQueryProvider>
       </body>
     </html>
   );
