@@ -32,7 +32,7 @@ import {
 } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { ListToolbar } from "@/components/list-toolbar";
-import { X } from "lucide-react";
+import { Plus } from "lucide-react";
 
 const STATUS_TONE: Record<string, "neutral" | "primary" | "warning" | "success" | "danger"> = {
   PENDING: "neutral",
@@ -170,7 +170,25 @@ export default function SalesOrdersPage() {
   return (
     <FeatureGate feature="SALES">
       <div className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Mobile Compact Stats Row */}
+        <div className="grid grid-cols-3 gap-2 lg:hidden">
+          {[
+            { label: "Total", value: soPage?.totalElements ?? 0 },
+            { label: "Pending", value: items.filter((s) => s.status === "PENDING").length },
+            { label: "Shipped", value: items.filter((s) => s.status === "SHIPPED").length },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-[10px] border border-[var(--border-subtle)] bg-card px-2 py-2.5 text-center text-[12px] text-[var(--text-secondary)]"
+            >
+              <span>{stat.label}: </span>
+              <span className="font-semibold text-[var(--text-primary)]">{stat.value}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Stat Tiles */}
+        <div className="hidden gap-4 lg:grid lg:grid-cols-3">
           <StatTile label="Total Sales Orders" value={soPage?.totalElements ?? 0} />
           <StatTile label="Pending (Page)" value={items.filter((s) => s.status === "PENDING").length} />
           <StatTile label="Shipped (Page)" value={items.filter((s) => s.status === "SHIPPED").length} />
@@ -183,6 +201,7 @@ export default function SalesOrdersPage() {
             setPageIndex(0);
           }}
           searchPlaceholder="Search SO reference or customer PO..."
+          hideActionsOnMobile
           filters={
             <Select
               value={statusFilter || "__all__"}
@@ -191,7 +210,7 @@ export default function SalesOrdersPage() {
                 setPageIndex(0);
               }}
             >
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-full sm:w-[160px]">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
@@ -249,6 +268,19 @@ export default function SalesOrdersPage() {
               </Link>
             )}
           />
+        )}
+
+        {/* Mobile Floating New Sales Order Button */}
+        {hasPermission("ORDER:CREATE") && (
+          <button
+            type="button"
+            onClick={() => setShowCreate(true)}
+            aria-label="New Sales Order"
+            title="New Sales Order"
+            className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--brand-primary)] text-white shadow-lg transition-transform hover:bg-[var(--brand-primary-hover)] active:scale-95 lg:hidden"
+          >
+            <Plus className="h-6 w-6" />
+          </button>
         )}
 
         <Dialog open={showCreate} onOpenChange={setShowCreate}>

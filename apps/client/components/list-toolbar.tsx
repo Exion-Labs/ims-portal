@@ -32,6 +32,7 @@ interface ListToolbarProps {
     onClick: () => void;
     icon?: React.ReactNode;
   };
+  hideActionsOnMobile?: boolean;
 }
 
 /**
@@ -45,6 +46,7 @@ export function ListToolbar({
   menuItems = [],
   secondaryAction,
   primaryAction,
+  hideActionsOnMobile = false,
 }: ListToolbarProps) {
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-border bg-card p-3">
@@ -68,7 +70,11 @@ export function ListToolbar({
       )}
 
       {(menuItems.length > 0 || secondaryAction || primaryAction) && (
-        <div className="ml-auto flex shrink-0 flex-wrap items-center gap-2">
+        <div
+          className={`ml-auto shrink-0 flex-wrap items-center gap-2 ${
+            hideActionsOnMobile ? "hidden lg:flex" : "flex"
+          }`}
+        >
           {menuItems.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

@@ -33,6 +33,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   EmptyState,
   ErrorState,
   ImportWizard,
@@ -58,6 +62,7 @@ import {
   FileSpreadsheet,
   Folder,
   FolderPlus,
+  MoreVertical,
   Plus,
   Trash2,
   X,
@@ -504,6 +509,55 @@ function PartsCatalogPageContent() {
                     {cat.directPartCount}
                   </span>
                 </button>
+                {editMode && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label={`Edit ${cat.name}`}
+                        title={`Edit ${cat.name}`}
+                        className="ml-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] text-[var(--text-muted)] hover:bg-[var(--bg-muted)] hover:text-[var(--brand-primary)]"
+                      >
+                        <Edit3 className="h-3.5 w-3.5" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40">
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          onSelectDone?.();
+                          setCatName(cat.name);
+                          setCatDesc(cat.description ?? "");
+                          setCatFormError(null);
+                          setShowCategoryModal({ mode: "edit", category: cat });
+                        }}
+                      >
+                        <Edit3 className="h-3.5 w-3.5" />
+                        <span>Rename</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          onSelectDone?.();
+                          setCatParentId(cat.parentId ?? "");
+                          setCatFormError(null);
+                          setShowCategoryModal({ mode: "move", category: cat });
+                        }}
+                      >
+                        <ArrowRightLeft className="h-3.5 w-3.5" />
+                        <span>Move</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onSelect={() => {
+                          onSelectDone?.();
+                          setDeleteCategoryTarget(cat);
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             );
           })}
@@ -568,6 +622,16 @@ function PartsCatalogPageContent() {
     );
   }
 
+  const openCreatePartModal = useCallback(() => {
+    setPartFormError(null);
+    setPartForm((prev) => ({
+      ...prev,
+      categoryId:
+        selectedCategory && !selectedCategory.structural ? selectedCategory.id : "",
+    }));
+    setShowCreatePart(true);
+  }, [selectedCategory]);
+
   return (
     <div className="space-y-4">
       {/* Dialog: Import Wizard */}
@@ -606,25 +670,52 @@ function PartsCatalogPageContent() {
 
       {/* Mobile Category Picker Pill + Bottom Sheet */}
       <div className="lg:hidden">
-        <button
-          type="button"
-          onClick={() => setShowCategorySheet(true)}
-          className="flex w-full items-center justify-between gap-2 rounded-[10px] border border-[var(--border-subtle)] bg-card px-3.5 py-2.5 text-left text-[13px] font-medium text-[var(--text-primary)] hover:border-[var(--brand-primary)]"
-        >
-          <span className="flex min-w-0 items-center gap-2">
+        <div className="flex w-full items-center justify-between gap-2 rounded-full border border-[var(--border-subtle)] bg-card px-3.5 py-2 shadow-xs">
+          <button
+            type="button"
+            onClick={() => setShowCategorySheet(true)}
+            className="flex min-w-0 items-center gap-2.5 text-left text-[13px] font-medium text-[var(--text-primary)]"
+          >
             <Folder className="h-4 w-4 shrink-0 text-[var(--brand-primary)]" />
             <span className="truncate">
               {selectedCategory ? selectedCategory.pathString : "All Categories"}
             </span>
-          </span>
-          <span className="flex shrink-0 items-center gap-1 text-[12px] text-[var(--text-muted)]">
-            <span>Filter</span>
-            <ChevronDown className="h-4 w-4" />
-          </span>
-        </button>
+            <span className="h-4 w-px shrink-0 bg-[var(--border-subtle)]" aria-hidden="true" />
+            <span className="flex shrink-0 items-center gap-1 text-[13px] font-normal text-[var(--text-muted)]">
+              <span>Filter</span>
+              <ChevronDown className="h-4 w-4" />
+            </span>
+          </button>
+
+          {hasFeature("IMPORT_EXPORT") && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="More actions"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-canvas)]"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onSelect={() => setShowImporter((v) => !v)}>
+                  <FileSpreadsheet className="h-4 w-4 text-[var(--brand-primary)]" />
+                  <span>{showImporter ? "Hide Importer" : "Import CSV / XLSX"}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a href="/api/v1/parts/export?format=csv">
+                    <Download className="h-4 w-4 text-[var(--text-secondary)]" />
+                    <span>Export CSV</span>
+                  </a>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
 
         <Sheet open={showCategorySheet} onOpenChange={setShowCategorySheet}>
-          <SheetContent side="bottom">
+          <SheetContent side="bottom" showCloseButton={false}>
             <SheetHeader className="sr-only">
               <SheetTitle>Select Category</SheetTitle>
             </SheetHeader>
@@ -701,21 +792,12 @@ function PartsCatalogPageContent() {
                   ]
                 : []
             }
+            hideActionsOnMobile
             primaryAction={
               hasPermission("PART:CREATE")
                 ? {
                     label: "New Item",
-                    onClick: () => {
-                      setPartFormError(null);
-                      setPartForm((prev) => ({
-                        ...prev,
-                        categoryId:
-                          selectedCategory && !selectedCategory.structural
-                            ? selectedCategory.id
-                            : "",
-                      }));
-                      setShowCreatePart(true);
-                    },
+                    onClick: openCreatePartModal,
                   }
                 : undefined
             }
@@ -732,8 +814,8 @@ function PartsCatalogPageContent() {
                 hasPermission("PART:CREATE") && (
                   <button
                     type="button"
-                    onClick={() => setShowCreatePart(true)}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
+                    onClick={openCreatePartModal}
+                    className="hidden h-9 items-center gap-1.5 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)] lg:inline-flex"
                   >
                     <Plus className="h-4 w-4" />
                     <span>New Item</span>
@@ -796,6 +878,19 @@ function PartsCatalogPageContent() {
           )}
         </div>
       </div>
+
+      {/* Mobile Floating New Item Button */}
+      {hasPermission("PART:CREATE") && (
+        <button
+          type="button"
+          onClick={openCreatePartModal}
+          aria-label="New Item"
+          title="New Item"
+          className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--brand-primary)] text-white shadow-lg transition-transform hover:bg-[var(--brand-primary-hover)] active:scale-95 lg:hidden"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      )}
 
       {/* Floating Bulk Action Bar */}
       <BulkActionBar selectedCount={selectedCount} onClear={() => setSelectedParts([])}>

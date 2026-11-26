@@ -78,6 +78,7 @@ import {
   History,
   MapPin,
   MoreHorizontal,
+  MoreVertical,
   Plus,
   QrCode,
   RefreshCw,
@@ -753,6 +754,59 @@ function StockAndLocationsPageContent() {
                     {loc.directItemCount}
                   </span>
                 </button>
+                {editMode && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label={`Edit ${loc.name}`}
+                        title={`Edit ${loc.name}`}
+                        className="ml-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] text-[var(--text-muted)] hover:bg-[var(--bg-muted)] hover:text-[var(--brand-primary)]"
+                      >
+                        <Edit3 className="h-3.5 w-3.5" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40">
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          onSelectDone?.();
+                          setLocName(loc.name);
+                          setLocDesc(loc.description ?? "");
+                          setLocType(loc.locationType);
+                          setLocStructural(loc.structural);
+                          setLocExternal(loc.externalLocation);
+                          setLocBarcode(loc.customBarcode ?? "");
+                          setLocError(null);
+                          setShowLocationModal({ mode: "edit", location: loc });
+                        }}
+                      >
+                        <Edit3 className="h-3.5 w-3.5" />
+                        <span>Edit</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          onSelectDone?.();
+                          setLocParentId(loc.parentId ?? "");
+                          setLocError(null);
+                          setShowLocationModal({ mode: "move", location: loc });
+                        }}
+                      >
+                        <ArrowRightLeft className="h-3.5 w-3.5" />
+                        <span>Move</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onSelect={() => {
+                          onSelectDone?.();
+                          setDeleteLocationTarget(loc);
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             );
           })}
@@ -816,6 +870,58 @@ function StockAndLocationsPageContent() {
       </>
     );
   }
+
+  const openCreateStockModal = useCallback(() => {
+    setCreateStockError(null);
+    setCreateStockForm({
+      partId: "",
+      locationId: "",
+      quantity: "",
+      serialNumber: "",
+      batchCode: "",
+      status: "",
+      customBarcode: "",
+      notes: "",
+    });
+    setShowCreateStock(true);
+  }, []);
+
+  const stockMenuItems = useMemo<ListToolbarMenuItem[]>(() => {
+    const items: ListToolbarMenuItem[] = [];
+    if (hasFeature("IMPORT_EXPORT")) {
+      items.push({
+        key: "import",
+        label: showImporter ? "Hide Importer" : "Import Stock",
+        icon: <FileSpreadsheet className="h-4 w-4 text-[var(--brand-primary)]" />,
+        onClick: () => setShowImporter((v) => !v),
+      });
+    }
+    if (hasFeature("BARCODES")) {
+      items.push({
+        key: "scan",
+        label: "Scan Barcode",
+        icon: <QrCode className="h-4 w-4 text-[var(--brand-primary)]" />,
+        onClick: () => {
+          setScanInput("");
+          setScanResult(null);
+          setScanError(null);
+          setShowScanner(true);
+        },
+      });
+    }
+    items.push({
+      key: "reconcile",
+      label: reconciling ? "Reconciling…" : "Verify & Reconcile",
+      icon: (
+        <RefreshCw
+          className={`h-4 w-4 text-[var(--status-success-fg)] ${reconciling ? "animate-spin" : ""}`}
+        />
+      ),
+      onClick: handleReconcile,
+      disabled: reconciling,
+    });
+    return items;
+  }, [hasFeature, showImporter, reconciling]);
 
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -887,8 +993,34 @@ function StockAndLocationsPageContent() {
           </Button>
         )}
 
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label="More actions"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-[var(--border-subtle)] bg-card text-[var(--text-secondary)] hover:border-[var(--brand-primary)]"
+            >
+              <MoreVertical className="h-4 w-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-52">
+            {stockMenuItems
+              .filter((item) => item.key !== "scan")
+              .map((item) => (
+                <DropdownMenuItem
+                  key={item.key}
+                  disabled={item.disabled}
+                  onSelect={() => item.onClick?.()}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </DropdownMenuItem>
+              ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <Sheet open={showLocationSheet} onOpenChange={setShowLocationSheet}>
-          <SheetContent side="bottom">
+          <SheetContent side="bottom" showCloseButton={false}>
             <SheetHeader className="sr-only">
               <SheetTitle>Select Warehouse Location</SheetTitle>
             </SheetHeader>
@@ -923,7 +1055,7 @@ function StockAndLocationsPageContent() {
                   setPageIndex(0);
                 }}
               >
-                <SelectTrigger className="w-[160px]">
+                <SelectTrigger className="w-full sm:w-[160px]">
                   <SelectValue placeholder="All Statuses" />
                 </SelectTrigger>
                 <SelectContent>
@@ -937,60 +1069,13 @@ function StockAndLocationsPageContent() {
                 </SelectContent>
               </Select>
             }
-            menuItems={(() => {
-              const items: ListToolbarMenuItem[] = [];
-              if (hasFeature("IMPORT_EXPORT")) {
-                items.push({
-                  key: "import",
-                  label: showImporter ? "Hide Importer" : "Import Stock",
-                  icon: <FileSpreadsheet className="h-4 w-4 text-[var(--brand-primary)]" />,
-                  onClick: () => setShowImporter((v) => !v),
-                });
-              }
-              if (hasFeature("BARCODES")) {
-                items.push({
-                  key: "scan",
-                  label: "Scan Barcode",
-                  icon: <QrCode className="h-4 w-4 text-[var(--brand-primary)]" />,
-                  onClick: () => {
-                    setScanInput("");
-                    setScanResult(null);
-                    setScanError(null);
-                    setShowScanner(true);
-                  },
-                });
-              }
-              items.push({
-                key: "reconcile",
-                label: reconciling ? "Reconciling…" : "Verify & Reconcile",
-                icon: (
-                  <RefreshCw
-                    className={`h-4 w-4 text-[var(--status-success-fg)] ${reconciling ? "animate-spin" : ""}`}
-                  />
-                ),
-                onClick: handleReconcile,
-                disabled: reconciling,
-              });
-              return items;
-            })()}
+            menuItems={stockMenuItems}
+            hideActionsOnMobile
             primaryAction={
               hasPermission("STOCK:CREATE")
                 ? {
                     label: "New Stock Item",
-                    onClick: () => {
-                      setCreateStockError(null);
-                      setCreateStockForm({
-                        partId: "",
-                        locationId: "",
-                        quantity: "",
-                        serialNumber: "",
-                        batchCode: "",
-                        status: "",
-                        customBarcode: "",
-                        notes: "",
-                      });
-                      setShowCreateStock(true);
-                    },
+                    onClick: openCreateStockModal,
                   }
                 : undefined
             }
@@ -1006,21 +1091,8 @@ function StockAndLocationsPageContent() {
                 hasPermission("STOCK:CREATE") && (
                   <button
                     type="button"
-                    onClick={() => {
-                      setCreateStockError(null);
-                      setCreateStockForm({
-                        partId: "",
-                        locationId: "",
-                        quantity: "",
-                        serialNumber: "",
-                        batchCode: "",
-                        status: "",
-                        customBarcode: "",
-                        notes: "",
-                      });
-                      setShowCreateStock(true);
-                    }}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white"
+                    onClick={openCreateStockModal}
+                    className="hidden h-9 items-center gap-1.5 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white lg:inline-flex"
                   >
                     <Plus className="h-4 w-4" />
                     <span>Create Stock Item</span>
@@ -1168,6 +1240,19 @@ function StockAndLocationsPageContent() {
       </div>
 
       {/* Bulk Action Bar (Merge Selected Batches) */}
+      {/* Mobile Floating New Stock Item Button */}
+      {hasPermission("STOCK:CREATE") && (
+        <button
+          type="button"
+          onClick={openCreateStockModal}
+          aria-label="New Stock Item"
+          title="New Stock Item"
+          className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--brand-primary)] text-white shadow-lg transition-transform hover:bg-[var(--brand-primary-hover)] active:scale-95 lg:hidden"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      )}
+
       <BulkActionBar selectedCount={selectedItems.length} onClear={() => setSelectedItems([])}>
         {selectedItems.length >= 2 && (
           <Button

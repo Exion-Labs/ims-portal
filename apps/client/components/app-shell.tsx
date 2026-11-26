@@ -343,18 +343,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Button>
 
               {canUseEditMode && (
-                <button
-                  type="button"
-                  onClick={handleToggleEditMode}
+                <span
                   title={
                     editMode
-                      ? "Edit Mode is enabled — click to lock structural edits"
-                      : "View Only — click to enable Edit Mode"
+                      ? "Edit Mode is enabled — toggle in your profile menu"
+                      : "View Only — toggle Edit Mode in your profile menu"
                   }
-                  className={`inline-flex h-8 items-center gap-1.5 rounded-full border px-2.5 text-[12px] font-medium transition-colors sm:px-3 ${
+                  className={`inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-[12px] font-medium sm:px-3 ${
                     editMode
-                      ? "border-[var(--status-warning-fg)] bg-[var(--status-warning-bg)] text-[var(--status-warning-fg)] hover:bg-[var(--border-warning)]"
-                      : "border-border bg-background text-muted-foreground hover:border-[var(--border-strong)] hover:text-foreground"
+                      ? "border-[var(--status-warning-fg)] bg-[var(--status-warning-bg)] text-[var(--status-warning-fg)]"
+                      : "border-border bg-background text-muted-foreground"
                   }`}
                 >
                   {editMode ? (
@@ -370,7 +368,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       <span className="sm:hidden">View</span>
                     </>
                   )}
-                </button>
+                </span>
               )}
 
               <DropdownMenu>
