@@ -239,7 +239,7 @@ export default function PlatformConsolePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6">
+    <div className="min-h-dvh bg-slate-950 p-3 text-slate-100 sm:p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div>
@@ -281,7 +281,7 @@ export default function PlatformConsolePage() {
                 + Register Tenant
               </button>
             </div>
-          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900">
             <table className="w-full text-sm">
               <thead className="bg-slate-950/60 text-xs uppercase text-slate-400">
                 <tr>

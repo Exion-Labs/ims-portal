@@ -259,6 +259,29 @@ export default function ManufacturingPage() {
             pageSize={25}
             totalCount={buildPage?.totalElements ?? items.length}
             onPageChange={setPageIndex}
+            renderMobileCard={(b) => (
+              <Link href={`/manufacturing/${b.id}`} className="block space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <span className="font-mono text-[12px] font-semibold text-primary">
+                      {b.reference}
+                    </span>
+                    <div className="truncate text-[14px] font-semibold">{b.title || b.partName}</div>
+                    <div className="truncate text-[12px] text-muted-foreground">
+                      {b.partIpn ? `${b.partIpn} · ` : ""}
+                      {b.partName}
+                    </div>
+                  </div>
+                  <StatusBadge label={b.status} tone={STATUS_TONE[b.status] ?? "neutral"} />
+                </div>
+                <div className="flex items-center justify-between text-[12px] text-muted-foreground">
+                  <span className="truncate">{b.destinationLocationPath ?? "No destination"}</span>
+                  <span className="shrink-0 font-mono font-semibold text-foreground">
+                    {b.completed} / {b.quantity} {b.partUnit ?? ""}
+                  </span>
+                </div>
+              </Link>
+            )}
           />
         )}
 
@@ -286,7 +309,7 @@ export default function ManufacturingPage() {
                   }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="space-y-1">
                   <Label>Quantity *</Label>
                   <Input
@@ -315,7 +338,7 @@ export default function ManufacturingPage() {
                   placeholder="Optional build batch title"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="space-y-1">
                   <Label>Source Location</Label>
                   <Combobox

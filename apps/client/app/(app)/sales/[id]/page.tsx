@@ -217,7 +217,7 @@ export default function SalesOrderDetailPage() {
         </div>
 
         <div className="bg-card border rounded-xl overflow-hidden">
-          <div className="px-5 py-4 border-b flex items-center justify-between">
+          <div className="px-4 py-3.5 border-b flex items-center justify-between sm:px-5 sm:py-4">
             <h2 className="text-base font-semibold">Order Line Items</h2>
             {canUpdate && isOpen && (
               <button
@@ -228,6 +228,44 @@ export default function SalesOrderDetailPage() {
               </button>
             )}
           </div>
+
+          {/* Mobile Sales Line Cards */}
+          <div className="divide-y md:hidden">
+            {so.lines.length === 0 ? (
+              <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+                No line items yet.
+              </div>
+            ) : (
+              so.lines.map((line) => (
+                <div key={line.id} className="space-y-2 p-3.5 text-sm">
+                  <div className="flex items-start justify-between gap-2">
+                    <Link href={`/parts/${line.partId}`} className="font-medium text-primary hover:underline">
+                      {line.partIpn ? `${line.partIpn} · ` : ""}
+                      {line.partName}
+                    </Link>
+                    <span className="shrink-0 font-mono text-xs font-semibold">
+                      {line.salePrice != null ? `${line.salePrice} ${line.salePriceCurrency ?? so.currency}` : "—"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-mono text-muted-foreground">
+                    <span>Ord: {line.quantity}</span>
+                    <span>Alloc: {line.allocated}</span>
+                    <span>Shipped: {line.shipped}</span>
+                  </div>
+                  {canUpdate && isOpen && (
+                    <button
+                      onClick={() => openAllocate(line)}
+                      className="h-9 w-full rounded-md border text-xs font-medium hover:bg-muted"
+                    >
+                      Allocate Stock
+                    </button>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block">
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
               <tr>
@@ -276,6 +314,7 @@ export default function SalesOrderDetailPage() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
 
         <div className="bg-card border rounded-xl overflow-hidden">

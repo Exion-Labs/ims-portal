@@ -183,7 +183,7 @@ export function BulkActionBar({
 }) {
   if (selectedCount <= 0) return null;
   return (
-    <div className="fixed bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 rounded-full bg-foreground px-4 py-2 text-[13px] text-background shadow-lg">
+    <div className="fixed bottom-20 left-1/2 z-40 flex max-w-[calc(100vw-1.5rem)] -translate-x-1/2 items-center gap-3 overflow-x-auto rounded-full bg-foreground px-4 py-2 text-[13px] text-background shadow-lg lg:bottom-5">
       <span className="font-medium tabular-nums">{selectedCount} selected</span>
       <span className="h-4 w-px bg-background/20" />
       <div className="flex items-center gap-2">{children}</div>

@@ -38,6 +38,10 @@ import {
   ImportWizard,
   Input,
   Label,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
   StatusBadge,
   toast,
   toastApiError,
@@ -48,6 +52,7 @@ import { EditModeHint } from "@/components/edit-mode-hint";
 import { ListToolbar } from "@/components/list-toolbar";
 import {
   ArrowRightLeft,
+  ChevronDown,
   Download,
   Edit3,
   FileSpreadsheet,
@@ -81,6 +86,7 @@ function PartsCatalogPageContent() {
   const [pageIndex, setPageIndex] = useState(0);
   const [selectedParts, setSelectedParts] = useState<PartView[]>([]);
   const [showImporter, setShowImporter] = useState(false);
+  const [showCategorySheet, setShowCategorySheet] = useState(false);
 
   // Modals
   const [showCreatePart, setShowCreatePart] = useState(false);
@@ -397,6 +403,171 @@ function PartsCatalogPageContent() {
 
   const selectedCount = selectedParts.length;
 
+  function renderCategoryTree(onSelectDone?: () => void) {
+    return (
+      <>
+        <div className="ims-modal-header">
+          <div>
+            <div className="text-[14px] font-semibold text-[var(--text-primary)]">Categories</div>
+            <div className="text-[11px] text-[var(--text-muted)]">Filter items by folder</div>
+          </div>
+          {hasPermission("PART:CREATE") && editMode && (
+            <button
+              type="button"
+              onClick={() => {
+                onSelectDone?.();
+                setCatName("");
+                setCatDesc("");
+                setCatParentId(selectedCategoryId ?? "");
+                setCatFormError(null);
+                setShowCategoryModal({ mode: "create" });
+              }}
+              title="New Category"
+              className="inline-flex h-8 items-center gap-1 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-2.5 text-[12px] font-medium text-[var(--text-primary)] hover:border-[var(--brand-primary)]"
+            >
+              <FolderPlus className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
+              <span>New</span>
+            </button>
+          )}
+        </div>
+
+        {/* Include Subcategories Toggle */}
+        <label className="mt-3 flex items-center gap-2 text-[12px] text-[var(--text-secondary)]">
+          <input
+            type="checkbox"
+            checked={includeSubcategories}
+            onChange={(e) => {
+              setIncludeSubcategories(e.target.checked);
+              setPageIndex(0);
+            }}
+            className="rounded border-[var(--border-subtle)]"
+          />
+          <span>Include subcategories</span>
+        </label>
+
+        {/* Tree Navigation */}
+        <div className="mt-3 max-h-[50dvh] space-y-0.5 overflow-y-auto lg:max-h-[500px]">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedCategoryId(null);
+              setPageIndex(0);
+              onSelectDone?.();
+            }}
+            className={`flex w-full items-center justify-between rounded-[8px] px-2.5 py-2 text-left text-[13px] font-medium lg:py-1.5 ${
+              selectedCategoryId === null
+                ? "bg-[var(--brand-tint)] text-[var(--brand-primary)]"
+                : "text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <Folder className="h-3.5 w-3.5" />
+              <span>All Categories</span>
+            </span>
+            <span className="font-mono text-[11px] text-[var(--text-muted)]">
+              {me?.usage?.MAX_PARTS ?? partsPage?.totalElements ?? 0}
+            </span>
+          </button>
+
+          {categories.map((cat) => {
+            const active = selectedCategoryId === cat.id;
+            const depthPadding = [
+              "pl-0",
+              "pl-3.5",
+              "pl-7",
+              "pl-10",
+              "pl-14",
+              "pl-[70px]",
+              "pl-[84px]",
+            ][Math.min(cat.depth, 6)];
+            return (
+              <div
+                key={cat.id}
+                className={`group flex items-center justify-between rounded-[8px] pr-1 hover:bg-[var(--bg-canvas)] ${depthPadding}`}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategoryId(cat.id);
+                    setPageIndex(0);
+                    onSelectDone?.();
+                  }}
+                  className={`flex min-w-0 flex-1 items-center justify-between rounded-[8px] px-2 py-2 text-left text-[13px] lg:py-1.5 ${
+                    active ? "bg-[var(--brand-tint)] font-semibold text-[var(--brand-primary)]" : "text-[var(--text-primary)]"
+                  }`}
+                >
+                  <span className="flex min-w-0 items-center gap-1.5 truncate">
+                    <Folder className="h-3.5 w-3.5 shrink-0 text-[var(--brand-primary)]" />
+                    <span className="truncate">{cat.name}</span>
+                  </span>
+                  <span className="ml-1 font-mono text-[11px] text-[var(--text-muted)]">
+                    {cat.directPartCount}
+                  </span>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Selected Category Action Footer */}
+        {selectedCategory && (
+          <div className="mt-4 space-y-2 border-t border-[var(--border-subtle)] pt-3">
+            <div className="text-[12px] font-medium text-[var(--text-primary)]">
+              {selectedCategory.pathString}
+            </div>
+            {selectedCategory.description && (
+              <div className="text-[11px] text-[var(--text-muted)]">{selectedCategory.description}</div>
+            )}
+            {editMode ? (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSelectDone?.();
+                    setCatName(selectedCategory.name);
+                    setCatDesc(selectedCategory.description ?? "");
+                    setCatFormError(null);
+                    setShowCategoryModal({ mode: "edit", category: selectedCategory });
+                  }}
+                  className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-subtle)] bg-white px-2 text-[11px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
+                >
+                  <Edit3 className="h-3 w-3" />
+                  <span>Rename</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSelectDone?.();
+                    setCatParentId(selectedCategory.parentId ?? "");
+                    setCatFormError(null);
+                    setShowCategoryModal({ mode: "move", category: selectedCategory });
+                  }}
+                  className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-subtle)] bg-white px-2 text-[11px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
+                >
+                  <ArrowRightLeft className="h-3 w-3" />
+                  <span>Move</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSelectDone?.();
+                    setDeleteCategoryTarget(selectedCategory);
+                  }}
+                  className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/40 px-2 text-[11px] font-medium text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  <span>Delete</span>
+                </button>
+              </div>
+            ) : (
+              <EditModeHint actionDescription="rename, move, or delete categories" className="mt-1" />
+            )}
+          </div>
+        )}
+      </>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Dialog: Import Wizard */}
@@ -433,161 +604,41 @@ function PartsCatalogPageContent() {
         </DialogContent>
       </Dialog>
 
+      {/* Mobile Category Picker Pill + Bottom Sheet */}
+      <div className="lg:hidden">
+        <button
+          type="button"
+          onClick={() => setShowCategorySheet(true)}
+          className="flex w-full items-center justify-between gap-2 rounded-[10px] border border-[var(--border-subtle)] bg-card px-3.5 py-2.5 text-left text-[13px] font-medium text-[var(--text-primary)] hover:border-[var(--brand-primary)]"
+        >
+          <span className="flex min-w-0 items-center gap-2">
+            <Folder className="h-4 w-4 shrink-0 text-[var(--brand-primary)]" />
+            <span className="truncate">
+              {selectedCategory ? selectedCategory.pathString : "All Categories"}
+            </span>
+          </span>
+          <span className="flex shrink-0 items-center gap-1 text-[12px] text-[var(--text-muted)]">
+            <span>Filter</span>
+            <ChevronDown className="h-4 w-4" />
+          </span>
+        </button>
+
+        <Sheet open={showCategorySheet} onOpenChange={setShowCategorySheet}>
+          <SheetContent side="bottom">
+            <SheetHeader className="sr-only">
+              <SheetTitle>Select Category</SheetTitle>
+            </SheetHeader>
+            {renderCategoryTree(() => setShowCategorySheet(false))}
+          </SheetContent>
+        </Sheet>
+      </div>
+
       {/* Split-Pane Layout: Left Category Tree + Right Items DataTable */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Left Pane: Category Tree (backed by PostgreSQL ltree) */}
-        <div className="lg:col-span-3">
+        <div className="hidden lg:col-span-3 lg:block">
           <Card className="p-4">
-            <div className="ims-modal-header">
-              <div>
-                <div className="text-[14px] font-semibold text-[var(--text-primary)]">Categories</div>
-                <div className="text-[11px] text-[var(--text-muted)]">Filter items by folder</div>
-              </div>
-              {hasPermission("PART:CREATE") && editMode && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCatName("");
-                    setCatDesc("");
-                    setCatParentId(selectedCategoryId ?? "");
-                    setCatFormError(null);
-                    setShowCategoryModal({ mode: "create" });
-                  }}
-                  title="New Category"
-                  className="inline-flex h-8 items-center gap-1 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-2.5 text-[12px] font-medium text-[var(--text-primary)] hover:border-[var(--brand-primary)]"
-                >
-                  <FolderPlus className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
-                  <span>New</span>
-                </button>
-              )}
-            </div>
-
-            {/* Include Subcategories Toggle */}
-            <label className="mt-3 flex items-center gap-2 text-[12px] text-[var(--text-secondary)]">
-              <input
-                type="checkbox"
-                checked={includeSubcategories}
-                onChange={(e) => {
-                  setIncludeSubcategories(e.target.checked);
-                  setPageIndex(0);
-                }}
-                className="rounded border-[var(--border-subtle)]"
-              />
-              <span>Include subcategories</span>
-            </label>
-
-            {/* Tree Navigation */}
-            <div className="mt-3 max-h-[500px] space-y-0.5 overflow-y-auto">
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedCategoryId(null);
-                  setPageIndex(0);
-                }}
-                className={`flex w-full items-center justify-between rounded-[8px] px-2.5 py-1.5 text-left text-[13px] font-medium ${
-                  selectedCategoryId === null
-                    ? "bg-[var(--brand-tint)] text-[var(--brand-primary)]"
-                    : "text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  <Folder className="h-3.5 w-3.5" />
-                  <span>All Categories</span>
-                </span>
-                <span className="font-mono text-[11px] text-[var(--text-muted)]">
-                  {me?.usage?.MAX_PARTS ?? partsPage?.totalElements ?? 0}
-                </span>
-              </button>
-
-              {categories.map((cat) => {
-                const active = selectedCategoryId === cat.id;
-                const depthPadding = [
-                  "pl-0",
-                  "pl-3.5",
-                  "pl-7",
-                  "pl-10",
-                  "pl-14",
-                  "pl-[70px]",
-                  "pl-[84px]",
-                ][Math.min(cat.depth, 6)];
-                return (
-                  <div
-                    key={cat.id}
-                    className={`group flex items-center justify-between rounded-[8px] pr-1 hover:bg-[var(--bg-canvas)] ${depthPadding}`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedCategoryId(cat.id);
-                        setPageIndex(0);
-                      }}
-                      className={`flex min-w-0 flex-1 items-center justify-between rounded-[8px] px-2 py-1.5 text-left text-[13px] ${
-                        active ? "bg-[var(--brand-tint)] font-semibold text-[var(--brand-primary)]" : "text-[var(--text-primary)]"
-                      }`}
-                    >
-                      <span className="flex min-w-0 items-center gap-1.5 truncate">
-                        <Folder className="h-3.5 w-3.5 shrink-0 text-[var(--brand-primary)]" />
-                        <span className="truncate">{cat.name}</span>
-                      </span>
-                      <span className="ml-1 font-mono text-[11px] text-[var(--text-muted)]">
-                        {cat.directPartCount}
-                      </span>
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Selected Category Action Footer */}
-            {selectedCategory && (
-              <div className="mt-4 space-y-2 border-t border-[var(--border-subtle)] pt-3">
-                <div className="text-[12px] font-medium text-[var(--text-primary)]">
-                  {selectedCategory.pathString}
-                </div>
-                {selectedCategory.description && (
-                  <div className="text-[11px] text-[var(--text-muted)]">{selectedCategory.description}</div>
-                )}
-                {editMode ? (
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCatName(selectedCategory.name);
-                        setCatDesc(selectedCategory.description ?? "");
-                        setCatFormError(null);
-                        setShowCategoryModal({ mode: "edit", category: selectedCategory });
-                      }}
-                      className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-subtle)] bg-white px-2 text-[11px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
-                    >
-                      <Edit3 className="h-3 w-3" />
-                      <span>Rename</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCatParentId(selectedCategory.parentId ?? "");
-                        setCatFormError(null);
-                        setShowCategoryModal({ mode: "move", category: selectedCategory });
-                      }}
-                      className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-subtle)] bg-white px-2 text-[11px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
-                    >
-                      <ArrowRightLeft className="h-3 w-3" />
-                      <span>Move</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeleteCategoryTarget(selectedCategory)}
-                      className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/40 px-2 text-[11px] font-medium text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                      <span>Delete</span>
-                    </button>
-                  </div>
-                ) : (
-                  <EditModeHint actionDescription="rename, move, or delete categories" className="mt-1" />
-                )}
-              </div>
-            )}
+            {renderCategoryTree()}
           </Card>
         </div>
 
@@ -601,7 +652,7 @@ function PartsCatalogPageContent() {
             }}
             searchPlaceholder="Search by SKU, item name, or description…"
             filters={
-              <div className="flex flex-wrap items-center gap-1.5">
+              <div className="no-scrollbar flex flex-nowrap items-center gap-1.5 overflow-x-auto sm:flex-wrap">
                 {(
                   [
                     { id: "all", label: "All Items" },
@@ -620,7 +671,7 @@ function PartsCatalogPageContent() {
                         setQuickFilter(tab.id);
                         setPageIndex(0);
                       }}
-                      className={`h-8 rounded-full border px-3 text-[12px] font-medium transition-colors ${
+                      className={`h-8 shrink-0 whitespace-nowrap rounded-full border px-3 text-[12px] font-medium transition-colors ${
                         active
                           ? "border-[var(--brand-primary)] bg-[var(--brand-tint)] text-[var(--brand-primary)]"
                           : "border-[var(--border-subtle)] bg-white text-[var(--text-secondary)] hover:bg-[var(--bg-canvas)]"
@@ -703,6 +754,44 @@ function PartsCatalogPageContent() {
                 quickFilter === "low_stock" ? displayedParts.length : partsPage?.totalElements
               }
               onPageChange={setPageIndex}
+              renderMobileCard={(p) => {
+                const summary = stockSummaries[p.id];
+                const inStock = Number(summary?.inStock ?? 0);
+                const minStock = Number(p.minimumStock ?? 0);
+                const stockTone =
+                  inStock <= 0
+                    ? "danger"
+                    : minStock > 0 && inStock < minStock
+                      ? "warning"
+                      : "success";
+                return (
+                  <Link href={`/parts/${p.id}`} className="block space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <span className="font-mono text-[12px] font-semibold text-[var(--brand-primary)]">
+                          {p.ipn}
+                        </span>
+                        <div className="truncate text-[14px] font-semibold text-[var(--text-primary)]">
+                          {p.name}
+                        </div>
+                      </div>
+                      <StatusBadge
+                        label={`${inStock.toLocaleString()} ${p.unit}`}
+                        tone={stockTone}
+                        showDot={false}
+                      />
+                    </div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-[12px] text-[var(--text-muted)]">
+                      <span className="truncate">{p.categoryPathString ?? "Uncategorized"}</span>
+                      <div className="flex items-center gap-1">
+                        {p.purchaseable && <StatusBadge label="Buy" tone="success" showDot={false} />}
+                        {p.salable && <StatusBadge label="Sell" tone="primary" showDot={false} />}
+                        {p.trackable && <StatusBadge label="Serial" tone="violet" showDot={false} />}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              }}
             />
           )}
         </div>

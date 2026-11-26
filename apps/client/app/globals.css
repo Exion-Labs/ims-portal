@@ -9,9 +9,19 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 @layer components {
   .ims-card {
-    @apply rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5;
+    @apply rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3.5 sm:p-5;
   }
 
   .ims-nav-card {
@@ -23,11 +33,11 @@ body {
   }
 
   .ims-page-title {
-    @apply text-[24px] font-semibold tracking-tight text-[var(--text-primary)];
+    @apply text-[20px] font-semibold tracking-tight text-[var(--text-primary)] sm:text-[24px];
   }
 
   .ims-page-subtitle {
-    @apply mt-0.5 text-[14px] text-[var(--text-secondary)];
+    @apply mt-0.5 text-[13px] text-[var(--text-secondary)] sm:text-[14px];
   }
 
   .ims-nav-card-title {
@@ -59,15 +69,15 @@ body {
   }
 
   .ims-input {
-    @apply h-9 w-full rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--brand-primary)];
+    @apply h-10 w-full rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 text-base text-[var(--text-primary)] outline-none focus:border-[var(--brand-primary)] sm:h-9 sm:text-[13px];
   }
 
   .ims-select {
-    @apply h-9 w-full rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--brand-primary)];
+    @apply h-10 w-full rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 text-base text-[var(--text-primary)] outline-none focus:border-[var(--brand-primary)] sm:h-9 sm:text-[13px];
   }
 
   .ims-textarea {
-    @apply w-full rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-2.5 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--brand-primary)];
+    @apply w-full rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-2.5 text-base text-[var(--text-primary)] outline-none focus:border-[var(--brand-primary)] sm:text-[13px];
   }
 
   .ims-btn-primary {
@@ -87,7 +97,7 @@ body {
   }
 
   .ims-modal-panel {
-    @apply w-full max-w-lg rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-xl;
+    @apply max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 shadow-xl sm:p-6;
   }
 
   .ims-modal-header {

@@ -285,7 +285,7 @@ export default function PurchaseOrderDetailPage() {
         </div>
 
         {/* Status Stepper */}
-        <div className="grid grid-cols-4 gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-white p-3">
+        <div className="grid grid-cols-2 gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-white p-3 sm:grid-cols-4">
           {STATUS_STEPS.map((step, idx) => {
             const currentIdx = STATUS_STEPS.indexOf(po.status as (typeof STATUS_STEPS)[number]);
             const reached = currentIdx >= idx;
@@ -311,7 +311,7 @@ export default function PurchaseOrderDetailPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <StatTile
             label="Order Total"
             value={`${Number(po.totalAmount).toLocaleString()} ${po.currency}`}
@@ -345,7 +345,7 @@ export default function PurchaseOrderDetailPage() {
                 required
                 value={selectedSpId}
                 onChange={(e) => setSelectedSpId(e.target.value)}
-                className="h-9 min-w-[260px] flex-1 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px]"
+                className="h-10 w-full min-w-0 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-base sm:h-9 sm:min-w-[260px] sm:flex-1 sm:text-[13px]"
               >
                 <option value="">Select supplier SKU…</option>
                 {supplierParts.map((sp) => (
@@ -358,26 +358,28 @@ export default function PurchaseOrderDetailPage() {
 
               <input
                 type="number"
+                inputMode="decimal"
                 step="any"
                 required
                 value={lineQty}
                 onChange={(e) => setLineQty(e.target.value)}
                 placeholder="Packs"
-                className="h-9 w-24 rounded-[8px] border border-[var(--border-subtle)] bg-white px-2.5 font-mono text-[13px]"
+                className="h-10 w-24 rounded-[8px] border border-[var(--border-subtle)] bg-white px-2.5 font-mono text-base sm:h-9 sm:text-[13px]"
               />
 
               <input
                 type="number"
+                inputMode="decimal"
                 step="any"
                 value={linePrice}
                 onChange={(e) => setLinePrice(e.target.value)}
                 placeholder={`Auto (${po.currency}/pack)`}
-                className="h-9 w-36 rounded-[8px] border border-[var(--border-subtle)] bg-white px-2.5 font-mono text-[13px]"
+                className="h-10 min-w-[120px] flex-1 rounded-[8px] border border-[var(--border-subtle)] bg-white px-2.5 font-mono text-base sm:h-9 sm:w-36 sm:flex-none sm:text-[13px]"
               />
 
               <button
                 type="submit"
-                className="inline-flex h-9 items-center gap-1 rounded-[8px] bg-[var(--brand-primary)] px-3.5 text-[13px] font-medium text-white"
+                className="inline-flex h-10 items-center gap-1 rounded-[8px] bg-[var(--brand-primary)] px-3.5 text-[13px] font-medium text-white sm:h-9"
               >
                 <Plus className="h-4 w-4" />
                 <span>Add Line</span>
@@ -385,7 +387,71 @@ export default function PurchaseOrderDetailPage() {
             </form>
           )}
 
-          <div className="mt-4 overflow-x-auto rounded-[8px] border border-[var(--border-subtle)]">
+          {/* Mobile PO Line Cards */}
+          <div className="mt-4 divide-y divide-[var(--border-subtle)] rounded-[8px] border border-[var(--border-subtle)] md:hidden">
+            {po.lines.length === 0 ? (
+              <div className="px-4 py-6 text-center text-[13px] text-[var(--text-muted)]">
+                No line items added yet.
+              </div>
+            ) : (
+              po.lines.map((l) => (
+                <div key={l.id} className="space-y-2 p-3.5 text-[13px]">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <span className="font-mono font-semibold text-[var(--text-primary)]">{l.supplierSku}</span>
+                      <div className="truncate text-[12px] text-[var(--text-secondary)]">
+                        <Link href={`/parts/${l.partId}`} className="font-mono text-[var(--brand-primary)] hover:underline">
+                          {l.partIpn}
+                        </Link>{" "}
+                        · {l.partName}
+                      </div>
+                    </div>
+                    <div className="shrink-0 text-right font-mono font-semibold">
+                      {l.lineTotal} {l.currency}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-[12px] text-[var(--text-muted)] font-mono">
+                    <span>Received: {l.received} / {l.quantity} packs</span>
+                    <span>{l.unitPrice} {l.currency}/pack</span>
+                  </div>
+                  {(canReceive && l.remaining > 0) || (canEditLines && l.received === 0) ? (
+                    <div className="flex items-center gap-2 pt-1">
+                      {canReceive && l.remaining > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReceiveLine(l);
+                            setRecvQtyPacks(String(l.remaining));
+                            setRecvLocationId(
+                              l.destinationLocationId ?? po.destinationLocationId ?? ""
+                            );
+                            setRecvBatchCode("");
+                            setRecvNotes("");
+                            setRecvError(null);
+                          }}
+                          className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-[8px] bg-[var(--status-success-fg)] px-3 text-[12px] font-medium text-white hover:opacity-90"
+                        >
+                          <PackageCheck className="h-4 w-4" />
+                          <span>Receive ({l.remaining} left)</span>
+                        </button>
+                      )}
+                      {canEditLines && l.received === 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setRemoveLineTarget(l)}
+                          className="inline-flex h-9 items-center justify-center rounded-[8px] border border-[var(--border-danger)] px-3 text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="mt-4 hidden overflow-x-auto rounded-[8px] border border-[var(--border-subtle)] md:block">
             <table className="w-full border-collapse text-left text-[13px]">
               <thead className="ims-table-head">
                 <tr className="border-b border-[var(--border-subtle)]">

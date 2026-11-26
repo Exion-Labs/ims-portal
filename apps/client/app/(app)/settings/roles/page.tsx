@@ -128,7 +128,7 @@ export default function RolesSettingsPage() {
                 key={perm}
                 type="button"
                 onClick={() => togglePerm(perm)}
-                className={`rounded-full border px-2.5 py-1 font-mono text-[11px] font-medium transition-colors ${
+                className={`min-h-8 rounded-full border px-3 py-1.5 font-mono text-[11px] font-medium transition-colors ${
                   active
                     ? "border-[var(--brand-primary)] bg-[var(--brand-tint)] text-[var(--brand-primary)]"
                     : "border-[var(--border-subtle)] bg-[var(--bg-canvas)] text-[var(--text-secondary)]"
@@ -143,7 +143,7 @@ export default function RolesSettingsPage() {
         <div className="mt-4 flex justify-end">
           <button
             type="submit"
-            className="h-9 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
+            className="h-10 w-full rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)] sm:h-9 sm:w-auto"
           >
             Save Role
           </button>

@@ -37,7 +37,7 @@ export default function SequencesSettingsPage() {
   }
 
   return (
-    <div className="ims-card p-6">
+    <div className="ims-card p-4 sm:p-6">
       <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
         Reference Number Sequences
       </h2>
@@ -51,7 +51,7 @@ export default function SequencesSettingsPage() {
           return (
             <div
               key={seq.id}
-              className="flex flex-wrap items-center justify-between gap-4 px-4 py-3"
+              className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
             >
               <div>
                 <div className="font-mono text-[14px] font-semibold text-[var(--text-primary)]">
@@ -65,37 +65,54 @@ export default function SequencesSettingsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  defaultValue={seq.prefix}
-                  onBlur={(e) =>
-                    handleUpdate(seq, e.target.value, seq.padding, seq.nextValue)
-                  }
-                  className="h-8 w-24 rounded-[6px] border border-[var(--border-subtle)] px-2 font-mono text-[12px]"
-                  aria-label={`${seq.sequenceKey} prefix`}
-                />
-                <input
-                  type="number"
-                  min={1}
-                  max={10}
-                  defaultValue={seq.padding}
-                  onBlur={(e) =>
-                    handleUpdate(seq, seq.prefix, Number(e.target.value), seq.nextValue)
-                  }
-                  className="h-8 w-20 rounded-[6px] border border-[var(--border-subtle)] px-2 font-mono text-[12px] text-right tabular-nums"
-                  aria-label={`${seq.sequenceKey} padding`}
-                />
-                <input
-                  type="number"
-                  min={1}
-                  defaultValue={seq.nextValue}
-                  onBlur={(e) =>
-                    handleUpdate(seq, seq.prefix, seq.padding, Number(e.target.value))
-                  }
-                  className="h-8 w-24 rounded-[6px] border border-[var(--border-subtle)] px-2 font-mono text-[12px] text-right tabular-nums"
-                  aria-label={`${seq.sequenceKey} next value`}
-                />
+              <div className="grid grid-cols-3 gap-2 sm:flex sm:items-center">
+                <label className="space-y-1">
+                  <span className="block text-[10px] font-medium uppercase text-[var(--text-muted)] sm:hidden">
+                    Prefix
+                  </span>
+                  <input
+                    type="text"
+                    defaultValue={seq.prefix}
+                    onBlur={(e) =>
+                      handleUpdate(seq, e.target.value, seq.padding, seq.nextValue)
+                    }
+                    className="h-10 w-full rounded-[6px] border border-[var(--border-subtle)] px-2 font-mono text-base sm:h-8 sm:w-24 sm:text-[12px]"
+                    aria-label={`${seq.sequenceKey} prefix`}
+                  />
+                </label>
+                <label className="space-y-1">
+                  <span className="block text-[10px] font-medium uppercase text-[var(--text-muted)] sm:hidden">
+                    Pad
+                  </span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    max={10}
+                    defaultValue={seq.padding}
+                    onBlur={(e) =>
+                      handleUpdate(seq, seq.prefix, Number(e.target.value), seq.nextValue)
+                    }
+                    className="h-10 w-full rounded-[6px] border border-[var(--border-subtle)] px-2 text-right font-mono text-base tabular-nums sm:h-8 sm:w-20 sm:text-[12px]"
+                    aria-label={`${seq.sequenceKey} padding`}
+                  />
+                </label>
+                <label className="space-y-1">
+                  <span className="block text-[10px] font-medium uppercase text-[var(--text-muted)] sm:hidden">
+                    Next #
+                  </span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    defaultValue={seq.nextValue}
+                    onBlur={(e) =>
+                      handleUpdate(seq, seq.prefix, seq.padding, Number(e.target.value))
+                    }
+                    className="h-10 w-full rounded-[6px] border border-[var(--border-subtle)] px-2 text-right font-mono text-base tabular-nums sm:h-8 sm:w-24 sm:text-[12px]"
+                    aria-label={`${seq.sequenceKey} next value`}
+                  />
+                </label>
               </div>
             </div>
           );

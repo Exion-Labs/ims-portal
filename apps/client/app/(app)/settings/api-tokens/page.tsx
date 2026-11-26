@@ -155,7 +155,7 @@ export default function ApiTokensSettingsPage() {
             </div>
           )}
 
-          <div className="mt-4 flex gap-3">
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
             <Input
               type="text"
               required
@@ -164,7 +164,7 @@ export default function ApiTokensSettingsPage() {
               placeholder="Token description (e.g. ERP Sync Worker)"
               className="flex-1"
             />
-            <Button type="submit">Generate Token</Button>
+            <Button type="submit" className="w-full sm:w-auto">Generate Token</Button>
           </div>
         </form>
 
@@ -173,6 +173,37 @@ export default function ApiTokensSettingsPage() {
           data={tokens ?? []}
           isLoading={isLoading}
           emptyTitle="No API tokens generated"
+          renderMobileCard={(t) => (
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0 space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="truncate text-[14px] font-semibold">{t.name}</span>
+                  {t.revoked ? (
+                    <StatusBadge label="Revoked" tone="danger" />
+                  ) : (
+                    <StatusBadge label="Active" tone="success" />
+                  )}
+                </div>
+                <div className="flex items-center gap-2 text-[12px] text-[var(--text-muted)]">
+                  <code className="rounded bg-[var(--bg-muted)] px-1.5 py-0.5 font-mono text-[11px]">
+                    {t.tokenPrefix}…
+                  </code>
+                  <span>{new Date(t.createdAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+              {!t.revoked && (
+                <button
+                  type="button"
+                  onClick={() => setRevokeTarget(t)}
+                  aria-label="Revoke API token"
+                  className="inline-flex h-9 shrink-0 items-center gap-1 rounded-[6px] border border-[var(--border-danger)] px-2.5 text-[12px] font-medium text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]/50"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Revoke</span>
+                </button>
+              )}
+            </div>
+          )}
         />
 
         <AlertDialog

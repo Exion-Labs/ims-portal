@@ -209,7 +209,7 @@ export default function PurchaseOrdersPage() {
   return (
     <FeatureGate feature="PURCHASING" fallback="not-in-plan">
       <div className="space-y-6">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <StatTile
             label="Total Purchase Orders"
             value={poPage?.totalElements ?? 0}
@@ -311,6 +311,30 @@ export default function PurchaseOrdersPage() {
             pageSize={25}
             totalCount={poPage?.totalElements}
             onPageChange={setPageIndex}
+            renderMobileCard={(po) => (
+              <Link href={`/purchasing/${po.id}`} className="block space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <span className="font-mono text-[12px] font-semibold text-[var(--brand-primary)]">
+                      {po.reference}
+                    </span>
+                    <div className="truncate text-[14px] font-semibold text-[var(--text-primary)]">
+                      {po.supplierName}
+                    </div>
+                  </div>
+                  <StatusBadge
+                    label={po.status}
+                    tone={STATUS_TONE[po.status] ?? "neutral"}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-[12px] text-[var(--text-muted)]">
+                  <span>{po.lines.length} line(s){po.targetDate ? ` · Due ${po.targetDate}` : ""}</span>
+                  <span className="font-mono font-semibold text-[var(--text-primary)]">
+                    {Number(po.totalAmount).toLocaleString()} {po.currency}
+                  </span>
+                </div>
+              </Link>
+            )}
           />
         )}
 

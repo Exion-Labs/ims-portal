@@ -58,6 +58,10 @@ export interface DataTableProps<TData> {
   pageSize?: number;
   totalCount?: number;
   onPageChange?: (pageIndex: number) => void;
+  renderMobileCard?: (
+    row: TData,
+    meta: { isSelected: boolean; toggleSelected: () => void }
+  ) => React.ReactNode;
 }
 
 export function DataTable<TData>({
@@ -78,6 +82,7 @@ export function DataTable<TData>({
   pageSize = 25,
   totalCount,
   onPageChange,
+  renderMobileCard,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -112,24 +117,29 @@ export function DataTable<TData>({
   return (
     <div className="rounded-[12px] border border-border bg-card">
       {(onSearchChange || filterChips || onExportCsv || rightActions) && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-border px-3 py-3 sm:gap-3 sm:px-4">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
             {onSearchChange && (
               <Input
                 type="search"
                 value={searchValue ?? ""}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-64 bg-background focus-visible:bg-card"
+                className="w-full bg-background focus-visible:bg-card sm:w-64"
               />
             )}
             {filterChips}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button type="button" variant="outline" aria-label="Choose columns">
+                <Button
+                  type="button"
+                  variant="outline"
+                  aria-label="Choose columns"
+                  className={renderMobileCard ? "hidden md:inline-flex" : undefined}
+                >
                   <SlidersHorizontal className="size-4 text-muted-foreground" />
                   <span>Columns</span>
                 </Button>
@@ -162,7 +172,38 @@ export function DataTable<TData>({
         </div>
       )}
 
-      <Table>
+      {renderMobileCard && (
+        <div className="divide-y divide-border md:hidden">
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, idx) => (
+              <div key={idx} className="space-y-2 p-3.5">
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-3.5 w-1/2" />
+              </div>
+            ))
+          ) : table.getRowModel().rows.length === 0 ? (
+            <div className="p-4">
+              <EmptyState title={emptyTitle} description={emptyDescription} />
+            </div>
+          ) : (
+            table.getRowModel().rows.map((row) => (
+              <div
+                key={row.id}
+                className={cn("p-3.5", row.getIsSelected() && "bg-accent/60")}
+              >
+                {renderMobileCard(row.original, {
+                  isSelected: row.getIsSelected(),
+                  toggleSelected: () => row.toggleSelected(),
+                })}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      <div className={renderMobileCard ? "hidden md:block" : undefined}>
+        <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
@@ -229,9 +270,10 @@ export function DataTable<TData>({
           )}
         </TableBody>
       </Table>
+      </div>
 
       {onPageChange !== undefined && pageIndex !== undefined && totalCount !== undefined && (
-        <div className="flex items-center justify-between border-t border-border px-4 py-2.5 text-[12px] text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-3 py-2.5 text-[12px] text-muted-foreground sm:px-4">
           <div>
             Showing{" "}
             <span className="font-mono font-medium text-foreground">

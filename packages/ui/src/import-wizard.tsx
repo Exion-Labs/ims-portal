@@ -243,7 +243,7 @@ export function ImportWizard({
 
       {step === "DRY_RUN" && report && (
         <div className="mt-4 space-y-4">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div className="rounded-[8px] border border-[var(--border-subtle)] p-3">
               <div className="text-[12px] text-[var(--text-secondary)]">Total Rows</div>
               <div className="mt-1 font-mono text-[18px] font-semibold tabular-nums">

@@ -11,6 +11,7 @@ import {
   KeyRound,
   LayoutDashboard,
   Package,
+  Plug,
   Shield,
   ShoppingCart,
   Truck,
@@ -76,6 +77,7 @@ export const SETTINGS_NAV: NavItem[] = [
     feature: "API_ACCESS",
   },
   { label: "Reference Formats", href: "/settings/sequences", icon: Hash },
+  { label: "Integrations", href: "/settings/integrations", icon: Plug },
   { label: "Audit Log", href: "/settings/audit-log", icon: History },
   { label: "Plan & Features", href: "/settings/plan", icon: CreditCard },
 ];

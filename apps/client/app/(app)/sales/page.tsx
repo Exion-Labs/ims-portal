@@ -226,6 +226,28 @@ export default function SalesOrdersPage() {
             pageSize={25}
             totalCount={soPage?.totalElements ?? items.length}
             onPageChange={setPageIndex}
+            renderMobileCard={(so) => (
+              <Link href={`/sales/${so.id}`} className="block space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <span className="font-mono text-[12px] font-semibold text-primary">
+                      {so.reference}
+                    </span>
+                    <div className="truncate text-[14px] font-semibold">{so.customerName}</div>
+                  </div>
+                  <StatusBadge label={so.status} tone={STATUS_TONE[so.status] ?? "neutral"} />
+                </div>
+                {so.description && (
+                  <div className="truncate text-[12px] text-muted-foreground">{so.description}</div>
+                )}
+                <div className="flex items-center justify-between text-[12px] text-muted-foreground">
+                  <span className="font-mono">
+                    {so.customerReference ? `Ref: ${so.customerReference}` : so.currency}
+                  </span>
+                  <span>{so.targetDate ? `Ship by ${so.targetDate}` : "No target date"}</span>
+                </div>
+              </Link>
+            )}
           />
         )}
 
@@ -250,7 +272,7 @@ export default function SalesOrdersPage() {
                   options={customers.map((c) => ({ value: c.id, label: c.name }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="space-y-1">
                   <Label>Customer PO Ref</Label>
                   <Input

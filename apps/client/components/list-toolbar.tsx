@@ -49,8 +49,8 @@ export function ListToolbar({
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-border bg-card p-3">
       {onSearchChange !== undefined && (
-        <div className="relative min-w-[140px] flex-1 basis-36">
-          <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-muted-foreground" />
+        <div className="relative min-w-[140px] flex-1 basis-full sm:basis-44">
+          <Search className="pointer-events-none absolute top-3 left-3 h-4 w-4 text-muted-foreground sm:top-2.5" />
           <Input
             type="text"
             value={searchQuery ?? ""}
@@ -61,10 +61,14 @@ export function ListToolbar({
         </div>
       )}
 
-      {filters}
+      {filters && (
+        <div className="w-full overflow-x-auto sm:w-auto sm:overflow-visible">
+          {filters}
+        </div>
+      )}
 
       {(menuItems.length > 0 || secondaryAction || primaryAction) && (
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <div className="ml-auto flex shrink-0 flex-wrap items-center gap-2">
           {menuItems.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

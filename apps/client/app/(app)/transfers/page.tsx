@@ -242,7 +242,7 @@ export default function TransfersAndReturnsPage() {
                     </div>
                   </div>
                   {hasPermission("ORDER:UPDATE") && (
-                    <div className="flex gap-2">
+                    <div className="flex w-full flex-wrap gap-2 sm:w-auto">
                       {trf.status === "PENDING" && (
                         <button
                           onClick={() =>
@@ -251,7 +251,7 @@ export default function TransfersAndReturnsPage() {
                               `Transfer ${trf.reference} dispatched`
                             )
                           }
-                          className="px-3 py-1.5 text-xs rounded-lg border hover:bg-muted font-medium"
+                          className="flex-1 rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted sm:flex-none sm:py-1.5"
                         >
                           Dispatch
                         </button>
@@ -264,7 +264,7 @@ export default function TransfersAndReturnsPage() {
                               `Transfer ${trf.reference} received`
                             )
                           }
-                          className="px-3 py-1.5 text-xs rounded-lg bg-emerald-600 text-white font-medium"
+                          className="flex-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white sm:flex-none sm:py-1.5"
                         >
                           Receive at Destination
                         </button>

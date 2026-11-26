@@ -143,7 +143,7 @@ export default function UsersSettingsPage() {
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-[var(--border-success)] bg-[var(--status-success-bg)]/50 p-3 text-[13px] text-[var(--status-success-fg)]">
             <div>
               Invitation created! Dev acceptance token:{" "}
-              <code className="rounded bg-white px-2 py-0.5 font-mono font-semibold">
+              <code className="break-all rounded bg-white px-2 py-0.5 font-mono font-semibold">
                 {lastInviteToken}
               </code>
             </div>
@@ -201,6 +201,32 @@ export default function UsersSettingsPage() {
         data={users ?? []}
         isLoading={isLoading}
         emptyTitle="No users found"
+        renderMobileCard={(u) => (
+          <div className="space-y-2">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="truncate text-[14px] font-semibold text-[var(--text-primary)]">
+                  {u.fullName}
+                </div>
+                <div className="truncate text-[12px] text-[var(--text-muted)]">{u.email}</div>
+              </div>
+              <StatusBadge
+                label={u.status}
+                tone={u.status === "ACTIVE" ? "success" : u.status === "INVITED" ? "warning" : "danger"}
+              />
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap gap-1">
+                {u.roles.map((r) => (
+                  <StatusBadge key={r.id} label={r.name} tone="primary" showDot={false} />
+                ))}
+              </div>
+              <span className="font-mono text-[11px] text-[var(--text-muted)]">
+                {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString() : "Never signed in"}
+              </span>
+            </div>
+          </div>
+        )}
       />
     </div>
   );

@@ -236,7 +236,7 @@ export default function CompaniesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatTile
           label="Total Companies"
           value={companiesPage?.totalElements ?? 0}
@@ -283,7 +283,7 @@ export default function CompaniesPage() {
         }}
         searchPlaceholder="Search company name or code…"
         filters={
-          <div className="flex items-center gap-1.5">
+          <div className="no-scrollbar flex flex-nowrap items-center gap-1.5 overflow-x-auto">
             {[
               { label: "Suppliers", val: filterSupplier, set: setFilterSupplier },
               { label: "Manufacturers", val: filterManufacturer, set: setFilterManufacturer },
@@ -298,7 +298,7 @@ export default function CompaniesPage() {
                     chip.set(active ? null : true);
                     setPageIndex(0);
                   }}
-                  className={`h-8 rounded-full border px-3 text-[12px] font-medium ${
+                  className={`h-8 shrink-0 whitespace-nowrap rounded-full border px-3 text-[12px] font-medium ${
                     active
                       ? "border-[var(--brand-primary)] bg-[var(--brand-tint)] text-[var(--brand-primary)]"
                       : "border-[var(--border-subtle)] bg-white text-[var(--text-secondary)]"
@@ -366,6 +366,38 @@ export default function CompaniesPage() {
           pageSize={25}
           totalCount={companiesPage?.totalElements}
           onPageChange={setPageIndex}
+          renderMobileCard={(c) => (
+            <Link href={`/companies/${c.id}`} className="block space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="truncate text-[14px] font-semibold text-[var(--brand-primary)]">
+                    {c.name}
+                  </div>
+                  {c.code && (
+                    <span className="font-mono text-[11px] text-[var(--text-muted)]">{c.code}</span>
+                  )}
+                </div>
+                <span className="shrink-0 rounded border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-2 py-0.5 font-mono text-[11px] font-medium">
+                  {c.defaultCurrency}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-1">
+                {c.supplier && <StatusBadge label="Supplier" tone="primary" showDot={false} />}
+                {c.manufacturer && (
+                  <StatusBadge label="Manufacturer" tone="violet" showDot={false} />
+                )}
+                {c.customer && <StatusBadge label="Customer" tone="success" showDot={false} />}
+                {c.internalCompany && (
+                  <StatusBadge label="Internal" tone="neutral" showDot={false} />
+                )}
+              </div>
+              {(c.email || c.website) && (
+                <div className="truncate text-[12px] text-[var(--text-secondary)]">
+                  {c.email ?? c.website}
+                </div>
+              )}
+            </Link>
+          )}
         />
       )}
 

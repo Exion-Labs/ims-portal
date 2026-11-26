@@ -36,6 +36,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   EmptyState,
   ErrorState,
   ImportWizard,
@@ -64,6 +68,7 @@ import {
   ArrowRightLeft,
   Boxes,
   CheckCircle2,
+  ChevronDown,
   Edit3,
   FileSpreadsheet,
   FolderPlus,
@@ -72,6 +77,7 @@ import {
   Hash,
   History,
   MapPin,
+  MoreHorizontal,
   Plus,
   QrCode,
   RefreshCw,
@@ -110,6 +116,7 @@ function StockAndLocationsPageContent() {
   const [pageIndex, setPageIndex] = useState(0);
   const [selectedItems, setSelectedItems] = useState<StockItemView[]>([]);
   const [showImporter, setShowImporter] = useState(false);
+  const [showLocationSheet, setShowLocationSheet] = useState(false);
 
   // Reconciliation status
   const [reconciling, setReconciling] = useState(false);
@@ -640,8 +647,178 @@ function StockAndLocationsPageContent() {
     [hasFeature]
   );
 
+  function renderLocationTree(onSelectDone?: () => void) {
+    return (
+      <>
+        <div className="ims-modal-header">
+          <div>
+            <div className="text-[14px] font-semibold text-[var(--text-primary)]">Locations</div>
+            <div className="text-[11px] text-[var(--text-muted)]">Warehouse / Room / Aisle / Bin</div>
+          </div>
+          {hasPermission("STOCK:CREATE") && editMode && (
+            <button
+              type="button"
+              onClick={() => {
+                onSelectDone?.();
+                setLocName("");
+                setLocDesc("");
+                setLocParentId(selectedLocationId ?? "");
+                setLocType("BIN");
+                setLocStructural(false);
+                setLocExternal(false);
+                setLocBarcode("");
+                setLocError(null);
+                setShowLocationModal({ mode: "create" });
+              }}
+              className="inline-flex h-8 items-center gap-1 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-2.5 text-[12px] font-medium text-[var(--text-primary)] hover:border-[var(--brand-primary)]"
+            >
+              <FolderPlus className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
+              <span>New</span>
+            </button>
+          )}
+        </div>
+
+        <label className="mt-3 flex items-center gap-2 text-[12px] text-[var(--text-secondary)]">
+          <input
+            type="checkbox"
+            checked={includeSublocations}
+            onChange={(e) => {
+              setIncludeSublocations(e.target.checked);
+              setPageIndex(0);
+            }}
+          />
+          <span>Include sub-locations</span>
+        </label>
+
+        <div className="mt-3 max-h-[50dvh] space-y-0.5 overflow-y-auto lg:max-h-[500px]">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedLocationId(null);
+              setPageIndex(0);
+              onSelectDone?.();
+            }}
+            className={`flex w-full items-center justify-between rounded-[8px] px-2.5 py-2 text-left text-[13px] font-medium lg:py-1.5 ${
+              selectedLocationId === null
+                ? "bg-[var(--brand-tint)] text-[var(--brand-primary)]"
+                : "text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <Boxes className="h-3.5 w-3.5" />
+              <span>All Locations</span>
+            </span>
+            <span className="font-mono text-[11px] text-[var(--text-muted)]">{locations.length}</span>
+          </button>
+
+          {locations.map((loc) => {
+            const active = selectedLocationId === loc.id;
+            const depthPadding = [
+              "pl-0",
+              "pl-3.5",
+              "pl-7",
+              "pl-10",
+              "pl-14",
+              "pl-[70px]",
+              "pl-[84px]",
+            ][Math.min(loc.depth, 6)];
+            return (
+              <div
+                key={loc.id}
+                className={`flex items-center justify-between rounded-[8px] pr-1 hover:bg-[var(--bg-canvas)] ${depthPadding}`}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedLocationId(loc.id);
+                    setPageIndex(0);
+                    onSelectDone?.();
+                  }}
+                  className={`flex min-w-0 flex-1 items-center justify-between rounded-[8px] px-2 py-2 text-left text-[13px] lg:py-1.5 ${
+                    active ? "bg-[var(--brand-tint)] font-semibold text-[var(--brand-primary)]" : "text-[var(--text-primary)]"
+                  }`}
+                >
+                  <span className="flex min-w-0 items-center gap-1.5 truncate">
+                    <MapPin
+                      className={`h-3.5 w-3.5 shrink-0 ${
+                        loc.structural ? "text-[var(--status-warning-fg)]" : "text-[var(--brand-primary)]"
+                      }`}
+                    />
+                    <span className="truncate">{loc.name}</span>
+                    <span className="rounded bg-[var(--bg-muted)] px-1 text-[10px] font-mono text-[var(--text-muted)]">
+                      {loc.locationType}
+                    </span>
+                  </span>
+                  <span className="ml-1 font-mono text-[11px] text-[var(--text-muted)]">
+                    {loc.directItemCount}
+                  </span>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {selectedLocation && (
+          <div className="mt-4 space-y-2 border-t border-[var(--border-subtle)] pt-3">
+            <div className="text-[12px] font-medium text-[var(--text-primary)]">
+              {selectedLocation.pathString}
+            </div>
+            {editMode ? (
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSelectDone?.();
+                    setLocName(selectedLocation.name);
+                    setLocDesc(selectedLocation.description ?? "");
+                    setLocType(selectedLocation.locationType);
+                    setLocStructural(selectedLocation.structural);
+                    setLocExternal(selectedLocation.externalLocation);
+                    setLocBarcode(selectedLocation.customBarcode ?? "");
+                    setLocError(null);
+                    setShowLocationModal({ mode: "edit", location: selectedLocation });
+                  }}
+                  className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-subtle)] bg-white px-2 text-[11px] font-medium"
+                >
+                  <Edit3 className="h-3 w-3" />
+                  <span>Edit</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSelectDone?.();
+                    setLocParentId(selectedLocation.parentId ?? "");
+                    setLocError(null);
+                    setShowLocationModal({ mode: "move", location: selectedLocation });
+                  }}
+                  className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-subtle)] bg-white px-2 text-[11px] font-medium"
+                >
+                  <ArrowRightLeft className="h-3 w-3" />
+                  <span>Move</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSelectDone?.();
+                    setDeleteLocationTarget(selectedLocation);
+                  }}
+                  className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/40 px-2 text-[11px] font-medium text-[var(--status-danger-fg)]"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  <span>Delete</span>
+                </button>
+              </div>
+            ) : (
+              <EditModeHint actionDescription="edit, move, or delete locations" />
+            )}
+          </div>
+        )}
+      </>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {reconcileBanner && (
         <div className="flex items-center justify-between rounded-[10px] border border-[var(--border-success)] bg-[var(--status-success-bg)]/70 px-4 py-2.5 text-[13px] text-[var(--status-success-fg)]">
           <span className="flex items-center gap-2 font-medium">
@@ -678,166 +855,54 @@ function StockAndLocationsPageContent() {
         </Dialog>
       )}
 
+      {/* Mobile Location Picker + Scan Shortcut */}
+      <div className="flex items-center gap-2 lg:hidden">
+        <button
+          type="button"
+          onClick={() => setShowLocationSheet(true)}
+          className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-[10px] border border-[var(--border-subtle)] bg-card px-3 py-2.5 text-left text-[13px] font-medium text-[var(--text-primary)] hover:border-[var(--brand-primary)]"
+        >
+          <span className="flex min-w-0 items-center gap-2">
+            <MapPin className="h-4 w-4 shrink-0 text-[var(--brand-primary)]" />
+            <span className="truncate">
+              {selectedLocation ? selectedLocation.pathString : "All Locations"}
+            </span>
+          </span>
+          <ChevronDown className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
+        </button>
+
+        {hasFeature("BARCODES") && (
+          <Button
+            type="button"
+            onClick={() => {
+              setScanInput("");
+              setScanResult(null);
+              setScanError(null);
+              setShowScanner(true);
+            }}
+            className="h-10 shrink-0"
+          >
+            <QrCode className="h-4 w-4" />
+            <span>Scan</span>
+          </Button>
+        )}
+
+        <Sheet open={showLocationSheet} onOpenChange={setShowLocationSheet}>
+          <SheetContent side="bottom">
+            <SheetHeader className="sr-only">
+              <SheetTitle>Select Warehouse Location</SheetTitle>
+            </SheetHeader>
+            {renderLocationTree(() => setShowLocationSheet(false))}
+          </SheetContent>
+        </Sheet>
+      </div>
+
       {/* Split-Pane Layout: Left Warehouse Location Tree + Right Stock Items Table */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Left Pane: Locations Tree */}
-        <div className="lg:col-span-3">
+        <div className="hidden lg:col-span-3 lg:block">
           <Card className="p-4">
-            <div className="ims-modal-header">
-              <div>
-                <div className="text-[14px] font-semibold text-[var(--text-primary)]">Locations</div>
-                <div className="text-[11px] text-[var(--text-muted)]">Warehouse / Room / Aisle / Bin</div>
-              </div>
-              {hasPermission("STOCK:CREATE") && editMode && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLocName("");
-                    setLocDesc("");
-                    setLocParentId(selectedLocationId ?? "");
-                    setLocType("BIN");
-                    setLocStructural(false);
-                    setLocExternal(false);
-                    setLocBarcode("");
-                    setLocError(null);
-                    setShowLocationModal({ mode: "create" });
-                  }}
-                  className="inline-flex h-8 items-center gap-1 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-2.5 text-[12px] font-medium text-[var(--text-primary)] hover:border-[var(--brand-primary)]"
-                >
-                  <FolderPlus className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
-                  <span>New</span>
-                </button>
-              )}
-            </div>
-
-            <label className="mt-3 flex items-center gap-2 text-[12px] text-[var(--text-secondary)]">
-              <input
-                type="checkbox"
-                checked={includeSublocations}
-                onChange={(e) => {
-                  setIncludeSublocations(e.target.checked);
-                  setPageIndex(0);
-                }}
-              />
-              <span>Include sub-locations</span>
-            </label>
-
-            <div className="mt-3 max-h-[500px] space-y-0.5 overflow-y-auto">
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedLocationId(null);
-                  setPageIndex(0);
-                }}
-                className={`flex w-full items-center justify-between rounded-[8px] px-2.5 py-1.5 text-left text-[13px] font-medium ${
-                  selectedLocationId === null
-                    ? "bg-[var(--brand-tint)] text-[var(--brand-primary)]"
-                    : "text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  <Boxes className="h-3.5 w-3.5" />
-                  <span>All Locations</span>
-                </span>
-                <span className="font-mono text-[11px] text-[var(--text-muted)]">{locations.length}</span>
-              </button>
-
-              {locations.map((loc) => {
-                const active = selectedLocationId === loc.id;
-                const depthPadding = [
-                  "pl-0",
-                  "pl-3.5",
-                  "pl-7",
-                  "pl-10",
-                  "pl-14",
-                  "pl-[70px]",
-                  "pl-[84px]",
-                ][Math.min(loc.depth, 6)];
-                return (
-                  <div
-                    key={loc.id}
-                    className={`flex items-center justify-between rounded-[8px] pr-1 hover:bg-[var(--bg-canvas)] ${depthPadding}`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedLocationId(loc.id);
-                        setPageIndex(0);
-                      }}
-                      className={`flex min-w-0 flex-1 items-center justify-between rounded-[8px] px-2 py-1.5 text-left text-[13px] ${
-                        active ? "bg-[var(--brand-tint)] font-semibold text-[var(--brand-primary)]" : "text-[var(--text-primary)]"
-                      }`}
-                    >
-                      <span className="flex min-w-0 items-center gap-1.5 truncate">
-                        <MapPin
-                          className={`h-3.5 w-3.5 shrink-0 ${
-                            loc.structural ? "text-[var(--status-warning-fg)]" : "text-[var(--brand-primary)]"
-                          }`}
-                        />
-                        <span className="truncate">{loc.name}</span>
-                        <span className="rounded bg-[var(--bg-muted)] px-1 text-[10px] font-mono text-[var(--text-muted)]">
-                          {loc.locationType}
-                        </span>
-                      </span>
-                      <span className="ml-1 font-mono text-[11px] text-[var(--text-muted)]">
-                        {loc.directItemCount}
-                      </span>
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-
-            {selectedLocation && (
-              <div className="mt-4 space-y-2 border-t border-[var(--border-subtle)] pt-3">
-                <div className="text-[12px] font-medium text-[var(--text-primary)]">
-                  {selectedLocation.pathString}
-                </div>
-                {editMode ? (
-                  <div className="flex flex-wrap gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setLocName(selectedLocation.name);
-                        setLocDesc(selectedLocation.description ?? "");
-                        setLocType(selectedLocation.locationType);
-                        setLocStructural(selectedLocation.structural);
-                        setLocExternal(selectedLocation.externalLocation);
-                        setLocBarcode(selectedLocation.customBarcode ?? "");
-                        setLocError(null);
-                        setShowLocationModal({ mode: "edit", location: selectedLocation });
-                      }}
-                      className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-subtle)] bg-white px-2 text-[11px] font-medium"
-                    >
-                      <Edit3 className="h-3 w-3" />
-                      <span>Edit</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setLocParentId(selectedLocation.parentId ?? "");
-                        setLocError(null);
-                        setShowLocationModal({ mode: "move", location: selectedLocation });
-                      }}
-                      className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-subtle)] bg-white px-2 text-[11px] font-medium"
-                    >
-                      <ArrowRightLeft className="h-3 w-3" />
-                      <span>Move</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeleteLocationTarget(selectedLocation)}
-                      className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-danger)] bg-[var(--status-danger-bg)]/40 px-2 text-[11px] font-medium text-[var(--status-danger-fg)]"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                      <span>Delete</span>
-                    </button>
-                  </div>
-                ) : (
-                  <EditModeHint actionDescription="edit, move, or delete locations" />
-                )}
-              </div>
-            )}
+            {renderLocationTree()}
           </Card>
         </div>
 
@@ -974,6 +1039,129 @@ function StockAndLocationsPageContent() {
               pageSize={25}
               totalCount={stockPage?.totalElements}
               onPageChange={setPageIndex}
+              renderMobileCard={(item) => {
+                const st = item.status;
+                const tone =
+                  st === "OK"
+                    ? "success"
+                    : st === "ATTENTION" || st === "QUARANTINED" || st === "IN_TRANSIT"
+                      ? "warning"
+                      : "danger";
+                return (
+                  <div className="space-y-2.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <Link
+                          href={`/parts/${item.partId}`}
+                          className="font-mono text-[12px] font-semibold text-[var(--brand-primary)] hover:underline"
+                        >
+                          {item.partIpn}
+                        </Link>
+                        <div className="truncate text-[14px] font-semibold text-[var(--text-primary)]">
+                          {item.partName}
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        <span className="font-mono text-[14px] font-semibold tabular-nums text-[var(--text-primary)]">
+                          {Number(item.quantity).toLocaleString()} {item.partUnit}
+                        </span>
+                        <StatusBadge label={st} tone={tone} />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5 text-[12px] text-[var(--text-muted)]">
+                      <span className="inline-flex items-center gap-1 rounded bg-[var(--bg-muted)] px-2 py-0.5 text-[var(--text-primary)]">
+                        <MapPin className="h-3 w-3 text-[var(--brand-primary)]" />
+                        <span>{item.locationPathString ?? "Unassigned"}</span>
+                      </span>
+                      {item.serialNumber && (
+                        <span className="rounded border border-[var(--border-violet)] bg-[var(--status-violet-bg)] px-2 py-0.5 font-mono text-[11px] text-[var(--status-violet-fg)]">
+                          SN: {item.serialNumber}
+                        </span>
+                      )}
+                      {item.batchCode && (
+                        <span className="rounded border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-2 py-0.5 font-mono text-[11px] text-[var(--text-secondary)]">
+                          Batch: {item.batchCode}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      {!item.serialNumber && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => {
+                            setOpQty(String(item.quantity));
+                            setOpNotes("");
+                            setOpError(null);
+                            setOpModal({ type: "adjust", item, mode: "count" });
+                          }}
+                        >
+                          Count / +/-
+                        </Button>
+                      )}
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => {
+                          setOpTargetLocId(item.locationId ?? "");
+                          setOpQty(String(item.quantity));
+                          setOpNotes("");
+                          setOpError(null);
+                          setOpModal({ type: "transfer", item });
+                        }}
+                      >
+                        Transfer
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button type="button" size="sm" variant="outline" aria-label="More stock operations">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {!item.serialNumber && (
+                            <DropdownMenuItem
+                              onSelect={() => {
+                                setOpQty("1");
+                                setOpTargetLocId(item.locationId ?? "");
+                                setOpNotes("");
+                                setOpError(null);
+                                setOpModal({ type: "split", item });
+                              }}
+                            >
+                              <GitFork className="h-4 w-4" />
+                              <span>Split Lot</span>
+                            </DropdownMenuItem>
+                          )}
+                          {!item.serialNumber && item.partTrackable && hasFeature("SERIAL_TRACKING") && (
+                            <DropdownMenuItem
+                              onSelect={() => {
+                                setOpSerialsText("");
+                                setOpTargetLocId(item.locationId ?? "");
+                                setOpNotes("");
+                                setOpError(null);
+                                setOpModal({ type: "serialize", item });
+                              }}
+                            >
+                              <Hash className="h-4 w-4" />
+                              <span>Serialize</span>
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem onSelect={() => openInspectModal(item)}>
+                            <History className="h-4 w-4" />
+                            <span>History &amp; QC</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                );
+              }}
             />
           )}
         </div>

@@ -712,7 +712,7 @@ export default function PartDetailPage() {
 
       {/* Tabs Navigation */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as DetailTab)}>
-        <TabsList className="w-full justify-start overflow-x-auto">
+        <TabsList className="no-scrollbar w-full justify-start overflow-x-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -929,7 +929,90 @@ export default function PartDetailPage() {
             )}
           </div>
 
-          <div className="ims-table-wrap">
+          {/* Mobile Stock Cards */}
+          <div className="divide-y divide-[var(--border-subtle)] rounded-[8px] border border-[var(--border-subtle)] md:hidden">
+            {stockItems.length === 0 ? (
+              <div className="px-4 py-6 text-center text-[13px] text-[var(--text-muted)]">
+                No stock lots found for this item.
+              </div>
+            ) : (
+              stockItems.map((item) => (
+                <div key={item.id} className="space-y-2.5 p-3.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-medium text-[var(--text-primary)]">
+                        {item.locationPathString ?? item.locationName ?? "Unassigned"}
+                      </div>
+                      <div className="font-mono text-[12px] text-[var(--text-muted)]">
+                        {item.serialNumber
+                          ? `SN: ${item.serialNumber}`
+                          : item.batchCode
+                            ? `Lot: ${item.batchCode}`
+                            : "Standard lot"}
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      <span className="font-mono text-[14px] font-semibold text-[var(--text-primary)]">
+                        {Number(item.quantity).toLocaleString()} {part.unit}
+                      </span>
+                      <StatusBadge
+                        label={item.status}
+                        tone={item.status === "OK" ? "success" : "warning"}
+                      />
+                    </div>
+                  </div>
+                  {hasPermission("STOCK:UPDATE") && (
+                    <div className="grid grid-cols-3 gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOpQty("1");
+                          setOpNotes("");
+                          setOpError(null);
+                          setStockOp({ type: "add", item });
+                        }}
+                        className="inline-flex h-9 items-center justify-center gap-1 rounded-[8px] border border-[var(--border-subtle)] text-[12px] font-medium hover:bg-[var(--bg-canvas)]"
+                      >
+                        <Plus className="h-3.5 w-3.5 text-[var(--status-success-fg)]" />
+                        <span>Add</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOpQty("1");
+                          setOpNotes("");
+                          setOpError(null);
+                          setStockOp({ type: "remove", item });
+                        }}
+                        className="inline-flex h-9 items-center justify-center gap-1 rounded-[8px] border border-[var(--border-subtle)] text-[12px] font-medium hover:bg-[var(--bg-canvas)]"
+                      >
+                        <Minus className="h-3.5 w-3.5 text-[var(--status-danger-fg)]" />
+                        <span>Remove</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOpQty(String(item.quantity));
+                          setOpLocationId(
+                            locations.find((l) => !l.structural && l.id !== item.locationId)?.id ?? ""
+                          );
+                          setOpNotes("");
+                          setOpError(null);
+                          setStockOp({ type: "transfer", item });
+                        }}
+                        className="inline-flex h-9 items-center justify-center gap-1 rounded-[8px] border border-[var(--border-subtle)] text-[12px] font-medium hover:bg-[var(--bg-canvas)]"
+                      >
+                        <ArrowRightLeft className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
+                        <span>Move</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="ims-table-wrap hidden md:block">
             <table className="w-full border-collapse text-left text-[13px]">
               <thead className="ims-table-head">
                 <tr className="border-b border-[var(--border-subtle)]">
@@ -1044,7 +1127,29 @@ export default function PartDetailPage() {
               description="Additions, sales, counts, and transfers will appear here automatically."
             />
           ) : (
-            <div className="ims-table-wrap">
+            <>
+              <div className="divide-y divide-[var(--border-subtle)] rounded-[8px] border border-[var(--border-subtle)] md:hidden">
+                {trackingHistory.map((tr) => (
+                  <div key={tr.id} className="space-y-1 p-3.5 text-[13px]">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium text-[var(--text-primary)]">{tr.trackingType}</span>
+                      <span
+                        className={`font-mono font-semibold ${
+                          tr.quantityDelta >= 0 ? "text-[var(--status-success-fg)]" : "text-[var(--status-danger-fg)]"
+                        }`}
+                      >
+                        {tr.quantityDelta >= 0 ? `+${tr.quantityDelta}` : tr.quantityDelta} → {tr.quantityAfter} {part.unit}
+                      </span>
+                    </div>
+                    <div className="text-[12px] text-[var(--text-secondary)]">
+                      {tr.locationPathString ?? "—"} · {new Date(tr.createdAt).toLocaleString()}
+                    </div>
+                    {tr.notes && <div className="text-[12px] text-[var(--text-muted)]">{tr.notes}</div>}
+                  </div>
+                ))}
+              </div>
+
+              <div className="ims-table-wrap hidden md:block">
               <table className="w-full border-collapse text-left text-[13px]">
                 <thead className="ims-table-head">
                   <tr className="border-b border-[var(--border-subtle)]">
@@ -1082,6 +1187,7 @@ export default function PartDetailPage() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </div>
       )}
@@ -1136,7 +1242,90 @@ export default function PartDetailPage() {
             </form>
           )}
 
-          <div className="ims-table-wrap">
+          {/* Mobile Stock Cards */}
+          <div className="divide-y divide-[var(--border-subtle)] rounded-[8px] border border-[var(--border-subtle)] md:hidden">
+            {stockItems.length === 0 ? (
+              <div className="px-4 py-6 text-center text-[13px] text-[var(--text-muted)]">
+                No stock lots found for this item.
+              </div>
+            ) : (
+              stockItems.map((item) => (
+                <div key={item.id} className="space-y-2.5 p-3.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-medium text-[var(--text-primary)]">
+                        {item.locationPathString ?? item.locationName ?? "Unassigned"}
+                      </div>
+                      <div className="font-mono text-[12px] text-[var(--text-muted)]">
+                        {item.serialNumber
+                          ? `SN: ${item.serialNumber}`
+                          : item.batchCode
+                            ? `Lot: ${item.batchCode}`
+                            : "Standard lot"}
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      <span className="font-mono text-[14px] font-semibold text-[var(--text-primary)]">
+                        {Number(item.quantity).toLocaleString()} {part.unit}
+                      </span>
+                      <StatusBadge
+                        label={item.status}
+                        tone={item.status === "OK" ? "success" : "warning"}
+                      />
+                    </div>
+                  </div>
+                  {hasPermission("STOCK:UPDATE") && (
+                    <div className="grid grid-cols-3 gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOpQty("1");
+                          setOpNotes("");
+                          setOpError(null);
+                          setStockOp({ type: "add", item });
+                        }}
+                        className="inline-flex h-9 items-center justify-center gap-1 rounded-[8px] border border-[var(--border-subtle)] text-[12px] font-medium hover:bg-[var(--bg-canvas)]"
+                      >
+                        <Plus className="h-3.5 w-3.5 text-[var(--status-success-fg)]" />
+                        <span>Add</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOpQty("1");
+                          setOpNotes("");
+                          setOpError(null);
+                          setStockOp({ type: "remove", item });
+                        }}
+                        className="inline-flex h-9 items-center justify-center gap-1 rounded-[8px] border border-[var(--border-subtle)] text-[12px] font-medium hover:bg-[var(--bg-canvas)]"
+                      >
+                        <Minus className="h-3.5 w-3.5 text-[var(--status-danger-fg)]" />
+                        <span>Remove</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOpQty(String(item.quantity));
+                          setOpLocationId(
+                            locations.find((l) => !l.structural && l.id !== item.locationId)?.id ?? ""
+                          );
+                          setOpNotes("");
+                          setOpError(null);
+                          setStockOp({ type: "transfer", item });
+                        }}
+                        className="inline-flex h-9 items-center justify-center gap-1 rounded-[8px] border border-[var(--border-subtle)] text-[12px] font-medium hover:bg-[var(--bg-canvas)]"
+                      >
+                        <ArrowRightLeft className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
+                        <span>Move</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="ims-table-wrap hidden md:block">
             <table className="w-full border-collapse text-left text-[13px]">
               <thead className="ims-table-head">
                 <tr className="border-b border-[var(--border-subtle)]">
@@ -1347,7 +1536,7 @@ export default function PartDetailPage() {
             </form>
           )}
 
-          <div className="overflow-hidden rounded-[12px] border border-[var(--border-subtle)] bg-white">
+          <div className="overflow-x-auto rounded-[12px] border border-[var(--border-subtle)] bg-white">
             <table className="w-full text-[13px]">
               <thead className="bg-[var(--bg-muted)] text-left text-[11px] uppercase text-[var(--text-muted)]">
                 <tr>

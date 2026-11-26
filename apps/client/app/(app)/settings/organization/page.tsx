@@ -63,7 +63,7 @@ export default function OrganizationSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <Card className="p-6">
+      <Card className="p-4 sm:p-6">
         <form onSubmit={handleSaveOrg}>
           <h2 className="text-[15px] font-semibold text-foreground">
             Organization Profile
@@ -128,7 +128,7 @@ export default function OrganizationSettingsPage() {
           </div>
 
           <div className="mt-6 flex justify-end">
-            <Button type="submit" disabled={saving}>
+            <Button type="submit" disabled={saving} className="w-full sm:w-auto">
               {saving ? "Saving…" : "Save Changes"}
             </Button>
           </div>
@@ -136,7 +136,7 @@ export default function OrganizationSettingsPage() {
       </Card>
 
       {/* Typed Key-Value Store Viewer */}
-      <div className="ims-card p-6">
+      <div className="ims-card p-4 sm:p-6">
         <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">
           Typed Tenant Preferences (`TenantSetting`)
         </h3>
@@ -148,17 +148,17 @@ export default function OrganizationSettingsPage() {
           {(kvSettings ?? []).map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between px-4 py-2.5 text-[13px]"
+              className="flex flex-col gap-1 px-4 py-2.5 text-[13px] sm:flex-row sm:items-center sm:justify-between"
             >
-              <div>
-                <span className="font-mono font-medium text-[var(--text-primary)]">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="break-all font-mono font-medium text-[var(--text-primary)]">
                   {item.settingKey}
                 </span>
-                <span className="ml-2 rounded bg-[var(--bg-muted)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--text-muted)]">
+                <span className="rounded bg-[var(--bg-muted)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--text-muted)]">
                   {item.valueType}
                 </span>
               </div>
-              <span className="font-mono text-[var(--text-secondary)]">{item.settingValue}</span>
+              <span className="break-all font-mono text-[var(--text-secondary)]">{item.settingValue}</span>
             </div>
           ))}
         </div>

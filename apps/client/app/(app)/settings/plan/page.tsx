@@ -15,7 +15,7 @@ export default function PlanAndFeaturesPage() {
   return (
     <div className="space-y-6">
       {/* Plan Header Card */}
-      <div className="ims-card p-6">
+      <div className="ims-card p-4 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
@@ -43,7 +43,7 @@ export default function PlanAndFeaturesPage() {
       </div>
 
       {/* Quotas & Usage Bars */}
-      <div className="ims-card p-6">
+      <div className="ims-card p-4 sm:p-6">
         <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">
           Quotas & Resource Usage
         </h3>
@@ -85,7 +85,7 @@ export default function PlanAndFeaturesPage() {
 
       {/* Feature Entitlements Table */}
       <div className="rounded-[12px] border border-[var(--border-subtle)] bg-white">
-        <div className="border-b border-[var(--border-subtle)] px-6 py-4">
+        <div className="border-b border-[var(--border-subtle)] px-4 py-3.5 sm:px-6 sm:py-4">
           <h3 className="text-[15px] font-semibold text-[var(--text-primary)]">
             Module Entitlements
           </h3>
@@ -94,7 +94,7 @@ export default function PlanAndFeaturesPage() {
           {booleanFeatures.map((bf) => (
             <div
               key={bf.featureKey}
-              className="flex items-center justify-between px-6 py-3.5 text-[13px]"
+              className="flex flex-col items-start gap-2 px-4 py-3.5 text-[13px] sm:flex-row sm:items-center sm:justify-between sm:px-6"
             >
               <div>
                 <div className="flex items-center gap-2">

@@ -44,8 +44,8 @@ export default function AcceptInvitePage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md p-8">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4 py-6">
+      <Card className="w-full max-w-md p-5 sm:p-8">
         <h1 className="text-[18px] font-semibold text-foreground">Accept Invitation</h1>
         <p className="mt-1 text-[13px] text-muted-foreground">
           Complete your account profile to join your team&apos;s workspace.

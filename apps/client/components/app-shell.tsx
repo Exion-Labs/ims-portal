@@ -4,14 +4,20 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  Boxes,
   ChevronDown,
+  Cpu,
+  LayoutDashboard,
   Lock,
   LogOut,
+  Menu,
+  Package,
   PanelLeftClose,
   PanelLeftOpen,
   Pencil,
   Search,
   Settings,
+  ShoppingCart,
   User,
 } from "lucide-react";
 import {
@@ -23,6 +29,10 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
   StatusBadge,
   Switch,
   Tooltip,
@@ -43,6 +53,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { editMode, canUseEditMode, setEditMode, toggleEditMode } = useEditMode();
   const [cmdOpen, setCmdOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   const userInitial = (me?.fullName || me?.email || "U").trim().charAt(0).toUpperCase();
 
@@ -84,12 +99,101 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     });
   }
 
+  const mobileBottomTabs = [
+    { label: "Home", href: "/", icon: LayoutDashboard },
+    ...(hasFeature("PARTS") ? [{ label: "Items", href: "/parts", icon: Cpu }] : []),
+    ...(hasFeature("STOCK") ? [{ label: "Stock", href: "/stock", icon: Boxes }] : []),
+    ...(hasFeature("SALES")
+      ? [{ label: "Sales", href: "/sales", icon: Package }]
+      : hasFeature("PURCHASING")
+        ? [{ label: "Orders", href: "/purchasing", icon: ShoppingCart }]
+        : []),
+  ];
+
+  function renderNavGroups(collapsed: boolean, onNavigate?: () => void) {
+    return (
+      <nav
+        className={`flex-1 overflow-y-auto py-4 ${
+          collapsed ? "space-y-2 px-2" : "space-y-4 px-3"
+        }`}
+      >
+        {NAV_GROUPS.map((group) => {
+          const visibleItems = group.items.filter((item) => {
+            if (item.feature && !hasFeature(item.feature)) return false;
+            if (item.permission && !hasPermission(item.permission)) return false;
+            return true;
+          });
+          if (visibleItems.length === 0) return null;
+
+          return (
+            <div key={group.group}>
+              {!collapsed ? (
+                <div className="px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {group.group}
+                </div>
+              ) : (
+                <div className="my-1 border-t border-muted" />
+              )}
+              <div className="space-y-0.5">
+                {visibleItems.map((item) => {
+                  const Icon = item.icon;
+                  const active =
+                    item.href === "/"
+                      ? pathname === "/"
+                      : pathname.startsWith(item.href) ||
+                        (item.href.startsWith("/settings") && pathname.startsWith("/settings"));
+                  const isTrialOverride = me?.featureDetails.some(
+                    (f) => f.featureKey === item.feature && f.source === "OVERRIDE_TRIAL"
+                  );
+
+                  const linkEl = (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={onNavigate}
+                      className={`flex h-10 items-center rounded-[8px] text-[13px] font-medium transition-colors lg:h-9 ${
+                        collapsed
+                          ? "justify-center px-0"
+                          : "justify-between px-2.5"
+                      } ${
+                        active
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:bg-background hover:text-foreground"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <Icon className="h-4 w-4 shrink-0" />
+                        {!collapsed && <span>{item.label}</span>}
+                      </span>
+                      {!collapsed && isTrialOverride && (
+                        <StatusBadge label="Trial" tone="violet" showDot={false} />
+                      )}
+                    </Link>
+                  );
+
+                  return collapsed ? (
+                    <Tooltip key={item.href}>
+                      <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
+                      <TooltipContent side="right">{item.label}</TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    linkEl
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </nav>
+    );
+  }
+
   return (
     <TooltipProvider>
-      <div className="flex min-h-screen bg-background text-foreground">
-        {/* Left Sidebar */}
+      <div className="flex min-h-dvh bg-background text-foreground">
+        {/* Desktop Left Sidebar */}
         <aside
-          className={`flex shrink-0 flex-col border-r border-border bg-card transition-all duration-200 ${
+          className={`hidden shrink-0 flex-col border-r border-border bg-card transition-all duration-200 lg:flex ${
             sidebarCollapsed ? "w-16" : "w-64"
           }`}
         >
@@ -165,90 +269,79 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
           </div>
 
-          {/* Feature-Aware Navigation */}
-          <nav
-            className={`flex-1 overflow-y-auto py-4 ${
-              sidebarCollapsed ? "space-y-2 px-2" : "space-y-4 px-3"
-            }`}
-          >
-            {NAV_GROUPS.map((group) => {
-              const visibleItems = group.items.filter((item) => {
-                if (item.feature && !hasFeature(item.feature)) return false;
-                if (item.permission && !hasPermission(item.permission)) return false;
-                return true;
-              });
-              if (visibleItems.length === 0) return null;
-
-              return (
-                <div key={group.group}>
-                  {!sidebarCollapsed ? (
-                    <div className="px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      {group.group}
-                    </div>
-                  ) : (
-                    <div className="my-1 border-t border-muted" />
-                  )}
-                  <div className="space-y-0.5">
-                    {visibleItems.map((item) => {
-                      const Icon = item.icon;
-                      const active =
-                        item.href === "/"
-                          ? pathname === "/"
-                          : pathname.startsWith(item.href) ||
-                            (item.href.startsWith("/settings") && pathname.startsWith("/settings"));
-                      const isTrialOverride = me?.featureDetails.some(
-                        (f) => f.featureKey === item.feature && f.source === "OVERRIDE_TRIAL"
-                      );
-
-                      const linkEl = (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className={`flex h-9 items-center rounded-[8px] text-[13px] font-medium transition-colors ${
-                            sidebarCollapsed
-                              ? "justify-center px-0"
-                              : "justify-between px-2.5"
-                          } ${
-                            active
-                              ? "bg-accent text-accent-foreground"
-                              : "text-muted-foreground hover:bg-background hover:text-foreground"
-                          }`}
-                        >
-                          <span className="flex items-center gap-2.5">
-                            <Icon className="h-4 w-4 shrink-0" />
-                            {!sidebarCollapsed && <span>{item.label}</span>}
-                          </span>
-                          {!sidebarCollapsed && isTrialOverride && (
-                            <StatusBadge label="Trial" tone="violet" showDot={false} />
-                          )}
-                        </Link>
-                      );
-
-                      return sidebarCollapsed ? (
-                        <Tooltip key={item.href}>
-                          <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
-                          <TooltipContent side="right">{item.label}</TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        linkEl
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </nav>
+          {renderNavGroups(sidebarCollapsed)}
         </aside>
+
+        {/* Mobile Slide-Out Navigation Drawer */}
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <SheetContent side="left" className="w-[86vw] max-w-xs gap-0 p-0">
+            <SheetHeader className="sr-only">
+              <SheetTitle>Navigation Menu</SheetTitle>
+            </SheetHeader>
+            <div className="border-b border-border px-4 py-3.5 pr-12">
+              <div className="flex items-center justify-between gap-1.5">
+                <span className="truncate text-[14px] font-semibold text-foreground">
+                  {me?.tenantName ?? "Loading tenant…"}
+                </span>
+                {me?.planName && (
+                  <StatusBadge label={me.planName} tone="primary" showDot={false} />
+                )}
+              </div>
+              <div className="mt-0.5 flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
+                <span className="truncate">{me?.tenantSlug ?? "—"}</span>
+                <span>·</span>
+                <span>{me?.baseCurrency ?? "USD"}</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setCmdOpen(true);
+                }}
+                className="mt-3 flex h-10 w-full items-center gap-2 rounded-[8px] border border-border bg-background px-3 text-[13px] text-muted-foreground hover:border-primary/50 hover:text-foreground"
+              >
+                <Search className="h-4 w-4 shrink-0" />
+                <span>Search parts, orders, settings…</span>
+              </button>
+            </div>
+
+            {renderNavGroups(false, () => setMobileMenuOpen(false))}
+          </SheetContent>
+        </Sheet>
 
         {/* Main Content Area */}
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Top Bar */}
-          <header className="flex h-14 items-center justify-between border-b border-border bg-card px-6">
-            <div className="text-[14px] font-semibold text-foreground">
-              {currentMenuLabel}
+          <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-2 border-b border-border bg-card px-3 sm:px-6">
+            <div className="flex min-w-0 items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Open menu"
+                className="shrink-0 lg:hidden"
+              >
+                <Menu className="h-4 w-4" />
+              </Button>
+              <div className="truncate text-[14px] font-semibold text-foreground">
+                {currentMenuLabel}
+              </div>
             </div>
 
-            <div className="flex items-center gap-2.5">
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setCmdOpen(true)}
+                aria-label="Quick search"
+                className="lg:hidden"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+
               {canUseEditMode && (
                 <button
                   type="button"
@@ -258,7 +351,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       ? "Edit Mode is enabled — click to lock structural edits"
                       : "View Only — click to enable Edit Mode"
                   }
-                  className={`inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[12px] font-medium transition-colors ${
+                  className={`inline-flex h-8 items-center gap-1.5 rounded-full border px-2.5 text-[12px] font-medium transition-colors sm:px-3 ${
                     editMode
                       ? "border-[var(--status-warning-fg)] bg-[var(--status-warning-bg)] text-[var(--status-warning-fg)] hover:bg-[var(--border-warning)]"
                       : "border-border bg-background text-muted-foreground hover:border-[var(--border-strong)] hover:text-foreground"
@@ -267,12 +360,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   {editMode ? (
                     <>
                       <Pencil className="h-3.5 w-3.5" />
-                      <span>Edit Mode ON</span>
+                      <span className="hidden sm:inline">Edit Mode ON</span>
+                      <span className="sm:hidden">Edit</span>
                     </>
                   ) : (
                     <>
                       <Lock className="h-3.5 w-3.5" />
-                      <span>View Only</span>
+                      <span className="hidden sm:inline">View Only</span>
+                      <span className="sm:hidden">View</span>
                     </>
                   )}
                 </button>
@@ -282,9 +377,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="flex items-center gap-2.5 rounded-[10px] px-2.5 py-1.5 transition-colors hover:bg-background"
+                    className="flex items-center gap-2 rounded-[10px] px-1.5 py-1.5 transition-colors hover:bg-background sm:gap-2.5 sm:px-2.5"
                   >
-                    <div className="min-w-0 text-right">
+                    <div className="hidden min-w-0 text-right sm:block">
                       <div className="truncate text-[13px] font-semibold text-foreground">
                         {me?.fullName ?? "User"}
                       </div>
@@ -295,7 +390,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <Avatar>
                       <AvatarFallback>{userInitial}</AvatarFallback>
                     </Avatar>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    <ChevronDown className="hidden h-4 w-4 text-muted-foreground sm:block" />
                   </button>
                 </DropdownMenuTrigger>
 
@@ -357,8 +452,42 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          <main className="flex-1 p-6">{children}</main>
+          <main className="min-w-0 flex-1 p-3 pb-24 sm:p-6 lg:pb-6">{children}</main>
         </div>
+
+        {/* Mobile Bottom Navigation Bar */}
+        <nav
+          aria-label="Mobile Navigation"
+          className="fixed inset-x-0 bottom-0 z-30 grid grid-flow-col auto-cols-fr border-t border-border bg-card/95 backdrop-blur-sm pb-[env(safe-area-inset-bottom)] lg:hidden"
+        >
+          {mobileBottomTabs.map((tab) => {
+            const Icon = tab.icon;
+            const active =
+              tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                className={`flex h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
+                  active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{tab.label}</span>
+              </Link>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className={`flex h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
+              mobileMenuOpen ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Menu className="h-4 w-4" />
+            <span>More</span>
+          </button>
+        </nav>
 
         <CommandPalette open={cmdOpen} onOpenChange={setCmdOpen} />
       </div>

@@ -325,10 +325,58 @@ export default function BuildOrderDetailPage() {
         )}
 
         <div className="bg-card border rounded-xl overflow-hidden">
-          <div className="px-5 py-4 border-b flex items-center justify-between">
+          <div className="px-4 py-3.5 border-b flex items-center justify-between sm:px-5 sm:py-4">
             <h2 className="text-base font-semibold">Required Components (BOM Lines)</h2>
           </div>
-          <div className="overflow-x-auto">
+
+          {/* Mobile BOM Component Cards */}
+          <div className="divide-y md:hidden">
+            {build.lines.map((line) => (
+              <div key={line.id} className="space-y-2.5 p-3.5 text-sm">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <Link href={`/parts/${line.subPartId}`} className="font-medium text-primary hover:underline">
+                      {line.subPartIpn ? `${line.subPartIpn} · ` : ""}
+                      {line.subPartName}
+                    </Link>
+                    {line.reference && (
+                      <div className="font-mono text-xs text-muted-foreground">Ref: {line.reference}</div>
+                    )}
+                  </div>
+                  <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                    Req: <strong className="text-foreground">{line.quantity}</strong>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-mono text-muted-foreground">
+                  <span>Allocated: {line.allocated}</span>
+                  <span>Consumed: {line.consumed}</span>
+                </div>
+                {line.allocations.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 text-xs">
+                    {line.allocations.map((a) => (
+                      <span
+                        key={a.id}
+                        className="inline-flex items-center gap-1 rounded border bg-background px-2 py-0.5 font-mono"
+                      >
+                        {a.serialNumber ? `SN:${a.serialNumber}` : a.batchCode ? `Batch:${a.batchCode}` : "Lot"} ·{" "}
+                        {a.quantity} {a.consumed ? "(Consumed)" : "(Reserved)"}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {canUpdate && isEditable && (
+                  <button
+                    onClick={() => openAllocateModal(line)}
+                    className="h-9 w-full rounded-md border text-xs font-medium hover:bg-muted"
+                  >
+                    Allocate Stock
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full text-sm">
               <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
                 <tr>

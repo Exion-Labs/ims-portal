@@ -31,8 +31,8 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md p-8">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4 py-6">
+      <Card className="w-full max-w-md p-5 sm:p-8">
         <h1 className="text-[18px] font-semibold text-foreground">Reset Password</h1>
         <p className="mt-1 text-[13px] text-muted-foreground">
           Enter your work email and we will send recovery instructions.

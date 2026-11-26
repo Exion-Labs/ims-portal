@@ -43,8 +43,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
-      <Card className="w-full max-w-md p-8 shadow-xs">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4 py-6 sm:py-10">
+      <Card className="w-full max-w-md p-5 shadow-xs sm:p-8">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-primary text-primary-foreground">
             <Boxes className="h-5 w-5" />
@@ -101,7 +101,7 @@ export default function LoginPage() {
 
         <div className="mt-6 rounded-[8px] border border-border bg-background p-3 text-[12px] text-muted-foreground">
           <div className="font-semibold text-foreground">Demo Seeded Accounts (Dev Profile)</div>
-          <div className="mt-1 flex flex-col gap-1 font-mono text-[11px]">
+          <div className="mt-1 flex flex-col gap-1.5 font-mono text-[11px]">
             <button
               type="button"
               onClick={() => {
@@ -109,7 +109,7 @@ export default function LoginPage() {
                 setPassword("Password123!");
                 toast.info("Demo credentials filled", { description: "admin@acme-robotics.dev" });
               }}
-              className="text-left text-primary hover:underline"
+              className="break-all text-left text-primary hover:underline"
             >
               PRO Tenant: admin@acme-robotics.dev / Password123!
             </button>
@@ -120,7 +120,7 @@ export default function LoginPage() {
                 setPassword("Password123!");
                 toast.info("Demo credentials filled", { description: "admin@nordic-labs.dev" });
               }}
-              className="text-left text-primary hover:underline"
+              className="break-all text-left text-primary hover:underline"
             >
               STARTER Tenant: admin@nordic-labs.dev / Password123!
             </button>

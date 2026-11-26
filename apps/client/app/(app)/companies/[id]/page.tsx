@@ -179,14 +179,14 @@ export default function CompanyDetailPage() {
         <div className="ims-card">
           <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Addresses ({addresses.length})</h2>
           {hasPermission("COMPANY:UPDATE") && (
-            <form onSubmit={handleAddAddress} className="mt-3 grid grid-cols-2 gap-2">
+            <form onSubmit={handleAddAddress} className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
               <input
                 type="text"
                 required
                 value={addrForm.label}
                 onChange={(e) => setAddrForm({ ...addrForm, label: e.target.value })}
                 placeholder="Label (HQ / Warehouse)"
-                className="h-8 rounded-[8px] border border-[var(--border-subtle)] px-2.5 text-[12px]"
+                className="h-10 rounded-[8px] border border-[var(--border-subtle)] px-2.5 text-base sm:h-8 sm:text-[12px]"
               />
               <input
                 type="text"
@@ -194,18 +194,18 @@ export default function CompanyDetailPage() {
                 value={addrForm.line1}
                 onChange={(e) => setAddrForm({ ...addrForm, line1: e.target.value })}
                 placeholder="Street Address"
-                className="h-8 rounded-[8px] border border-[var(--border-subtle)] px-2.5 text-[12px]"
+                className="h-10 rounded-[8px] border border-[var(--border-subtle)] px-2.5 text-base sm:h-8 sm:text-[12px]"
               />
               <input
                 type="text"
                 value={addrForm.city}
                 onChange={(e) => setAddrForm({ ...addrForm, city: e.target.value })}
                 placeholder="City"
-                className="h-8 rounded-[8px] border border-[var(--border-subtle)] px-2.5 text-[12px]"
+                className="h-10 rounded-[8px] border border-[var(--border-subtle)] px-2.5 text-base sm:h-8 sm:text-[12px]"
               />
               <button
                 type="submit"
-                className="h-8 rounded-[8px] bg-[var(--brand-primary)] px-3 text-[12px] font-medium text-white"
+                className="h-10 rounded-[8px] bg-[var(--brand-primary)] px-3 text-[13px] font-medium text-white sm:h-8 sm:text-[12px]"
               >
                 + Add Address
               </button>
@@ -230,7 +230,43 @@ export default function CompanyDetailPage() {
           <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
             Supplier SKUs & Converted Price Breaks ({supplierParts.length})
           </h2>
-          <div className="mt-3 overflow-x-auto rounded-[8px] border border-[var(--border-subtle)]">
+          {/* Mobile Supplier SKUs Cards */}
+          <div className="mt-3 divide-y divide-[var(--border-subtle)] rounded-[8px] border border-[var(--border-subtle)] md:hidden">
+            {supplierParts.map((sp) => (
+              <div key={sp.id} className="space-y-1.5 p-3 text-[13px]">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono font-semibold text-[var(--text-primary)]">{sp.sku}</span>
+                  <span className="font-mono text-[12px] text-[var(--text-secondary)]">
+                    1 pack = {sp.packQuantity} {sp.partUnit}
+                  </span>
+                </div>
+                <div>
+                  <Link
+                    href={`/parts/${sp.partId}`}
+                    className="font-mono text-[var(--brand-primary)] hover:underline"
+                  >
+                    {sp.partIpn}
+                  </Link>
+                  <span className="ml-2 text-[12px] text-[var(--text-secondary)]">{sp.partName}</span>
+                </div>
+                {sp.priceBreaks.length > 0 && (
+                  <div className="space-y-0.5 pt-1 font-mono text-[12px]">
+                    {sp.priceBreaks.map((pb) => (
+                      <div key={pb.id}>
+                        ≥{pb.minQuantity}: {pb.unitPrice} {pb.currency} (
+                        <span className="text-[var(--brand-primary)]">
+                          {pb.convertedInternalUnitPriceInBase} {pb.tenantBaseCurrency}/{sp.partUnit}
+                        </span>
+                        )
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3 hidden overflow-x-auto rounded-[8px] border border-[var(--border-subtle)] md:block">
             <table className="w-full border-collapse text-left text-[13px]">
               <thead className="ims-table-head">
                 <tr className="border-b border-[var(--border-subtle)]">

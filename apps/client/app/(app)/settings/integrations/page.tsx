@@ -146,7 +146,7 @@ export default function IntegrationsSettingsPage() {
                 value={tplName}
                 onChange={(e) => setTplName(e.target.value)}
                 placeholder="Template name"
-                className="px-3 py-2 border rounded-lg text-sm bg-background"
+                className="h-10 rounded-lg border bg-background px-3 py-2 text-base sm:h-9 sm:text-sm"
               />
               <Select value={tplEntity} onValueChange={setTplEntity}>
                 <SelectTrigger>
@@ -164,7 +164,7 @@ export default function IntegrationsSettingsPage() {
                 value={tplHtml}
                 onChange={(e) => setTplHtml(e.target.value)}
                 placeholder="Handlebars XHTML"
-                className="px-3 py-2 border rounded-lg text-sm bg-background font-mono"
+                className="h-10 rounded-lg border bg-background px-3 py-2 font-mono text-base sm:h-9 sm:text-sm"
               />
               <button type="submit" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium">
                 <Plus className="w-4 h-4" /> Add Template
@@ -227,7 +227,7 @@ export default function IntegrationsSettingsPage() {
                 value={hookName}
                 onChange={(e) => setHookName(e.target.value)}
                 placeholder="Webhook name"
-                className="px-3 py-2 border rounded-lg text-sm bg-background"
+                className="h-10 rounded-lg border bg-background px-3 py-2 text-base sm:h-9 sm:text-sm"
               />
               <input
                 required
@@ -235,19 +235,19 @@ export default function IntegrationsSettingsPage() {
                 value={hookUrl}
                 onChange={(e) => setHookUrl(e.target.value)}
                 placeholder="https://hooks.example.com/ims"
-                className="px-3 py-2 border rounded-lg text-sm bg-background font-mono"
+                className="h-10 rounded-lg border bg-background px-3 py-2 font-mono text-base sm:h-9 sm:text-sm"
               />
-              <button type="submit" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium">
+              <button type="submit" className="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground sm:h-9">
                 <Plus className="w-4 h-4" /> Subscribe
               </button>
             </form>
           )}
           <div className="divide-y">
             {webhooks.map((w) => (
-              <div key={w.id} className="py-3 flex items-center justify-between">
-                <div>
+              <div key={w.id} className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0">
                   <div className="font-medium text-sm">{w.name}</div>
-                  <div className="text-xs text-muted-foreground font-mono">
+                  <div className="break-all font-mono text-xs text-muted-foreground">
                     {w.targetUrl} · Failures: {w.failureCount}
                   </div>
                 </div>

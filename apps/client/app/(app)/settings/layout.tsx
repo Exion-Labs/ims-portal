@@ -26,9 +26,9 @@ export default function SettingsLayout({
         </p>
       </div>
 
-      <div className="flex flex-col gap-6 lg:flex-row">
+      <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
         <aside className="w-full shrink-0 lg:w-56">
-          <Card className="space-y-1 p-2">
+          <Card className="no-scrollbar flex flex-nowrap gap-1 overflow-x-auto p-1.5 lg:flex-col lg:space-y-1 lg:p-2">
             {SETTINGS_NAV.map((item) => {
               if (item.feature && !hasFeature(item.feature)) {
                 return null;
@@ -39,13 +39,13 @@ export default function SettingsLayout({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex h-9 items-center gap-2.5 rounded-[8px] px-3 text-[13px] font-medium transition-colors ${
+                  className={`flex h-9 shrink-0 items-center gap-2 whitespace-nowrap rounded-[8px] px-3 text-[13px] font-medium transition-colors lg:gap-2.5 ${
                     active
                       ? "bg-accent text-accent-foreground"
                       : "text-muted-foreground hover:bg-background hover:text-foreground"
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-4 w-4 shrink-0" />
                   <span>{item.label}</span>
                 </Link>
               );

@@ -33,7 +33,7 @@ function CommandDialog({
     <Dialog {...props}>
       <DialogContent
         showCloseButton={false}
-        className="overflow-hidden p-0 sm:max-w-xl"
+        className="top-4 right-auto bottom-auto left-[50%] max-w-[calc(100%-1.5rem)] translate-x-[-50%] translate-y-0 overflow-hidden rounded-[12px] p-0 sm:top-[50%] sm:max-w-xl sm:translate-y-[-50%]"
       >
         <DialogHeader className="sr-only">
           <DialogTitle>{title}</DialogTitle>
@@ -59,7 +59,7 @@ function CommandInput({
       <CommandPrimitive.Input
         data-slot="command-input"
         className={cn(
-          "flex h-10 w-full rounded-md bg-transparent py-2 text-[13px] outline-hidden placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+          "flex h-10 w-full rounded-md bg-transparent py-2 text-base outline-hidden placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 sm:text-[13px]",
           className
         )}
         {...props}
