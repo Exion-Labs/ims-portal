@@ -41,6 +41,14 @@ async function proxyToBackend(
   if (accept) {
     headers.set("Accept", accept);
   }
+  const idempotencyKey = req.headers.get("idempotency-key");
+  if (idempotencyKey) {
+    headers.set("Idempotency-Key", idempotencyKey);
+  }
+  const ifMatch = req.headers.get("if-match");
+  if (ifMatch) {
+    headers.set("If-Match", ifMatch);
+  }
 
   const accessToken = req.cookies.get(ACCESS_COOKIE_NAME)?.value;
   if (accessToken) {
@@ -70,6 +78,12 @@ async function proxyToBackend(
   const contentDisposition = upstream.headers.get("content-disposition");
   if (contentDisposition) {
     responseHeaders.set("Content-Disposition", contentDisposition);
+  }
+  for (const name of ["etag", "location", "idempotent-replayed"]) {
+    const val = upstream.headers.get(name);
+    if (val) {
+      responseHeaders.set(name, val);
+    }
   }
 
   if (upstream.status === 204) {

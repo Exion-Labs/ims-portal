@@ -30,20 +30,40 @@ export class ApiError extends Error {
   }
 }
 
+export interface ApiFetchOptions extends RequestInit {
+  /** Stable idempotency key for a logical mutation; generated automatically for POST/PATCH if omitted. */
+  idempotencyKey?: string;
+}
+
 /**
  * Browser BFF API fetch client with automatic deduplicated 401 refresh & retry.
  */
-export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+export async function apiFetch<T>(path: string, init?: ApiFetchOptions): Promise<T> {
+  const { idempotencyKey, ...requestInit } = init ?? {};
+  const method = (requestInit.method ?? "GET").toUpperCase();
+  const isMutating = method === "POST" || method === "PATCH";
+  const isMultipart = typeof FormData !== "undefined" && requestInit.body instanceof FormData;
+
+  const headers = new Headers(requestInit.headers);
+  if (requestInit.body && !isMultipart && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+  if (isMutating && !isMultipart && !headers.has("Idempotency-Key")) {
+    const key =
+      idempotencyKey ??
+      (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : undefined);
+    if (key) {
+      headers.set("Idempotency-Key", key);
+    }
+  }
+
   const execute = () =>
     fetch(path, {
-      ...init,
+      ...requestInit,
       credentials: "same-origin",
-      headers: {
-        ...(init?.body && !(init.body instanceof FormData)
-          ? { "Content-Type": "application/json" }
-          : {}),
-        ...init?.headers,
-      },
+      headers,
     });
 
   let response = await execute();
