@@ -41,6 +41,7 @@ import {
   toastApiError,
 } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
+import { CurrencySelect } from "@/components/currency-select";
 import { ListToolbar } from "@/components/list-toolbar";
 import { MoreVertical, Plus, RefreshCw, RotateCcw, ShoppingCart, X } from "lucide-react";
 
@@ -430,12 +431,9 @@ export default function PurchaseOrdersPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label>Currency</Label>
-                  <Input
-                    type="text"
-                    maxLength={3}
+                  <CurrencySelect
                     value={form.currency}
-                    onChange={(e) => setForm({ ...form, currency: e.target.value.toUpperCase() })}
-                    className="font-mono"
+                    onValueChange={(val) => setForm({ ...form, currency: val })}
                   />
                 </div>
                 <div className="space-y-1">

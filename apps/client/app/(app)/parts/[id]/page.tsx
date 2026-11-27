@@ -8,6 +8,7 @@ import {
   AttachmentView,
   BomItemView,
   CategoryView,
+  CompanyView,
   LocationView,
   ManufacturerPartView,
   NoteView,
@@ -34,6 +35,11 @@ import {
   Card,
   Checkbox,
   Combobox,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   EmptyState,
   ErrorState,
   Input,
@@ -57,6 +63,7 @@ import {
 } from "@ims/ui";
 import { useEntitlements } from "@/lib/entitlements";
 import { useEditMode } from "@/lib/edit-mode";
+import { CurrencySelect } from "@/components/currency-select";
 import { EditModeHint } from "@/components/edit-mode-hint";
 import {
   AlertTriangle,
@@ -119,6 +126,7 @@ export default function PartDetailPage() {
   const { editMode } = useEditMode();
 
   const [part, setPart] = useState<PartView | null>(null);
+  const [parentPart, setParentPart] = useState<PartView | null>(null);
   const [categories, setCategories] = useState<CategoryView[]>([]);
   const [locations, setLocations] = useState<LocationView[]>([]);
   const [templates, setTemplates] = useState<ParameterTemplateView[]>([]);
@@ -129,10 +137,30 @@ export default function PartDetailPage() {
   const [stockItems, setStockItems] = useState<StockItemView[]>([]);
   const [trackingHistory, setTrackingHistory] = useState<StockTrackingView[]>([]);
   const [supplierParts, setSupplierParts] = useState<SupplierPartView[]>([]);
+  const [suppliers, setSuppliers] = useState<CompanyView[]>([]);
   const [manufacturerParts, setManufacturerParts] = useState<ManufacturerPartView[]>([]);
   const [bomItems, setBomItems] = useState<BomItemView[]>([]);
   const [whereUsed, setWhereUsed] = useState<BomItemView[]>([]);
   const [allParts, setAllParts] = useState<PartView[]>([]);
+
+  // Add Supplier / Price Break modals
+  const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
+  const [supplierForm, setSupplierForm] = useState({
+    supplierId: "",
+    sku: "",
+    packQuantity: "1",
+    moq: "1",
+    leadTimeDays: "",
+    unitPrice: "",
+    currency: "USD",
+  });
+  const [supplierError, setSupplierError] = useState<string | null>(null);
+  const [savingSupplier, setSavingSupplier] = useState(false);
+
+  const [priceBreakTarget, setPriceBreakTarget] = useState<SupplierPartView | null>(null);
+  const [pbForm, setPbForm] = useState({ minQuantity: "1", unitPrice: "", currency: "USD" });
+  const [pbError, setPbError] = useState<string | null>(null);
+  const [savingPb, setSavingPb] = useState(false);
 
   const [bomSubPartId, setBomSubPartId] = useState("");
   const [bomQuantity, setBomQuantity] = useState("1");
@@ -142,7 +170,7 @@ export default function PartDetailPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Add/Update Specification state
-  const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [paramName, setParamName] = useState("");
   const [paramValue, setParamValue] = useState("");
   const [paramError, setParamError] = useState<string | null>(null);
   const [savingParam, setSavingParam] = useState(false);
@@ -211,6 +239,7 @@ export default function PartDetailPage() {
         bom,
         wu,
         partsPage,
+        suppliersPage,
       ] = await Promise.all([
         apiFetch<PartView>(`/api/v1/parts/${partId}`),
         apiFetch<CategoryView[]>("/api/v1/part-categories"),
@@ -238,6 +267,13 @@ export default function PartDetailPage() {
           number: 0,
           size: 200,
         })),
+        apiFetch<PageResponse<CompanyView>>("/api/v1/companies?supplier=true&size=200").catch(() => ({
+          content: [],
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
+          size: 200,
+        })),
       ]);
 
       setPart(p);
@@ -254,6 +290,19 @@ export default function PartDetailPage() {
       setBomItems(bom);
       setWhereUsed(wu);
       setAllParts(partsPage.content);
+      setSuppliers(suppliersPage.content);
+
+      if (p.variantOfId) {
+        const fromList = partsPage.content.find((item) => item.id === p.variantOfId);
+        if (fromList) {
+          setParentPart(fromList);
+        } else {
+          const fetchedParent = await apiFetch<PartView>(`/api/v1/parts/${p.variantOfId}`).catch(() => null);
+          setParentPart(fetchedParent);
+        }
+      } else {
+        setParentPart(null);
+      }
 
       // Load stock movement history across up to 5 recent stock lots for this item
       if (itemsPage.content.length > 0) {
@@ -397,17 +446,23 @@ export default function PartDetailPage() {
 
   async function handleUpsertParameter(e: React.FormEvent) {
     e.preventDefault();
-    if (!part || !selectedTemplateId) return;
+    const trimmedName = paramName.trim();
+    if (!part || !trimmedName) return;
     setParamError(null);
     setSavingParam(true);
     try {
+      const matchedTemplate = templates.find(
+        (t) => t.name.toLowerCase() === trimmedName.toLowerCase()
+      );
       await apiFetch(`/api/v1/parts/${part.id}/parameters`, {
         method: "POST",
-        body: JSON.stringify({
-          templateId: selectedTemplateId,
-          value: paramValue,
-        }),
+        body: JSON.stringify(
+          matchedTemplate
+            ? { templateId: matchedTemplate.id, value: paramValue }
+            : { name: trimmedName, value: paramValue }
+        ),
       });
+      setParamName("");
       setParamValue("");
       toast.success("Specification saved");
       await loadAll();
@@ -526,6 +581,83 @@ export default function PartDetailPage() {
     }
   }
 
+  async function handleCreateSupplierPart(e: React.FormEvent) {
+    e.preventDefault();
+    if (!part || !supplierForm.supplierId || !supplierForm.sku.trim()) return;
+    setSupplierError(null);
+    setSavingSupplier(true);
+    try {
+      const created = await apiFetch<SupplierPartView>("/api/v1/supplier-parts", {
+        method: "POST",
+        body: JSON.stringify({
+          partId: part.id,
+          supplierId: supplierForm.supplierId,
+          sku: supplierForm.sku.trim(),
+          packQuantity: Number(supplierForm.packQuantity || 1),
+          moq: Number(supplierForm.moq || 1),
+          multiple: 1,
+          leadTimeDays: supplierForm.leadTimeDays.trim() ? Number(supplierForm.leadTimeDays) : null,
+          currency: supplierForm.currency.trim() || currency || "USD",
+        }),
+      });
+      if (supplierForm.unitPrice.trim() !== "") {
+        await apiFetch(`/api/v1/supplier-parts/${created.id}/price-breaks`, {
+          method: "POST",
+          body: JSON.stringify({
+            minQuantity: Number(supplierForm.moq || 1),
+            unitPrice: Number(supplierForm.unitPrice),
+            currency: supplierForm.currency.trim() || currency || "USD",
+          }),
+        });
+      }
+      setShowAddSupplierModal(false);
+      toast.success("Supplier linked", { description: created.sku });
+      await loadAll();
+    } catch (err) {
+      setSupplierError(err instanceof Error ? err.message : "Failed to link supplier");
+      toastApiError(err, "Failed to link supplier");
+    } finally {
+      setSavingSupplier(false);
+    }
+  }
+
+  async function handleAddPriceBreak(e: React.FormEvent) {
+    e.preventDefault();
+    if (!priceBreakTarget || pbForm.unitPrice.trim() === "") return;
+    setPbError(null);
+    setSavingPb(true);
+    try {
+      await apiFetch(`/api/v1/supplier-parts/${priceBreakTarget.id}/price-breaks`, {
+        method: "POST",
+        body: JSON.stringify({
+          minQuantity: Number(pbForm.minQuantity || 1),
+          unitPrice: Number(pbForm.unitPrice),
+          currency: pbForm.currency.trim() || priceBreakTarget.currency || "USD",
+        }),
+      });
+      setPriceBreakTarget(null);
+      toast.success("Price break saved");
+      await loadAll();
+    } catch (err) {
+      setPbError(err instanceof Error ? err.message : "Failed to save price break");
+      toastApiError(err, "Failed to save price break");
+    } finally {
+      setSavingPb(false);
+    }
+  }
+
+  async function handleDeletePriceBreak(supplierPartId: string, priceBreakId: string) {
+    try {
+      await apiFetch<void>(`/api/v1/supplier-parts/${supplierPartId}/price-breaks/${priceBreakId}`, {
+        method: "DELETE",
+      });
+      toast.success("Price break removed");
+      await loadAll();
+    } catch (err) {
+      toastApiError(err, "Failed to remove price break");
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -589,6 +721,15 @@ export default function PartDetailPage() {
               <span className="rounded border border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-2 py-0.5 text-[12px] text-[var(--text-secondary)]">
                 {part.categoryPathString}
               </span>
+            )}
+            {parentPart && (
+              <Link
+                href={`/parts/${parentPart.id}`}
+                className="inline-flex items-center gap-1 rounded border border-[var(--border-brand)] bg-[var(--brand-tint)] px-2 py-0.5 text-[12px] font-medium text-[var(--brand-primary)] hover:underline"
+              >
+                <Layers className="h-3 w-3" />
+                <span>Variant of {parentPart.ipn}</span>
+              </Link>
             )}
           </div>
 
@@ -1214,15 +1355,13 @@ export default function PartDetailPage() {
               className="flex flex-wrap items-center gap-2.5 rounded-[10px] border border-border bg-background p-3"
             >
               <div className="min-w-[220px] flex-1">
-                <Combobox
-                  value={selectedTemplateId}
-                  onValueChange={setSelectedTemplateId}
-                  placeholder="Select specification…"
-                  searchPlaceholder="Search specifications…"
-                  options={templates.map((t) => ({
-                    value: t.id,
-                    label: `${t.name} ${t.units ? `(${t.units})` : t.checkbox ? "(Yes/No)" : ""}`,
-                  }))}
+                <Input
+                  type="text"
+                  required
+                  list="spec-template-options"
+                  value={paramName}
+                  onChange={(e) => setParamName(e.target.value)}
+                  placeholder="Specification name (e.g. Weight, Color)…"
                 />
               </div>
 
@@ -1231,11 +1370,11 @@ export default function PartDetailPage() {
                 required
                 value={paramValue}
                 onChange={(e) => setParamValue(e.target.value)}
-                placeholder="Enter value (e.g. Black, 12 V, 250 g)…"
+                placeholder="Enter value (e.g. 10 kg, Black)…"
                 className="min-w-[240px] flex-1"
               />
 
-              <Button type="submit" disabled={savingParam || !selectedTemplateId}>
+              <Button type="submit" disabled={savingParam || !paramName.trim()}>
                 <Plus className="h-4 w-4" />
                 <span>{savingParam ? "Saving…" : "Save Spec"}</span>
               </Button>
@@ -1384,12 +1523,38 @@ export default function PartDetailPage() {
       {activeTab === "suppliers" && (
         <div className="space-y-6">
           <div className="ims-card">
-            <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
-              Suppliers & Purchase Pricing ({supplierParts.length})
-            </h2>
-            <p className="text-[12px] text-[var(--text-secondary)]">
-              Vendor SKUs, minimum order quantities, and pack-to-unit conversions ({part.unit}).
-            </p>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
+                  Suppliers & Purchase Pricing ({supplierParts.length})
+                </h2>
+                <p className="text-[12px] text-[var(--text-secondary)]">
+                  Vendor SKUs, minimum order quantities, and pack-to-unit conversions ({part.unit}).
+                </p>
+              </div>
+              {hasPermission("COMPANY:CREATE") && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    setSupplierForm({
+                      supplierId: suppliers[0]?.id ?? "",
+                      sku: `${part.ipn}-SUP`,
+                      packQuantity: "1",
+                      moq: "1",
+                      leadTimeDays: "",
+                      unitPrice: "",
+                      currency: currency || "USD",
+                    });
+                    setSupplierError(null);
+                    setShowAddSupplierModal(true);
+                  }}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>Add Supplier</span>
+                </Button>
+              )}
+            </div>
             <div className="mt-3 overflow-x-auto rounded-[8px] border border-[var(--border-subtle)]">
               <table className="w-full border-collapse text-left text-[13px]">
                 <thead className="ims-table-head">
@@ -1398,12 +1563,18 @@ export default function PartDetailPage() {
                     <th className="px-4 py-2 font-semibold">Vendor SKU</th>
                     <th className="px-4 py-2 font-semibold">Pack Size & MOQ</th>
                     <th className="px-4 py-2 font-semibold">Price Breaks</th>
+                    {hasPermission("COMPANY:UPDATE") && (
+                      <th className="px-4 py-2 text-right font-semibold">Actions</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border-subtle)]">
                   {supplierParts.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-4 py-6 text-center text-[var(--text-muted)]">
+                      <td
+                        colSpan={hasPermission("COMPANY:UPDATE") ? 5 : 4}
+                        className="px-4 py-6 text-center text-[var(--text-muted)]"
+                      >
                         No suppliers linked to this item yet.
                       </td>
                     </tr>
@@ -1428,15 +1599,48 @@ export default function PartDetailPage() {
                           {sp.priceBreaks.length === 0
                             ? "—"
                             : sp.priceBreaks.map((pb) => (
-                                <div key={pb.id}>
-                                  ≥{pb.minQuantity}: {pb.unitPrice} {pb.currency}/pack →{" "}
-                                  <span className="font-semibold text-[var(--brand-primary)]">
-                                    {pb.convertedInternalUnitPriceInBase} {pb.tenantBaseCurrency}/
-                                    {part.unit}
+                                <div key={pb.id} className="flex items-center gap-2">
+                                  <span>
+                                    ≥{pb.minQuantity}: {pb.unitPrice} {pb.currency}/pack →{" "}
+                                    <span className="font-semibold text-[var(--brand-primary)]">
+                                      {pb.convertedInternalUnitPriceInBase} {pb.tenantBaseCurrency}/
+                                      {part.unit}
+                                    </span>
                                   </span>
+                                  {hasPermission("COMPANY:UPDATE") && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeletePriceBreak(sp.id, pb.id)}
+                                      title="Remove price break"
+                                      className="text-[var(--text-muted)] hover:text-[var(--status-danger-fg)]"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  )}
                                 </div>
                               ))}
                         </td>
+                        {hasPermission("COMPANY:UPDATE") && (
+                          <td className="px-4 py-2.5 text-right">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setPbForm({
+                                  minQuantity: "1",
+                                  unitPrice: "",
+                                  currency: sp.currency || currency || "USD",
+                                });
+                                setPbError(null);
+                                setPriceBreakTarget(sp);
+                              }}
+                            >
+                              <Plus className="h-3 w-3" />
+                              <span>Price Break</span>
+                            </Button>
+                          </td>
+                        )}
                       </tr>
                     ))
                   )}
@@ -1444,6 +1648,166 @@ export default function PartDetailPage() {
               </table>
             </div>
           </div>
+
+          {/* Dialog: Add Supplier */}
+          <Dialog open={showAddSupplierModal} onOpenChange={setShowAddSupplierModal}>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Add Supplier for {part.ipn}</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleCreateSupplierPart} className="space-y-4">
+                {supplierError && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{supplierError}</AlertDescription>
+                  </Alert>
+                )}
+                <div className="space-y-1">
+                  <Label>Supplier *</Label>
+                  {suppliers.length === 0 ? (
+                    <div className="text-[12px] text-[var(--text-muted)]">
+                      No suppliers found.{" "}
+                      <Link href="/companies" className="text-[var(--brand-primary)] hover:underline">
+                        Create a supplier in Companies first →
+                      </Link>
+                    </div>
+                  ) : (
+                    <Combobox
+                      value={supplierForm.supplierId}
+                      onValueChange={(val) => setSupplierForm({ ...supplierForm, supplierId: val })}
+                      placeholder="Select supplier…"
+                      searchPlaceholder="Search suppliers…"
+                      options={suppliers.map((s) => ({ value: s.id, label: s.name }))}
+                    />
+                  )}
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="space-y-1">
+                    <Label>Vendor SKU *</Label>
+                    <Input
+                      type="text"
+                      required
+                      value={supplierForm.sku}
+                      onChange={(e) => setSupplierForm({ ...supplierForm, sku: e.target.value })}
+                      placeholder="SUP-SKU-001"
+                      className="font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Pack Size ({part.unit} per pack)</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      min="0.0001"
+                      required
+                      value={supplierForm.packQuantity}
+                      onChange={(e) => setSupplierForm({ ...supplierForm, packQuantity: e.target.value })}
+                      className="font-mono"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <div className="space-y-1">
+                    <Label>MOQ (packs)</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      min="1"
+                      value={supplierForm.moq}
+                      onChange={(e) => setSupplierForm({ ...supplierForm, moq: e.target.value })}
+                      className="font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Unit Price (optional)</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      min="0"
+                      value={supplierForm.unitPrice}
+                      onChange={(e) => setSupplierForm({ ...supplierForm, unitPrice: e.target.value })}
+                      placeholder="0.00"
+                      className="font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Currency</Label>
+                    <CurrencySelect
+                      value={supplierForm.currency}
+                      onValueChange={(val) => setSupplierForm({ ...supplierForm, currency: val })}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setShowAddSupplierModal(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={savingSupplier || !supplierForm.supplierId}>
+                    {savingSupplier ? "Saving…" : "Save Supplier"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          {/* Dialog: Add Price Break */}
+          <Dialog
+            open={priceBreakTarget !== null}
+            onOpenChange={(open) => !open && setPriceBreakTarget(null)}
+          >
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Add Price Break · {priceBreakTarget?.sku}</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleAddPriceBreak} className="space-y-4">
+                {pbError && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{pbError}</AlertDescription>
+                  </Alert>
+                )}
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <div className="space-y-1">
+                    <Label>Min Qty (packs) *</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      min="1"
+                      required
+                      value={pbForm.minQuantity}
+                      onChange={(e) => setPbForm({ ...pbForm, minQuantity: e.target.value })}
+                      className="font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Price / pack *</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      min="0"
+                      required
+                      value={pbForm.unitPrice}
+                      onChange={(e) => setPbForm({ ...pbForm, unitPrice: e.target.value })}
+                      className="font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Currency</Label>
+                    <CurrencySelect
+                      value={pbForm.currency}
+                      onValueChange={(val) => setPbForm({ ...pbForm, currency: val })}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setPriceBreakTarget(null)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={savingPb}>
+                    {savingPb ? "Saving…" : "Save Price Break"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
 
           {manufacturerParts.length > 0 && (
             <div className="ims-card">
@@ -1617,6 +1981,25 @@ export default function PartDetailPage() {
       {/* TAB: Variants */}
       {activeTab === "variants" && (
         <div className="ims-card">
+          {parentPart && (
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-[var(--border-brand)] bg-[var(--brand-tint)] px-3.5 py-2.5 text-[13px]">
+              <div>
+                <span className="text-[var(--text-secondary)]">This item is a variant of </span>
+                <Link
+                  href={`/parts/${parentPart.id}`}
+                  className="font-mono font-semibold text-[var(--brand-primary)] hover:underline"
+                >
+                  {parentPart.ipn} — {parentPart.name}
+                </Link>
+              </div>
+              <Link
+                href={`/parts/${parentPart.id}`}
+                className="text-[12px] font-medium text-[var(--brand-primary)] hover:underline"
+              >
+                View Parent →
+              </Link>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
@@ -2006,13 +2389,10 @@ export default function PartDetailPage() {
           <div className="grid grid-cols-4 gap-2">
             <div>
               <label className="ims-label">Currency</label>
-              <input
-                type="text"
+              <CurrencySelect
                 value={editForm.currency}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, currency: e.target.value.toUpperCase() })
-                }
-                className="ims-input mt-1 px-2.5 font-mono"
+                onValueChange={(val) => setEditForm({ ...editForm, currency: val })}
+                className="mt-1"
               />
             </div>
             <div>

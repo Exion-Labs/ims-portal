@@ -9,14 +9,10 @@ import {
   Card,
   Input,
   Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   toast,
   toastApiError,
 } from "@ims/ui";
+import { CurrencySelect } from "@/components/currency-select";
 import { useEntitlements } from "@/lib/entitlements";
 import { useQuery } from "@tanstack/react-query";
 
@@ -101,18 +97,7 @@ export default function OrganizationSettingsPage() {
 
             <div className="space-y-1">
               <Label>Base Currency</Label>
-              <Select value={baseCurrency} onValueChange={setBaseCurrency}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="USD">USD — US Dollar</SelectItem>
-                  <SelectItem value="EUR">EUR — Euro</SelectItem>
-                  <SelectItem value="GBP">GBP — British Pound</SelectItem>
-                  <SelectItem value="SEK">SEK — Swedish Krona</SelectItem>
-                  <SelectItem value="JPY">JPY — Japanese Yen</SelectItem>
-                </SelectContent>
-              </Select>
+              <CurrencySelect value={baseCurrency} onValueChange={setBaseCurrency} />
             </div>
 
             <div className="space-y-1">
