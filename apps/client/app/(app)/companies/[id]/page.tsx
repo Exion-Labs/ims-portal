@@ -9,9 +9,13 @@ import {
   CompanyView,
   ContactView,
   ManufacturerPartView,
+  PageResponse,
+  PartView,
   SupplierPartView,
 } from "@ims/api-client";
 import {
+  Alert,
+  AlertDescription,
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -23,6 +27,7 @@ import {
   Button,
   Card,
   Checkbox,
+  Combobox,
   Dialog,
   DialogContent,
   DialogFooter,
@@ -44,7 +49,8 @@ import {
   toastApiError,
 } from "@ims/ui";
 import { useEntitlements } from "@/lib/entitlements";
-import { ArrowLeft, MapPin, Pencil, Plus, Trash2, UserCheck } from "lucide-react";
+import { CurrencySelect } from "@/components/currency-select";
+import { ArrowLeft, MapPin, Pencil, Plus, Trash2, UserCheck, X } from "lucide-react";
 
 export default function CompanyDetailPage() {
   const params = useParams<{ id: string }>();
@@ -56,8 +62,45 @@ export default function CompanyDetailPage() {
   const [addresses, setAddresses] = useState<AddressView[]>([]);
   const [supplierParts, setSupplierParts] = useState<SupplierPartView[]>([]);
   const [manufacturerParts, setManufacturerParts] = useState<ManufacturerPartView[]>([]);
+  const [parts, setParts] = useState<PartView[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [showAddPartModal, setShowAddPartModal] = useState(false);
+  const [partLinkForm, setPartLinkForm] = useState({
+    partId: "",
+    sku: "",
+    packQuantity: "1",
+    moq: "1",
+    unitPrice: "",
+    currency: "USD",
+  });
+  const [partLinkError, setPartLinkError] = useState<string | null>(null);
+  const [savingPartLink, setSavingPartLink] = useState(false);
+
+  const [priceBreakTarget, setPriceBreakTarget] = useState<SupplierPartView | null>(null);
+  const [pbForm, setPbForm] = useState({ minQuantity: "1", unitPrice: "", currency: "USD" });
+  const [pbError, setPbError] = useState<string | null>(null);
+  const [savingPb, setSavingPb] = useState(false);
+
+  const [showEditCompany, setShowEditCompany] = useState(false);
+  const [editCompanyForm, setEditCompanyForm] = useState({
+    name: "",
+    code: "",
+    description: "",
+    website: "",
+    email: "",
+    phone: "",
+    taxId: "",
+    defaultCurrency: "USD",
+    supplier: true,
+    manufacturer: false,
+    customer: false,
+    internalCompany: false,
+    active: true,
+  });
+  const [editCompanyError, setEditCompanyError] = useState<string | null>(null);
+  const [savingCompany, setSavingCompany] = useState(false);
 
   const [contactForm, setContactForm] = useState({ name: "", roleTitle: "", email: "", phone: "" });
   const [addrForm, setAddrForm] = useState({ label: "HQ", line1: "", city: "", country: "US" });
@@ -94,18 +137,26 @@ export default function CompanyDetailPage() {
     setLoading(true);
     setError(null);
     try {
-      const [c, cts, addrs, sps, mps] = await Promise.all([
+      const [c, cts, addrs, sps, mps, partsPage] = await Promise.all([
         apiFetch<CompanyView>(`/api/v1/companies/${companyId}`),
         apiFetch<ContactView[]>(`/api/v1/companies/${companyId}/contacts`),
         apiFetch<AddressView[]>(`/api/v1/companies/${companyId}/addresses`),
         apiFetch<SupplierPartView[]>(`/api/v1/companies/${companyId}/supplier-parts`),
         apiFetch<ManufacturerPartView[]>(`/api/v1/companies/${companyId}/manufacturer-parts`),
+        apiFetch<PageResponse<PartView>>("/api/v1/parts?size=200").catch(() => ({
+          content: [],
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
+          size: 200,
+        })),
       ]);
       setCompany(c);
       setContacts(cts);
       setAddresses(addrs);
       setSupplierParts(sps);
       setManufacturerParts(mps);
+      setParts(partsPage.content);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load company details");
     } finally {
@@ -116,6 +167,118 @@ export default function CompanyDetailPage() {
   useEffect(() => {
     loadAll();
   }, [loadAll]);
+
+  async function handleCreateSupplierPart(e: React.FormEvent) {
+    e.preventDefault();
+    if (!company || !partLinkForm.partId || !partLinkForm.sku.trim()) return;
+    setPartLinkError(null);
+    setSavingPartLink(true);
+    try {
+      const created = await apiFetch<SupplierPartView>("/api/v1/supplier-parts", {
+        method: "POST",
+        body: JSON.stringify({
+          partId: partLinkForm.partId,
+          supplierId: company.id,
+          sku: partLinkForm.sku.trim(),
+          packQuantity: Number(partLinkForm.packQuantity || 1),
+          moq: Number(partLinkForm.moq || 1),
+          multiple: 1,
+          currency: partLinkForm.currency.trim() || company.defaultCurrency || "USD",
+        }),
+      });
+      if (partLinkForm.unitPrice.trim() !== "") {
+        await apiFetch(`/api/v1/supplier-parts/${created.id}/price-breaks`, {
+          method: "POST",
+          body: JSON.stringify({
+            minQuantity: Number(partLinkForm.moq || 1),
+            unitPrice: Number(partLinkForm.unitPrice),
+            currency: partLinkForm.currency.trim() || company.defaultCurrency || "USD",
+          }),
+        });
+      }
+      setShowAddPartModal(false);
+      toast.success("Supplied part linked", { description: created.sku });
+      await loadAll();
+    } catch (err) {
+      setPartLinkError(err instanceof Error ? err.message : "Failed to link supplied part");
+      toastApiError(err, "Failed to link supplied part");
+    } finally {
+      setSavingPartLink(false);
+    }
+  }
+
+  async function handleAddPriceBreak(e: React.FormEvent) {
+    e.preventDefault();
+    if (!priceBreakTarget || pbForm.unitPrice.trim() === "") return;
+    setPbError(null);
+    setSavingPb(true);
+    try {
+      await apiFetch(`/api/v1/supplier-parts/${priceBreakTarget.id}/price-breaks`, {
+        method: "POST",
+        body: JSON.stringify({
+          minQuantity: Number(pbForm.minQuantity || 1),
+          unitPrice: Number(pbForm.unitPrice),
+          currency: pbForm.currency.trim() || priceBreakTarget.currency || "USD",
+        }),
+      });
+      setPriceBreakTarget(null);
+      toast.success("Price break saved");
+      await loadAll();
+    } catch (err) {
+      setPbError(err instanceof Error ? err.message : "Failed to save price break");
+      toastApiError(err, "Failed to save price break");
+    } finally {
+      setSavingPb(false);
+    }
+  }
+
+  async function handleDeletePriceBreak(supplierPartId: string, priceBreakId: string) {
+    try {
+      await apiFetch<void>(`/api/v1/supplier-parts/${supplierPartId}/price-breaks/${priceBreakId}`, {
+        method: "DELETE",
+      });
+      toast.success("Price break removed");
+      await loadAll();
+    } catch (err) {
+      toastApiError(err, "Failed to remove price break");
+    }
+  }
+
+  async function handleUpdateCompany(e: React.FormEvent) {
+    e.preventDefault();
+    if (!company) return;
+    setEditCompanyError(null);
+    setSavingCompany(true);
+    try {
+      const updated = await apiFetch<CompanyView>(`/api/v1/companies/${company.id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          name: editCompanyForm.name.trim(),
+          code: editCompanyForm.code.trim() || null,
+          description: editCompanyForm.description.trim() || null,
+          website: editCompanyForm.website.trim() || null,
+          email: editCompanyForm.email.trim() || null,
+          phone: editCompanyForm.phone.trim() || null,
+          taxId: editCompanyForm.taxId.trim() || null,
+          defaultCurrency: editCompanyForm.defaultCurrency.trim() || "USD",
+          supplier: editCompanyForm.supplier,
+          manufacturer: editCompanyForm.manufacturer,
+          customer: editCompanyForm.customer,
+          internalCompany: editCompanyForm.internalCompany,
+          active: editCompanyForm.active,
+        }),
+      });
+      setCompany(updated);
+      setShowEditCompany(false);
+      toast.success("Company updated", { description: updated.name });
+      await loadAll();
+    } catch (err) {
+      setEditCompanyError(err instanceof Error ? err.message : "Failed to update company");
+      toastApiError(err, "Failed to update company");
+    } finally {
+      setSavingCompany(false);
+    }
+  }
 
   async function handleAddContact(e: React.FormEvent) {
     e.preventDefault();
@@ -235,33 +398,75 @@ export default function CompanyDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <Link
-          href="/companies"
-          className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)]"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          <span>Back to Companies</span>
-        </Link>
-        <div className="mt-2 flex flex-wrap items-center gap-2.5">
-          <h1 className="text-[24px] font-semibold tracking-tight text-[var(--text-primary)]">
-            {company.name}
-          </h1>
-          {company.supplier && <StatusBadge label="Supplier" tone="primary" />}
-          {company.manufacturer && <StatusBadge label="Manufacturer" tone="violet" />}
-          {company.customer && <StatusBadge label="Customer" tone="success" />}
-          <span className="rounded border border-[var(--border-subtle)] bg-white px-2 py-0.5 font-mono text-[12px]">
-            {company.defaultCurrency}
-          </span>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <Link
+            href="/companies"
+            className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)]"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Back to Companies</span>
+          </Link>
+          <div className="mt-2 flex flex-wrap items-center gap-2.5">
+            <h1 className="text-[24px] font-semibold tracking-tight text-[var(--text-primary)]">
+              {company.name}
+            </h1>
+            {company.code && (
+              <span className="rounded bg-[var(--bg-muted)] px-2 py-0.5 font-mono text-[12px] text-[var(--text-secondary)]">
+                {company.code}
+              </span>
+            )}
+            {company.supplier && <StatusBadge label="Supplier" tone="primary" />}
+            {company.manufacturer && <StatusBadge label="Manufacturer" tone="violet" />}
+            {company.customer && <StatusBadge label="Customer" tone="success" />}
+            {company.internalCompany && <StatusBadge label="Internal" tone="neutral" />}
+            {!company.active && <StatusBadge label="Inactive" tone="neutral" />}
+            <span className="rounded border border-[var(--border-subtle)] bg-white px-2 py-0.5 font-mono text-[12px]">
+              {company.defaultCurrency}
+            </span>
+          </div>
+          {company.description && (
+            <p className="mt-1 max-w-2xl text-[13px] text-[var(--text-secondary)]">{company.description}</p>
+          )}
         </div>
+
+        {hasPermission("COMPANY:UPDATE") && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setEditCompanyForm({
+                name: company.name,
+                code: company.code ?? "",
+                description: company.description ?? "",
+                website: company.website ?? "",
+                email: company.email ?? "",
+                phone: company.phone ?? "",
+                taxId: company.taxId ?? "",
+                defaultCurrency: company.defaultCurrency || "USD",
+                supplier: company.supplier,
+                manufacturer: company.manufacturer,
+                customer: company.customer,
+                internalCompany: company.internalCompany,
+                active: company.active,
+              });
+              setEditCompanyError(null);
+              setShowEditCompany(true);
+            }}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            <span>Edit Company</span>
+          </Button>
+        )}
       </div>
 
       {/* Contacts & Addresses */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="space-y-6">
         <div className="ims-card">
           <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Contacts ({contacts.length})</h2>
           {hasPermission("COMPANY:UPDATE") && (
-            <form onSubmit={handleAddContact} className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <form onSubmit={handleAddContact} className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
               <input
                 type="text"
                 required
@@ -337,7 +542,7 @@ export default function CompanyDetailPage() {
         <div className="ims-card">
           <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Addresses ({addresses.length})</h2>
           {hasPermission("COMPANY:UPDATE") && (
-            <form onSubmit={handleAddAddress} className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <form onSubmit={handleAddAddress} className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
               <input
                 type="text"
                 required
@@ -421,43 +626,105 @@ export default function CompanyDetailPage() {
       {/* Supplied Parts Catalog */}
       {company.supplier && (
         <div className="ims-card">
-          <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
-            Supplier SKUs & Converted Price Breaks ({supplierParts.length})
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
+              Supplier SKUs & Converted Price Breaks ({supplierParts.length})
+            </h2>
+            {hasPermission("COMPANY:CREATE") && (
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => {
+                  setPartLinkForm({
+                    partId: parts[0]?.id ?? "",
+                    sku: "",
+                    packQuantity: "1",
+                    moq: "1",
+                    unitPrice: "",
+                    currency: company.defaultCurrency || "USD",
+                  });
+                  setPartLinkError(null);
+                  setShowAddPartModal(true);
+                }}
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>Add Supplied Part</span>
+              </Button>
+            )}
+          </div>
           {/* Mobile Supplier SKUs Cards */}
           <div className="mt-3 divide-y divide-[var(--border-subtle)] rounded-[8px] border border-[var(--border-subtle)] md:hidden">
-            {supplierParts.map((sp) => (
-              <div key={sp.id} className="space-y-1.5 p-3 text-[13px]">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono font-semibold text-[var(--text-primary)]">{sp.sku}</span>
-                  <span className="font-mono text-[12px] text-[var(--text-secondary)]">
-                    1 pack = {sp.packQuantity} {sp.partUnit}
-                  </span>
-                </div>
-                <div>
-                  <Link
-                    href={`/parts/${sp.partId}`}
-                    className="font-mono text-[var(--brand-primary)] hover:underline"
-                  >
-                    {sp.partIpn}
-                  </Link>
-                  <span className="ml-2 text-[12px] text-[var(--text-secondary)]">{sp.partName}</span>
-                </div>
-                {sp.priceBreaks.length > 0 && (
-                  <div className="space-y-0.5 pt-1 font-mono text-[12px]">
-                    {sp.priceBreaks.map((pb) => (
-                      <div key={pb.id}>
-                        ≥{pb.minQuantity}: {pb.unitPrice} {pb.currency} (
-                        <span className="text-[var(--brand-primary)]">
-                          {pb.convertedInternalUnitPriceInBase} {pb.tenantBaseCurrency}/{sp.partUnit}
-                        </span>
-                        )
-                      </div>
-                    ))}
-                  </div>
-                )}
+            {supplierParts.length === 0 ? (
+              <div className="px-4 py-6 text-center text-[13px] text-[var(--text-muted)]">
+                No supplied parts linked to this vendor yet.
               </div>
-            ))}
+            ) : (
+              supplierParts.map((sp) => (
+                <div key={sp.id} className="space-y-1.5 p-3 text-[13px]">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono font-semibold text-[var(--text-primary)]">{sp.sku}</span>
+                    <span className="font-mono text-[12px] text-[var(--text-secondary)]">
+                      1 pack = {sp.packQuantity} {sp.partUnit}
+                    </span>
+                  </div>
+                  <div>
+                    <Link
+                      href={`/parts/${sp.partId}`}
+                      className="font-mono text-[var(--brand-primary)] hover:underline"
+                    >
+                      {sp.partIpn}
+                    </Link>
+                    <span className="ml-2 text-[12px] text-[var(--text-secondary)]">{sp.partName}</span>
+                  </div>
+                  {sp.priceBreaks.length > 0 && (
+                    <div className="space-y-0.5 pt-1 font-mono text-[12px]">
+                      {sp.priceBreaks.map((pb) => (
+                        <div key={pb.id} className="flex items-center gap-2">
+                          <span>
+                            ≥{pb.minQuantity}: {pb.unitPrice} {pb.currency} (
+                            <span className="text-[var(--brand-primary)]">
+                              {pb.convertedInternalUnitPriceInBase} {pb.tenantBaseCurrency}/{sp.partUnit}
+                            </span>
+                            )
+                          </span>
+                          {hasPermission("COMPANY:UPDATE") && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeletePriceBreak(sp.id, pb.id)}
+                              title="Remove price break"
+                              className="text-[var(--text-muted)] hover:text-[var(--status-danger-fg)]"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {hasPermission("COMPANY:UPDATE") && (
+                    <div className="pt-1">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setPbForm({
+                            minQuantity: "1",
+                            unitPrice: "",
+                            currency: sp.currency || company.defaultCurrency || "USD",
+                          });
+                          setPbError(null);
+                          setPriceBreakTarget(sp);
+                        }}
+                      >
+                        <Plus className="h-3 w-3" />
+                        <span>Price Break</span>
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
 
           <div className="mt-3 hidden overflow-x-auto rounded-[8px] border border-[var(--border-subtle)] md:block">
@@ -468,43 +735,368 @@ export default function CompanyDetailPage() {
                   <th className="px-4 py-2 font-semibold">Internal Part</th>
                   <th className="px-4 py-2 font-semibold">Pack Quantity</th>
                   <th className="px-4 py-2 font-semibold">Tiered Price Breaks (Converted to Base)</th>
+                  {hasPermission("COMPANY:UPDATE") && (
+                    <th className="px-4 py-2 text-right font-semibold">Actions</th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-subtle)]">
-                {supplierParts.map((sp) => (
-                  <tr key={sp.id}>
-                    <td className="px-4 py-2.5 font-mono font-semibold text-[var(--text-primary)]">{sp.sku}</td>
-                    <td className="px-4 py-2.5">
-                      <Link
-                        href={`/parts/${sp.partId}`}
-                        className="font-mono text-[var(--brand-primary)] hover:underline"
-                      >
-                        {sp.partIpn}
-                      </Link>
-                      <span className="ml-2 text-[12px] text-[var(--text-secondary)]">{sp.partName}</span>
-                    </td>
-                    <td className="px-4 py-2.5 font-mono">
-                      1 pack = {sp.packQuantity} {sp.partUnit}
-                    </td>
-                    <td className="px-4 py-2.5 font-mono text-[12px]">
-                      {sp.priceBreaks.map((pb) => (
-                        <div key={pb.id}>
-                          ≥{pb.minQuantity}: {pb.unitPrice} {pb.currency} (
-                          <span className="text-[var(--brand-primary)]">
-                            {pb.convertedInternalUnitPriceInBase} {pb.tenantBaseCurrency}/
-                            {sp.partUnit}
-                          </span>
-                          )
-                        </div>
-                      ))}
+                {supplierParts.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={hasPermission("COMPANY:UPDATE") ? 5 : 4}
+                      className="px-4 py-6 text-center text-[var(--text-muted)]"
+                    >
+                      No supplied parts linked to this vendor yet.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  supplierParts.map((sp) => (
+                    <tr key={sp.id}>
+                      <td className="px-4 py-2.5 font-mono font-semibold text-[var(--text-primary)]">{sp.sku}</td>
+                      <td className="px-4 py-2.5">
+                        <Link
+                          href={`/parts/${sp.partId}`}
+                          className="font-mono text-[var(--brand-primary)] hover:underline"
+                        >
+                          {sp.partIpn}
+                        </Link>
+                        <span className="ml-2 text-[12px] text-[var(--text-secondary)]">{sp.partName}</span>
+                      </td>
+                      <td className="px-4 py-2.5 font-mono">
+                        1 pack = {sp.packQuantity} {sp.partUnit}
+                      </td>
+                      <td className="px-4 py-2.5 font-mono text-[12px]">
+                        {sp.priceBreaks.length === 0
+                          ? "—"
+                          : sp.priceBreaks.map((pb) => (
+                              <div key={pb.id} className="flex items-center gap-2">
+                                <span>
+                                  ≥{pb.minQuantity}: {pb.unitPrice} {pb.currency} (
+                                  <span className="text-[var(--brand-primary)]">
+                                    {pb.convertedInternalUnitPriceInBase} {pb.tenantBaseCurrency}/
+                                    {sp.partUnit}
+                                  </span>
+                                  )
+                                </span>
+                                {hasPermission("COMPANY:UPDATE") && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeletePriceBreak(sp.id, pb.id)}
+                                    title="Remove price break"
+                                    className="text-[var(--text-muted)] hover:text-[var(--status-danger-fg)]"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                      </td>
+                      {hasPermission("COMPANY:UPDATE") && (
+                        <td className="px-4 py-2.5 text-right">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setPbForm({
+                                minQuantity: "1",
+                                unitPrice: "",
+                                currency: sp.currency || company.defaultCurrency || "USD",
+                              });
+                              setPbError(null);
+                              setPriceBreakTarget(sp);
+                            }}
+                          >
+                            <Plus className="h-3 w-3" />
+                            <span>Price Break</span>
+                          </Button>
+                        </td>
+                      )}
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
       )}
+
+      {/* Dialog: Add Supplied Part */}
+      <Dialog open={showAddPartModal} onOpenChange={setShowAddPartModal}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add Supplied Part for {company.name}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateSupplierPart} className="space-y-4">
+            {partLinkError && (
+              <Alert variant="destructive">
+                <AlertDescription>{partLinkError}</AlertDescription>
+              </Alert>
+            )}
+            <div className="space-y-1">
+              <Label>Internal Part *</Label>
+              <Combobox
+                value={partLinkForm.partId}
+                onValueChange={(val) => {
+                  const selected = parts.find((p) => p.id === val);
+                  setPartLinkForm((prev) => ({
+                    ...prev,
+                    partId: val,
+                    sku: prev.sku || (selected ? `${selected.ipn}-SUP` : ""),
+                  }));
+                }}
+                placeholder="Select part…"
+                searchPlaceholder="Search parts by SKU or name…"
+                options={parts.map((p) => ({ value: p.id, label: `${p.ipn} — ${p.name}` }))}
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="space-y-1">
+                <Label>Vendor SKU *</Label>
+                <Input
+                  type="text"
+                  required
+                  value={partLinkForm.sku}
+                  onChange={(e) => setPartLinkForm({ ...partLinkForm, sku: e.target.value })}
+                  placeholder="SUP-SKU-001"
+                  className="font-mono"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Pack Size (units per pack)</Label>
+                <Input
+                  type="number"
+                  step="any"
+                  min="0.0001"
+                  required
+                  value={partLinkForm.packQuantity}
+                  onChange={(e) => setPartLinkForm({ ...partLinkForm, packQuantity: e.target.value })}
+                  className="font-mono"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="space-y-1">
+                <Label>MOQ (packs)</Label>
+                <Input
+                  type="number"
+                  step="any"
+                  min="1"
+                  value={partLinkForm.moq}
+                  onChange={(e) => setPartLinkForm({ ...partLinkForm, moq: e.target.value })}
+                  className="font-mono"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Unit Price (optional)</Label>
+                <Input
+                  type="number"
+                  step="any"
+                  min="0"
+                  value={partLinkForm.unitPrice}
+                  onChange={(e) => setPartLinkForm({ ...partLinkForm, unitPrice: e.target.value })}
+                  placeholder="0.00"
+                  className="font-mono"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Currency</Label>
+                <CurrencySelect
+                  value={partLinkForm.currency}
+                  onValueChange={(val) => setPartLinkForm({ ...partLinkForm, currency: val })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowAddPartModal(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={savingPartLink || !partLinkForm.partId}>
+                {savingPartLink ? "Saving…" : "Save Supplied Part"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog: Add Price Break */}
+      <Dialog
+        open={priceBreakTarget !== null}
+        onOpenChange={(open) => !open && setPriceBreakTarget(null)}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Price Break · {priceBreakTarget?.sku}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddPriceBreak} className="space-y-4">
+            {pbError && (
+              <Alert variant="destructive">
+                <AlertDescription>{pbError}</AlertDescription>
+              </Alert>
+            )}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="space-y-1">
+                <Label>Min Qty (packs) *</Label>
+                <Input
+                  type="number"
+                  step="any"
+                  min="1"
+                  required
+                  value={pbForm.minQuantity}
+                  onChange={(e) => setPbForm({ ...pbForm, minQuantity: e.target.value })}
+                  className="font-mono"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Price / pack *</Label>
+                <Input
+                  type="number"
+                  step="any"
+                  min="0"
+                  required
+                  value={pbForm.unitPrice}
+                  onChange={(e) => setPbForm({ ...pbForm, unitPrice: e.target.value })}
+                  className="font-mono"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Currency</Label>
+                <CurrencySelect
+                  value={pbForm.currency}
+                  onValueChange={(val) => setPbForm({ ...pbForm, currency: val })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setPriceBreakTarget(null)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={savingPb}>
+                {savingPb ? "Saving…" : "Save Price Break"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      {/* Dialog: Edit Company */}
+      <Dialog open={showEditCompany} onOpenChange={setShowEditCompany}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Company</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleUpdateCompany} className="space-y-3">
+            {editCompanyError && (
+              <Alert variant="destructive">
+                <AlertDescription>{editCompanyError}</AlertDescription>
+              </Alert>
+            )}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="space-y-1">
+                <Label>Company Name *</Label>
+                <Input
+                  type="text"
+                  required
+                  value={editCompanyForm.name}
+                  onChange={(e) => setEditCompanyForm({ ...editCompanyForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Code</Label>
+                <Input
+                  type="text"
+                  value={editCompanyForm.code}
+                  onChange={(e) => setEditCompanyForm({ ...editCompanyForm, code: e.target.value })}
+                  className="font-mono"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="space-y-1">
+                <Label>Default Currency</Label>
+                <CurrencySelect
+                  value={editCompanyForm.defaultCurrency}
+                  onValueChange={(val) =>
+                    setEditCompanyForm({ ...editCompanyForm, defaultCurrency: val })
+                  }
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={editCompanyForm.email}
+                  onChange={(e) => setEditCompanyForm({ ...editCompanyForm, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Phone</Label>
+                <Input
+                  type="text"
+                  value={editCompanyForm.phone}
+                  onChange={(e) => setEditCompanyForm({ ...editCompanyForm, phone: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="space-y-1">
+                <Label>Website</Label>
+                <Input
+                  type="text"
+                  value={editCompanyForm.website}
+                  onChange={(e) => setEditCompanyForm({ ...editCompanyForm, website: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Tax ID</Label>
+                <Input
+                  type="text"
+                  value={editCompanyForm.taxId}
+                  onChange={(e) => setEditCompanyForm({ ...editCompanyForm, taxId: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label>Description</Label>
+              <Input
+                type="text"
+                value={editCompanyForm.description}
+                onChange={(e) => setEditCompanyForm({ ...editCompanyForm, description: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2 pt-1 text-[12px] sm:grid-cols-3">
+              {(
+                [
+                  { key: "supplier", label: "Supplier" },
+                  { key: "manufacturer", label: "Manufacturer" },
+                  { key: "customer", label: "Customer" },
+                  { key: "internalCompany", label: "Internal" },
+                  { key: "active", label: "Active" },
+                ] as const
+              ).map((opt) => (
+                <label key={opt.key} className="flex items-center gap-2">
+                  <Checkbox
+                    checked={editCompanyForm[opt.key]}
+                    onCheckedChange={(v) =>
+                      setEditCompanyForm({ ...editCompanyForm, [opt.key]: Boolean(v) })
+                    }
+                  />
+                  <span>{opt.label}</span>
+                </label>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowEditCompany(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={savingCompany}>
+                {savingCompany ? "Saving…" : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Dialog: Edit Contact */}
       <Dialog open={editingContact !== null} onOpenChange={(open) => !open && setEditingContact(null)}>
         <DialogContent className="sm:max-w-md">

@@ -42,6 +42,7 @@ import {
   toastApiError,
 } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
+import { CurrencySelect } from "@/components/currency-select";
 import { ListToolbar, ListToolbarMenuItem } from "@/components/list-toolbar";
 import {
   Building2,
@@ -453,17 +454,11 @@ export default function CompaniesPage() {
               </div>
               <div className="space-y-1">
                 <Label>Currency</Label>
-                <Input
-                  type="text"
-                  maxLength={3}
+                <CurrencySelect
                   value={companyForm.defaultCurrency}
-                  onChange={(e) =>
-                    setCompanyForm({
-                      ...companyForm,
-                      defaultCurrency: e.target.value.toUpperCase(),
-                    })
+                  onValueChange={(val) =>
+                    setCompanyForm({ ...companyForm, defaultCurrency: val })
                   }
-                  className="font-mono"
                 />
               </div>
             </div>
@@ -541,14 +536,10 @@ export default function CompaniesPage() {
 
           <FeatureGate feature="MULTI_CURRENCY">
             <form onSubmit={handleSaveRate} className="flex gap-2">
-              <Input
-                type="text"
-                maxLength={3}
-                required
+              <CurrencySelect
                 value={rateCurrency}
-                onChange={(e) => setRateCurrency(e.target.value.toUpperCase())}
-                placeholder="EUR"
-                className="w-24 font-mono"
+                onValueChange={setRateCurrency}
+                className="w-40"
               />
               <Input
                 type="number"
