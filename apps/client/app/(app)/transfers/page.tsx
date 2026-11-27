@@ -21,10 +21,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   EmptyState,
   ErrorState,
   Input,
   Label,
+  NotInPlan,
   Select,
   SelectContent,
   SelectItem,
@@ -37,9 +42,9 @@ import {
   toast,
   toastApiError,
 } from "@ims/ui";
-import { FeatureGate, useEntitlements } from "@/lib/entitlements";
+import { useEntitlements } from "@/lib/entitlements";
 import { ListToolbar } from "@/components/list-toolbar";
-import { ArrowLeftRight, RotateCcw, X } from "lucide-react";
+import { ArrowLeftRight, MoreVertical, Plus, RefreshCw, RotateCcw } from "lucide-react";
 
 const STATUS_TONE: Record<string, "neutral" | "primary" | "warning" | "success" | "danger"> = {
   PENDING: "neutral",
@@ -50,7 +55,9 @@ const STATUS_TONE: Record<string, "neutral" | "primary" | "warning" | "success" 
 };
 
 export default function TransfersAndReturnsPage() {
-  const { hasFeature, hasPermission } = useEntitlements();
+  const { me, isLoading: entitlementsLoading, hasFeature, hasPermission } = useEntitlements();
+  const transfersEnabled = hasFeature("TRANSFERS");
+  const returnsEnabled = hasFeature("RETURNS");
   const [tab, setTab] = useState<"transfers" | "returns">("transfers");
 
   const [transfers, setTransfers] = useState<TransferOrderView[]>([]);
@@ -85,15 +92,24 @@ export default function TransfersAndReturnsPage() {
   const [receiveLocId, setReceiveLocId] = useState("");
   const [receiveOutcome, setReceiveOutcome] = useState("RESTOCK");
 
+  useEffect(() => {
+    if (!entitlementsLoading && !transfersEnabled && returnsEnabled) {
+      setTab("returns");
+    }
+  }, [entitlementsLoading, transfersEnabled, returnsEnabled]);
+
   const loadData = useCallback(async () => {
+    if (entitlementsLoading || (!transfersEnabled && !returnsEnabled)) {
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
       const [trfs, rmas, locs, comps, stocks] = await Promise.all([
-        hasFeature("TRANSFERS")
+        transfersEnabled
           ? apiFetch<PageResponse<TransferOrderView>>("/api/v1/transfer-orders?size=50").then((r) => r.content)
           : Promise.resolve([]),
-        hasFeature("RETURNS")
+        returnsEnabled
           ? apiFetch<PageResponse<ReturnOrderView>>("/api/v1/return-orders?size=50").then((r) => r.content)
           : Promise.resolve([]),
         apiFetch<LocationView[]>("/api/v1/stock-locations"),
@@ -110,11 +126,31 @@ export default function TransfersAndReturnsPage() {
     } finally {
       setLoading(false);
     }
-  }, [hasFeature]);
+  }, [entitlementsLoading, transfersEnabled, returnsEnabled]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  function openCreateTransferModal() {
+    setTrfForm({
+      sourceLocationId: "",
+      destinationLocationId: "",
+      stockItemId: "",
+      quantity: "1",
+      description: "",
+    });
+    setShowCreateTransfer(true);
+  }
+
+  function openCreateReturnModal() {
+    setRmaForm({
+      customerId: "",
+      stockItemId: "",
+      description: "",
+    });
+    setShowCreateReturn(true);
+  }
 
   async function runAction(fn: () => Promise<unknown>, successTitle?: string) {
     setActionError(null);
@@ -172,47 +208,78 @@ export default function TransfersAndReturnsPage() {
     }, "Return order created");
   }
 
+  if (!entitlementsLoading && !transfersEnabled && !returnsEnabled) {
+    return <NotInPlan featureKey="TRANSFERS" planName={me?.planName} />;
+  }
+
   return (
-    <FeatureGate feature="TRANSFERS">
-      <div className="space-y-6">
-        <ListToolbar
-          filters={
-            <Tabs value={tab} onValueChange={(v) => setTab(v as "transfers" | "returns")}>
-              <TabsList>
+    <div className="space-y-6">
+      <ListToolbar
+        hideActionsOnMobile
+        mobileTopAction={
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="More actions"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-background hover:text-foreground"
+              >
+                <MoreVertical className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onSelect={() => loadData()}>
+                <RefreshCw className="h-4 w-4 text-[var(--brand-primary)]" />
+                <span>Refresh</span>
+              </DropdownMenuItem>
+              {hasPermission("ORDER:CREATE") && returnsEnabled && (
+                <DropdownMenuItem onSelect={openCreateReturnModal}>
+                  <RotateCcw className="h-4 w-4 text-muted-foreground" />
+                  <span>New RMA</span>
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }
+        filters={
+          <Tabs value={tab} onValueChange={(v) => setTab(v as "transfers" | "returns")}>
+            <TabsList>
+              {transfersEnabled && (
                 <TabsTrigger value="transfers">
                   <ArrowLeftRight className="h-3.5 w-3.5" />
                   <span>Transfer Orders ({transfers.length})</span>
                 </TabsTrigger>
-                {hasFeature("RETURNS") && (
-                  <TabsTrigger value="returns">
-                    <RotateCcw className="h-3.5 w-3.5" />
-                    <span>Return Orders ({returns.length})</span>
-                  </TabsTrigger>
-                )}
-              </TabsList>
-            </Tabs>
-          }
-          secondaryAction={
-            hasPermission("ORDER:CREATE") && hasFeature("RETURNS") ? (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowCreateReturn(true)}
-              >
-                <RotateCcw className="h-4 w-4 text-muted-foreground" />
-                <span>New RMA</span>
-              </Button>
-            ) : undefined
-          }
-          primaryAction={
-            hasPermission("ORDER:CREATE")
-              ? {
-                  label: "New Transfer",
-                  onClick: () => setShowCreateTransfer(true),
-                }
-              : undefined
-          }
-        />
+              )}
+              {returnsEnabled && (
+                <TabsTrigger value="returns">
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  <span>Return Orders ({returns.length})</span>
+                </TabsTrigger>
+              )}
+            </TabsList>
+          </Tabs>
+        }
+        secondaryAction={
+          hasPermission("ORDER:CREATE") && returnsEnabled ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={openCreateReturnModal}
+            >
+              <RotateCcw className="h-4 w-4 text-muted-foreground" />
+              <span>New RMA</span>
+            </Button>
+          ) : undefined
+        }
+        primaryAction={
+          hasPermission("ORDER:CREATE") && transfersEnabled
+            ? {
+                label: "New Transfer",
+                onClick: openCreateTransferModal,
+              }
+            : undefined
+        }
+      />
 
         {actionError && (
           <Alert variant="destructive">
@@ -307,7 +374,7 @@ export default function TransfersAndReturnsPage() {
                           toastApiError(err, "Failed to load return order");
                         }
                       }}
-                      className="px-3 py-1.5 text-xs rounded-lg bg-primary text-primary-foreground font-medium"
+                      className="w-full rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground sm:w-auto sm:py-1.5"
                     >
                       Receive &amp; Disposition
                     </button>
@@ -372,6 +439,15 @@ export default function TransfersAndReturnsPage() {
                   onChange={(e) => setTrfForm({ ...trfForm, quantity: e.target.value })}
                 />
               </div>
+              <div className="space-y-1">
+                <Label>Description</Label>
+                <Input
+                  type="text"
+                  value={trfForm.description}
+                  onChange={(e) => setTrfForm({ ...trfForm, description: e.target.value })}
+                  placeholder="Optional transfer notes…"
+                />
+              </div>
               <DialogFooter>
                 <Button
                   type="button"
@@ -424,6 +500,15 @@ export default function TransfersAndReturnsPage() {
                       value: s.id,
                       label: `${s.partName} ${s.serialNumber ? `SN:${s.serialNumber}` : `Qty:${s.quantity}`}`,
                     }))}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Description</Label>
+                <Input
+                  type="text"
+                  value={rmaForm.description}
+                  onChange={(e) => setRmaForm({ ...rmaForm, description: e.target.value })}
+                  placeholder="Optional RMA reason…"
                 />
               </div>
               <DialogFooter>
@@ -513,7 +598,18 @@ export default function TransfersAndReturnsPage() {
             )}
           </DialogContent>
         </Dialog>
+        {/* Mobile Floating Create Button */}
+        {hasPermission("ORDER:CREATE") && (
+          <button
+            type="button"
+            onClick={tab === "returns" && returnsEnabled ? openCreateReturnModal : openCreateTransferModal}
+            aria-label={tab === "returns" && returnsEnabled ? "New RMA" : "New Transfer"}
+            title={tab === "returns" && returnsEnabled ? "New RMA" : "New Transfer"}
+            className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--brand-primary)] text-white shadow-lg transition-transform hover:bg-[var(--brand-primary-hover)] active:scale-95 lg:hidden"
+          >
+            <Plus className="h-6 w-6" />
+          </button>
+        )}
       </div>
-    </FeatureGate>
-  );
-}
+    );
+  }

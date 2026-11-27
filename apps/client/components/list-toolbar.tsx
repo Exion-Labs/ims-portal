@@ -27,6 +27,7 @@ interface ListToolbarProps {
   filters?: React.ReactNode;
   menuItems?: ListToolbarMenuItem[];
   secondaryAction?: React.ReactNode;
+  mobileTopAction?: React.ReactNode;
   primaryAction?: {
     label: string;
     onClick: () => void;
@@ -45,11 +46,15 @@ export function ListToolbar({
   filters,
   menuItems = [],
   secondaryAction,
+  mobileTopAction,
   primaryAction,
   hideActionsOnMobile = false,
 }: ListToolbarProps) {
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-border bg-card p-3">
+      {mobileTopAction && (
+        <div className="flex w-full justify-end lg:hidden">{mobileTopAction}</div>
+      )}
       {onSearchChange !== undefined && (
         <div className="relative min-w-[140px] flex-1 basis-full sm:basis-44">
           <Search className="pointer-events-none absolute top-3 left-3 h-4 w-4 text-muted-foreground sm:top-2.5" />

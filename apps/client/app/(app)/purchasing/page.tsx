@@ -22,6 +22,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   EmptyState,
   ErrorState,
   Input,
@@ -38,7 +42,7 @@ import {
 } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
 import { ListToolbar } from "@/components/list-toolbar";
-import { Plus, ShoppingCart, X } from "lucide-react";
+import { MoreVertical, Plus, RefreshCw, RotateCcw, ShoppingCart, X } from "lucide-react";
 
 const STATUS_TONE: Record<string, "neutral" | "primary" | "warning" | "success" | "danger"> = {
   PENDING: "neutral",
@@ -103,6 +107,16 @@ export default function PurchaseOrdersPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  function openCreateModal() {
+    setFormError(null);
+    setForm((prev) => ({
+      ...prev,
+      supplierId: suppliers[0]?.id ?? "",
+      currency: suppliers[0]?.defaultCurrency ?? me?.baseCurrency ?? "USD",
+    }));
+    setShowCreate(true);
+  }
 
   async function handleCreatePo(e: React.FormEvent) {
     e.preventDefault();
@@ -206,10 +220,28 @@ export default function PurchaseOrdersPage() {
     []
   );
 
+  const openPlacedCount =
+    poPage?.content.filter((o) => o.status === "PLACED" || o.status === "IN_PROGRESS").length ?? 0;
+
   return (
     <FeatureGate feature="PURCHASING" fallback="not-in-plan">
       <div className="space-y-6">
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        {/* Mobile Compact Stats Row */}
+        <div className="grid grid-cols-2 gap-2 lg:hidden">
+          <div className="flex items-center justify-between gap-2 rounded-[10px] border border-[var(--border-subtle)] bg-card px-3 py-2 text-[12px] text-[var(--text-secondary)]">
+            <span className="truncate">Total Purchase Orders</span>
+            <span className="font-semibold text-[var(--text-primary)]">
+              {poPage?.totalElements ?? 0}
+            </span>
+          </div>
+          <div className="flex items-center justify-between gap-2 rounded-[10px] border border-[var(--border-subtle)] bg-card px-3 py-2 text-[12px] text-[var(--text-secondary)]">
+            <span className="truncate">Open / Placed</span>
+            <span className="font-semibold text-[var(--text-primary)]">{openPlacedCount}</span>
+          </div>
+        </div>
+
+        {/* Desktop Stat Tiles */}
+        <div className="hidden gap-4 lg:grid lg:grid-cols-4">
           <StatTile
             label="Total Purchase Orders"
             value={poPage?.totalElements ?? 0}
@@ -217,22 +249,8 @@ export default function PurchaseOrdersPage() {
           />
           <StatTile
             label="Open / Placed"
-            value={
-              poPage?.content.filter((o) => o.status === "PLACED" || o.status === "IN_PROGRESS")
-                .length ?? 0
-            }
+            value={openPlacedCount}
             hint="Awaiting warehouse receiving"
-          />
-          <StatTile
-            label="Registered Suppliers"
-            value={suppliers.length}
-            hint="Active vendor accounts"
-          />
-          <StatTile
-            label="Base Currency"
-            value={me?.baseCurrency ?? "USD"}
-            hint="Rollup currency"
-            mono
           />
         </div>
 
@@ -243,6 +261,38 @@ export default function PurchaseOrdersPage() {
             setPageIndex(0);
           }}
           searchPlaceholder="Search PO reference, description, or vendor reference…"
+          hideActionsOnMobile
+          mobileTopAction={
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="More actions"
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-background hover:text-foreground"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onSelect={() => loadData()}>
+                  <RefreshCw className="h-4 w-4 text-[var(--brand-primary)]" />
+                  <span>Refresh Orders</span>
+                </DropdownMenuItem>
+                {(searchQuery || statusFilter) && (
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      setSearchQuery("");
+                      setStatusFilter("");
+                      setPageIndex(0);
+                    }}
+                  >
+                    <RotateCcw className="h-4 w-4 text-[var(--text-secondary)]" />
+                    <span>Clear Filters</span>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          }
           filters={
             <Select
               value={statusFilter || "__all__"}
@@ -251,7 +301,7 @@ export default function PurchaseOrdersPage() {
                 setPageIndex(0);
               }}
             >
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-full sm:w-[160px]">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
@@ -269,15 +319,7 @@ export default function PurchaseOrdersPage() {
             hasPermission("ORDER:CREATE")
               ? {
                   label: "New Purchase Order",
-                  onClick: () => {
-                    setFormError(null);
-                    setForm((prev) => ({
-                      ...prev,
-                      supplierId: suppliers[0]?.id ?? "",
-                      currency: suppliers[0]?.defaultCurrency ?? me?.baseCurrency ?? "USD",
-                    }));
-                    setShowCreate(true);
-                  },
+                  onClick: openCreateModal,
                 }
               : undefined
           }
@@ -293,7 +335,7 @@ export default function PurchaseOrdersPage() {
               hasPermission("ORDER:CREATE") && (
                 <button
                   type="button"
-                  onClick={() => setShowCreate(true)}
+                  onClick={openCreateModal}
                   className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[var(--brand-primary)] px-4 text-[13px] font-medium text-white"
                 >
                   <Plus className="h-4 w-4" />
@@ -336,6 +378,19 @@ export default function PurchaseOrdersPage() {
               </Link>
             )}
           />
+        )}
+
+        {/* Mobile Floating New Purchase Order Button */}
+        {hasPermission("ORDER:CREATE") && (
+          <button
+            type="button"
+            onClick={openCreateModal}
+            aria-label="New Purchase Order"
+            title="New Purchase Order"
+            className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--brand-primary)] text-white shadow-lg transition-transform hover:bg-[var(--brand-primary-hover)] active:scale-95 lg:hidden"
+          >
+            <Plus className="h-6 w-6" />
+          </button>
         )}
 
         <Dialog open={showCreate} onOpenChange={setShowCreate}>
