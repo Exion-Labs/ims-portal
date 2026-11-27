@@ -92,6 +92,7 @@ type OperationModal =
   | { type: "adjust"; item: StockItemView; mode: "add" | "remove" | "count" }
   | { type: "split"; item: StockItemView }
   | { type: "serialize"; item: StockItemView }
+  | { type: "status"; item: StockItemView }
   | { type: "inspect"; item: StockItemView };
 
 function StockAndLocationsPageContent() {
@@ -155,6 +156,7 @@ function StockAndLocationsPageContent() {
   // Atomic Operation Modal
   const [opModal, setOpModal] = useState<OperationModal>(null);
   const [opQty, setOpQty] = useState("");
+  const [opStatus, setOpStatus] = useState("OK");
   const [opTargetLocId, setOpTargetLocId] = useState("");
   const [opSerialsText, setOpSerialsText] = useState("");
   const [opNotes, setOpNotes] = useState("");
@@ -383,6 +385,15 @@ function StockAndLocationsPageContent() {
             notes: opNotes || null,
           }),
         });
+      } else if (modal.type === "status") {
+        await apiFetch(`/api/v1/stock-items/${modal.item.id}/status`, {
+          method: "POST",
+          body: JSON.stringify({
+            status: opStatus,
+            locationId: opTargetLocId || null,
+            notes: opNotes || null,
+          }),
+        });
       }
       setOpModal(null);
       const opTitle =
@@ -392,11 +403,13 @@ function StockAndLocationsPageContent() {
             ? "Batch split"
             : modal.type === "serialize"
               ? "Batch serialized"
-              : modal.mode === "count"
-                ? "Stock count updated"
-                : modal.mode === "add"
-                  ? "Stock added"
-                  : "Stock removed";
+              : modal.type === "status"
+                ? `Status updated to ${opStatus}`
+                : modal.mode === "count"
+                  ? "Stock count updated"
+                  : modal.mode === "add"
+                    ? "Stock added"
+                    : "Stock removed";
       toast.success(opTitle, { description: modal.item.partIpn });
       await Promise.all([loadStock(), loadMetadata()]);
     } catch (err) {
@@ -573,7 +586,7 @@ function StockAndLocationsPageContent() {
         cell: ({ row }) => {
           const item = row.original;
           return (
-            <div className="flex items-center justify-end gap-1">
+            <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
               <button
                 type="button"
                 onClick={() => {
@@ -584,68 +597,96 @@ function StockAndLocationsPageContent() {
                   setOpModal({ type: "transfer", item });
                 }}
                 title="Transfer (full or partial auto-split)"
-                className="rounded border border-[var(--border-subtle)] bg-white px-2 py-1 text-[11px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
+                className="inline-flex h-7 items-center rounded border border-[var(--border-subtle)] bg-white px-2 text-[11px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
               >
                 Transfer
               </button>
               {!item.serialNumber && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOpQty(String(item.quantity));
-                      setOpNotes("");
-                      setOpError(null);
-                      setOpModal({ type: "adjust", item, mode: "count" });
-                    }}
-                    className="rounded border border-[var(--border-subtle)] bg-white px-2 py-1 text-[11px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
-                  >
-                    Count / +/-
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOpQty("1");
-                      setOpTargetLocId(item.locationId ?? "");
-                      setOpNotes("");
-                      setOpError(null);
-                      setOpModal({ type: "split", item });
-                    }}
-                    className="rounded border border-[var(--border-subtle)] bg-white px-2 py-1 text-[11px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
-                  >
-                    Split
-                  </button>
-                  {item.partTrackable && hasFeature("SERIAL_TRACKING") && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOpSerialsText("");
-                        setOpTargetLocId(item.locationId ?? "");
-                        setOpNotes("");
-                        setOpError(null);
-                        setOpModal({ type: "serialize", item });
-                      }}
-                      className="rounded border border-[var(--border-violet)] bg-[var(--status-violet-bg)]/60 px-2 py-1 text-[11px] font-medium text-[var(--status-violet-fg)] hover:bg-[var(--status-violet-bg)]"
-                    >
-                      Serialize
-                    </button>
-                  )}
-                </>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpQty(String(item.quantity));
+                    setOpNotes("");
+                    setOpError(null);
+                    setOpModal({ type: "adjust", item, mode: "count" });
+                  }}
+                  className="inline-flex h-7 items-center rounded border border-[var(--border-subtle)] bg-white px-2 text-[11px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-canvas)]"
+                >
+                  Count / +/-
+                </button>
               )}
               <button
                 type="button"
                 onClick={() => openInspectModal(item)}
-                className="inline-flex items-center gap-1 rounded border border-[var(--border-brand)] bg-[var(--brand-tint)] px-2 py-1 text-[11px] font-medium text-[var(--brand-primary)]"
+                className="inline-flex h-7 items-center gap-1 rounded border border-[var(--border-brand)] bg-[var(--brand-tint)] px-2 text-[11px] font-medium text-[var(--brand-primary)]"
               >
                 <History className="h-3 w-3" />
                 <span>History</span>
               </button>
+              {(!item.serialNumber || hasPermission("STOCK:UPDATE")) && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="More stock operations"
+                      title="More actions"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded border border-[var(--border-subtle)] bg-white text-[var(--text-secondary)] hover:bg-[var(--bg-canvas)]"
+                    >
+                      <MoreHorizontal className="h-3.5 w-3.5" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44">
+                    {hasPermission("STOCK:UPDATE") && (
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          setOpStatus(item.status || "OK");
+                          setOpTargetLocId(item.locationId ?? "");
+                          setOpNotes("");
+                          setOpError(null);
+                          setOpModal({ type: "status", item });
+                        }}
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        <span>Change Status</span>
+                      </DropdownMenuItem>
+                    )}
+                    {!item.serialNumber && (
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          setOpQty("1");
+                          setOpTargetLocId(item.locationId ?? "");
+                          setOpNotes("");
+                          setOpError(null);
+                          setOpModal({ type: "split", item });
+                        }}
+                      >
+                        <GitFork className="h-3.5 w-3.5" />
+                        <span>Split Lot</span>
+                      </DropdownMenuItem>
+                    )}
+                    {!item.serialNumber && item.partTrackable && hasFeature("SERIAL_TRACKING") && (
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          setOpSerialsText("");
+                          setOpTargetLocId(item.locationId ?? "");
+                          setOpNotes("");
+                          setOpError(null);
+                          setOpModal({ type: "serialize", item });
+                        }}
+                      >
+                        <Hash className="h-3.5 w-3.5 text-[var(--status-violet-fg)]" />
+                        <span>Serialize</span>
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           );
         },
       },
     ],
-    [hasFeature]
+    [hasFeature, hasPermission]
   );
 
   function renderLocationTree(onSelectDone?: () => void) {
@@ -1066,6 +1107,9 @@ function StockAndLocationsPageContent() {
                   <SelectItem value="IN_TRANSIT">IN_TRANSIT</SelectItem>
                   <SelectItem value="DAMAGED">DAMAGED</SelectItem>
                   <SelectItem value="RETURNED">RETURNED</SelectItem>
+                  <SelectItem value="REJECTED">REJECTED</SelectItem>
+                  <SelectItem value="LOST">LOST</SelectItem>
+                  <SelectItem value="DESTROYED">DESTROYED</SelectItem>
                 </SelectContent>
               </Select>
             }
@@ -1222,6 +1266,20 @@ function StockAndLocationsPageContent() {
                             >
                               <Hash className="h-4 w-4" />
                               <span>Serialize</span>
+                            </DropdownMenuItem>
+                          )}
+                          {hasPermission("STOCK:UPDATE") && (
+                            <DropdownMenuItem
+                              onSelect={() => {
+                                setOpStatus(item.status || "OK");
+                                setOpTargetLocId(item.locationId ?? "");
+                                setOpNotes("");
+                                setOpError(null);
+                                setOpModal({ type: "status", item });
+                              }}
+                            >
+                              <RefreshCw className="h-4 w-4" />
+                              <span>Change Status</span>
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem onSelect={() => openInspectModal(item)}>
@@ -1520,7 +1578,9 @@ function StockAndLocationsPageContent() {
                   ? "Stocktake Count / Add / Remove"
                   : opModal?.type === "split"
                     ? "Split Stock Batch"
-                    : "Serialize Batch into Tracked Units"}
+                    : opModal?.type === "status"
+                      ? "Change Stock Status"
+                      : "Serialize Batch into Tracked Units"}
             </DialogTitle>
           </DialogHeader>
 
@@ -1559,7 +1619,26 @@ function StockAndLocationsPageContent() {
                 </div>
               )}
 
-              {opModal.type !== "serialize" ? (
+              {opModal.type === "status" ? (
+                <div className="space-y-1">
+                  <Label>New Status *</Label>
+                  <Select value={opStatus} onValueChange={setOpStatus}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="OK">OK (Available)</SelectItem>
+                      <SelectItem value="ATTENTION">ATTENTION</SelectItem>
+                      <SelectItem value="QUARANTINED">QUARANTINED</SelectItem>
+                      <SelectItem value="DAMAGED">DAMAGED</SelectItem>
+                      <SelectItem value="REJECTED">REJECTED</SelectItem>
+                      <SelectItem value="LOST">LOST</SelectItem>
+                      <SelectItem value="DESTROYED">DESTROYED</SelectItem>
+                      <SelectItem value="RETURNED">RETURNED</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : opModal.type !== "serialize" ? (
                 <div className="space-y-1">
                   <Label>Quantity *</Label>
                   <Input
@@ -1587,7 +1666,8 @@ function StockAndLocationsPageContent() {
 
               {(opModal.type === "transfer" ||
                 opModal.type === "split" ||
-                opModal.type === "serialize") && (
+                opModal.type === "serialize" ||
+                opModal.type === "status") && (
                 <div className="space-y-1">
                   <Label>Destination Location</Label>
                   <Combobox
