@@ -41,7 +41,7 @@ import {
   TooltipTrigger,
   toast,
 } from "@ims/ui";
-import { NAV_GROUPS, SETTINGS_NAV } from "@/lib/constants";
+import { isNavItemVisible, NAV_GROUPS, SETTINGS_NAV } from "@/lib/constants";
 import { useEntitlements } from "@/lib/entitlements";
 import { useEditMode } from "@/lib/edit-mode";
 import { CommandPalette } from "./command-palette";
@@ -118,11 +118,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         }`}
       >
         {NAV_GROUPS.map((group) => {
-          const visibleItems = group.items.filter((item) => {
-            if (item.feature && !hasFeature(item.feature)) return false;
-            if (item.permission && !hasPermission(item.permission)) return false;
-            return true;
-          });
+          const visibleItems = group.items.filter((item) =>
+            isNavItemVisible(item, hasFeature, hasPermission)
+          );
           if (visibleItems.length === 0) return null;
 
           return (

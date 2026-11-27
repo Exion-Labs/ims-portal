@@ -7,7 +7,7 @@ import { useEntitlements, FeatureGate } from "@/lib/entitlements";
 import { ShieldCheck, Users, KeyRound, History, Cpu, Boxes, Package, ShoppingCart } from "lucide-react";
 
 export default function DashboardPage() {
-  const { me, isLoading } = useEntitlements();
+  const { me, isLoading, hasFeature, hasPermission } = useEntitlements();
 
   if (isLoading) {
     return (
@@ -66,90 +66,111 @@ export default function DashboardPage() {
       </div>
 
       {/* Mobile Quick Business Actions */}
-      <div className="space-y-2 md:hidden">
-        <div className="text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Quick Business Actions
+      {(hasFeature("PARTS") ||
+        hasFeature("STOCK") ||
+        hasFeature("SALES") ||
+        hasFeature("PURCHASING")) && (
+        <div className="space-y-2 md:hidden">
+          <div className="text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Quick Business Actions
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {hasFeature("PARTS") && (
+              <Link href="/parts" className="ims-nav-card-featured p-3.5">
+                <Cpu className="h-5 w-5 text-[var(--brand-primary)]" />
+                <div className="mt-2 text-[14px] font-semibold text-[var(--text-primary)]">
+                  Check Items &amp; Price
+                </div>
+                <p className="mt-0.5 text-[12px] text-[var(--text-secondary)]">
+                  Search SKUs &amp; prices
+                </p>
+              </Link>
+            )}
+            {hasFeature("STOCK") && (
+              <Link href="/stock" className="ims-nav-card p-3.5">
+                <Boxes className="h-5 w-5 text-[var(--brand-primary)]" />
+                <div className="mt-2 text-[14px] font-semibold text-[var(--text-primary)]">
+                  Stock &amp; Scan
+                </div>
+                <p className="mt-0.5 text-[12px] text-[var(--text-secondary)]">
+                  Count, adjust &amp; move
+                </p>
+              </Link>
+            )}
+            {hasFeature("SALES") && (
+              <Link href="/sales" className="ims-nav-card p-3.5">
+                <Package className="h-5 w-5 text-[var(--brand-primary)]" />
+                <div className="mt-2 text-[14px] font-semibold text-[var(--text-primary)]">
+                  Sales Orders
+                </div>
+                <p className="mt-0.5 text-[12px] text-[var(--text-secondary)]">
+                  Create &amp; ship orders
+                </p>
+              </Link>
+            )}
+            {hasFeature("PURCHASING") && (
+              <Link href="/purchasing" className="ims-nav-card p-3.5">
+                <ShoppingCart className="h-5 w-5 text-[var(--brand-primary)]" />
+                <div className="mt-2 text-[14px] font-semibold text-[var(--text-primary)]">
+                  Purchase Orders
+                </div>
+                <p className="mt-0.5 text-[12px] text-[var(--text-secondary)]">
+                  Receive inbound stock
+                </p>
+              </Link>
+            )}
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Link href="/parts" className="ims-nav-card-featured p-3.5">
-            <Cpu className="h-5 w-5 text-[var(--brand-primary)]" />
-            <div className="mt-2 text-[14px] font-semibold text-[var(--text-primary)]">
-              Check Items &amp; Price
-            </div>
-            <p className="mt-0.5 text-[12px] text-[var(--text-secondary)]">
-              Search SKUs &amp; prices
-            </p>
-          </Link>
-          <Link href="/stock" className="ims-nav-card p-3.5">
-            <Boxes className="h-5 w-5 text-[var(--brand-primary)]" />
-            <div className="mt-2 text-[14px] font-semibold text-[var(--text-primary)]">
-              Stock &amp; Scan
-            </div>
-            <p className="mt-0.5 text-[12px] text-[var(--text-secondary)]">
-              Count, adjust &amp; move
-            </p>
-          </Link>
-          <Link href="/sales" className="ims-nav-card p-3.5">
-            <Package className="h-5 w-5 text-[var(--brand-primary)]" />
-            <div className="mt-2 text-[14px] font-semibold text-[var(--text-primary)]">
-              Sales Orders
-            </div>
-            <p className="mt-0.5 text-[12px] text-[var(--text-secondary)]">
-              Create &amp; ship orders
-            </p>
-          </Link>
-          <Link href="/purchasing" className="ims-nav-card p-3.5">
-            <ShoppingCart className="h-5 w-5 text-[var(--brand-primary)]" />
-            <div className="mt-2 text-[14px] font-semibold text-[var(--text-primary)]">
-              Purchase Orders
-            </div>
-            <p className="mt-0.5 text-[12px] text-[var(--text-secondary)]">
-              Receive inbound stock
-            </p>
-          </Link>
-        </div>
-      </div>
+      )}
 
       {/* Quick Navigation & Administration Cards */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Link href="/parts" className="ims-nav-card-featured">
-          <Cpu className="h-5 w-5 text-[var(--brand-primary)]" />
-          <div className="ims-nav-card-title">Parts Catalog</div>
-          <p className="ims-nav-card-desc">
-            Hierarchical categories, revisions, variants, and Indriya parameters.
-          </p>
-        </Link>
-        <Link href="/settings/users" className="ims-nav-card">
-          <Users className="h-5 w-5 text-[var(--brand-primary)]" />
-          <div className="ims-nav-card-title">Users & Invitations</div>
-          <p className="ims-nav-card-desc">
-            Invite team members and manage multi-role assignments.
-          </p>
-        </Link>
+        {hasFeature("PARTS") && (
+          <Link href="/parts" className="ims-nav-card-featured">
+            <Cpu className="h-5 w-5 text-[var(--brand-primary)]" />
+            <div className="ims-nav-card-title">Parts Catalog</div>
+            <p className="ims-nav-card-desc">
+              Hierarchical categories, revisions, variants, and Indriya parameters.
+            </p>
+          </Link>
+        )}
+        {hasPermission("ADMIN:VIEW") && (
+          <>
+            <Link href="/settings/users" className="ims-nav-card">
+              <Users className="h-5 w-5 text-[var(--brand-primary)]" />
+              <div className="ims-nav-card-title">Users &amp; Invitations</div>
+              <p className="ims-nav-card-desc">
+                Invite team members and manage multi-role assignments.
+              </p>
+            </Link>
 
-        <Link href="/settings/roles" className="ims-nav-card">
-          <ShieldCheck className="h-5 w-5 text-[var(--brand-primary)]" />
-          <div className="ims-nav-card-title">Roles & RBAC Matrix</div>
-          <p className="ims-nav-card-desc">
-            Granular domain permissions filtered by enabled entitlements.
-          </p>
-        </Link>
+            <Link href="/settings/roles" className="ims-nav-card">
+              <ShieldCheck className="h-5 w-5 text-[var(--brand-primary)]" />
+              <div className="ims-nav-card-title">Roles &amp; RBAC Matrix</div>
+              <p className="ims-nav-card-desc">
+                Granular domain permissions filtered by enabled entitlements.
+              </p>
+            </Link>
 
-        <Link href="/settings/api-tokens" className="ims-nav-card">
-          <KeyRound className="h-5 w-5 text-[var(--brand-primary)]" />
-          <div className="ims-nav-card-title">API Access Tokens</div>
-          <p className="ims-nav-card-desc">
-            Generate SHA-256 hashed tokens with scoped permissions.
-          </p>
-        </Link>
+            {hasFeature("API_ACCESS") && (
+              <Link href="/settings/api-tokens" className="ims-nav-card">
+                <KeyRound className="h-5 w-5 text-[var(--brand-primary)]" />
+                <div className="ims-nav-card-title">API Access Tokens</div>
+                <p className="ims-nav-card-desc">
+                  Generate SHA-256 hashed tokens with scoped permissions.
+                </p>
+              </Link>
+            )}
 
-        <Link href="/settings/audit-log" className="ims-nav-card">
-          <History className="h-5 w-5 text-[var(--brand-primary)]" />
-          <div className="ims-nav-card-title">Immutable Audit Log</div>
-          <p className="ims-nav-card-desc">
-            Inspect before/after field diffs and export compliance CSVs.
-          </p>
-        </Link>
+            <Link href="/settings/audit-log" className="ims-nav-card">
+              <History className="h-5 w-5 text-[var(--brand-primary)]" />
+              <div className="ims-nav-card-title">Immutable Audit Log</div>
+              <p className="ims-nav-card-desc">
+                Inspect before/after field diffs and export compliance CSVs.
+              </p>
+            </Link>
+          </>
+        )}
       </div>
 
       {/* Phase 0 Generic Import Wizard Demo (Desktop/Tablet) */}

@@ -24,12 +24,30 @@ export interface NavItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   feature?: string;
+  anyOfFeatures?: string[];
   permission?: string;
 }
 
 export interface NavGroup {
   group: string;
   items: NavItem[];
+}
+
+export interface QuickLinkItem extends SearchResultItem {
+  feature?: string;
+  anyOfFeatures?: string[];
+  permission?: string;
+}
+
+export function isNavItemVisible(
+  item: { feature?: string; anyOfFeatures?: string[]; permission?: string },
+  hasFeature: (featureKey: string) => boolean,
+  hasPermission: (permission: string) => boolean
+): boolean {
+  if (item.feature && !hasFeature(item.feature)) return false;
+  if (item.anyOfFeatures && !item.anyOfFeatures.some((f) => hasFeature(f))) return false;
+  if (item.permission && !hasPermission(item.permission)) return false;
+  return true;
 }
 
 export const NAV_GROUPS: NavGroup[] = [
@@ -61,28 +79,65 @@ export const NAV_GROUPS: NavGroup[] = [
     group: "Sales & Outbound",
     items: [
       { label: "Sales Orders", href: "/sales", icon: Package, feature: "SALES" },
-      { label: "Transfers", href: "/transfers", icon: Truck, feature: "TRANSFERS" },
+      {
+        label: "Transfers",
+        href: "/transfers",
+        icon: Truck,
+        anyOfFeatures: ["TRANSFERS", "RETURNS"],
+      },
     ],
   },
 ];
 
 export const SETTINGS_NAV: NavItem[] = [
-  { label: "Organization", href: "/settings/organization", icon: Building },
-  { label: "Users & Invitations", href: "/settings/users", icon: Users },
-  { label: "Roles & Permissions", href: "/settings/roles", icon: Shield },
+  {
+    label: "Organization",
+    href: "/settings/organization",
+    icon: Building,
+    permission: "ADMIN:VIEW",
+  },
+  {
+    label: "Users & Invitations",
+    href: "/settings/users",
+    icon: Users,
+    permission: "ADMIN:VIEW",
+  },
+  {
+    label: "Roles & Permissions",
+    href: "/settings/roles",
+    icon: Shield,
+    permission: "ADMIN:VIEW",
+  },
   {
     label: "API Tokens",
     href: "/settings/api-tokens",
     icon: KeyRound,
     feature: "API_ACCESS",
+    permission: "ADMIN:VIEW",
   },
-  { label: "Reference Formats", href: "/settings/sequences", icon: Hash },
-  { label: "Integrations", href: "/settings/integrations", icon: Plug },
-  { label: "Audit Log", href: "/settings/audit-log", icon: History },
+  {
+    label: "Reference Formats",
+    href: "/settings/sequences",
+    icon: Hash,
+    permission: "ADMIN:VIEW",
+  },
+  {
+    label: "Integrations",
+    href: "/settings/integrations",
+    icon: Plug,
+    anyOfFeatures: ["CUSTOM_REPORTS", "WEBHOOKS", "REALTIME"],
+    permission: "ADMIN:VIEW",
+  },
+  {
+    label: "Audit Log",
+    href: "/settings/audit-log",
+    icon: History,
+    permission: "ADMIN:VIEW",
+  },
   { label: "Plan & Features", href: "/settings/plan", icon: CreditCard },
 ];
 
-export const QUICK_LINKS: SearchResultItem[] = [
+export const QUICK_LINKS: QuickLinkItem[] = [
   {
     category: "Navigation",
     id: "nav-dashboard",
@@ -96,6 +151,7 @@ export const QUICK_LINKS: SearchResultItem[] = [
     title: "Parts Catalog & Categories",
     subtitle: "Hierarchical ltree categories, parts, variants, revisions, and typed parameters",
     href: "/parts",
+    feature: "PARTS",
   },
   {
     category: "Inventory",
@@ -103,6 +159,7 @@ export const QUICK_LINKS: SearchResultItem[] = [
     title: "Warehouse Locations & Stock Engine",
     subtitle: "Storage bins, batches, serialized stock, transfers, and barcode scanner",
     href: "/stock",
+    feature: "STOCK",
   },
   {
     category: "Purchasing",
@@ -110,6 +167,7 @@ export const QUICK_LINKS: SearchResultItem[] = [
     title: "Companies & Suppliers",
     subtitle: "Vendors, manufacturers, customers, pack-size SKUs, and exchange rates",
     href: "/companies",
+    feature: "COMPANIES",
   },
   {
     category: "Purchasing",
@@ -117,6 +175,7 @@ export const QUICK_LINKS: SearchResultItem[] = [
     title: "Purchase Orders & Receiving",
     subtitle: "Inbound supplier orders, tiered pricing, and warehouse receiving",
     href: "/purchasing",
+    feature: "PURCHASING",
   },
   {
     category: "Manufacturing",
@@ -124,6 +183,7 @@ export const QUICK_LINKS: SearchResultItem[] = [
     title: "Manufacturing & Build Orders",
     subtitle: "BOM assemblies, stock allocation, build outputs, and serialized genealogy",
     href: "/manufacturing",
+    feature: "MANUFACTURING",
   },
   {
     category: "Sales & Outbound",
@@ -131,6 +191,7 @@ export const QUICK_LINKS: SearchResultItem[] = [
     title: "Sales Orders & Shipments",
     subtitle: "Customer orders, stock allocations, and shipment dispatch",
     href: "/sales",
+    feature: "SALES",
   },
   {
     category: "Sales & Outbound",
@@ -138,6 +199,7 @@ export const QUICK_LINKS: SearchResultItem[] = [
     title: "Transfers & Return Orders (RMA)",
     subtitle: "Inter-warehouse transfers and customer returns",
     href: "/transfers",
+    anyOfFeatures: ["TRANSFERS", "RETURNS"],
   },
   {
     category: "Settings",
@@ -145,6 +207,8 @@ export const QUICK_LINKS: SearchResultItem[] = [
     title: "Reports, Webhooks & Real-Time SSE",
     subtitle: "Custom PDF templates, HMAC webhooks, and live SSE event streams",
     href: "/settings/integrations",
+    anyOfFeatures: ["CUSTOM_REPORTS", "WEBHOOKS", "REALTIME"],
+    permission: "ADMIN:VIEW",
   },
   {
     category: "Settings",
@@ -152,6 +216,7 @@ export const QUICK_LINKS: SearchResultItem[] = [
     title: "Organization Settings",
     subtitle: "Name, base currency, timezone, and preferences",
     href: "/settings/organization",
+    permission: "ADMIN:VIEW",
   },
   {
     category: "Settings",
@@ -159,6 +224,7 @@ export const QUICK_LINKS: SearchResultItem[] = [
     title: "Users & Invitations",
     subtitle: "Manage tenant users and role assignments",
     href: "/settings/users",
+    permission: "ADMIN:VIEW",
   },
   {
     category: "Settings",
@@ -166,6 +232,7 @@ export const QUICK_LINKS: SearchResultItem[] = [
     title: "Roles & Permissions",
     subtitle: "Configure granular RBAC permissions",
     href: "/settings/roles",
+    permission: "ADMIN:VIEW",
   },
   {
     category: "Settings",
@@ -173,6 +240,8 @@ export const QUICK_LINKS: SearchResultItem[] = [
     title: "API Tokens",
     subtitle: "Programmatic REST API personal access tokens",
     href: "/settings/api-tokens",
+    feature: "API_ACCESS",
+    permission: "ADMIN:VIEW",
   },
   {
     category: "Settings",
@@ -180,6 +249,7 @@ export const QUICK_LINKS: SearchResultItem[] = [
     title: "Reference Sequences",
     subtitle: "PO-0001, BO-0001, SO-0001 numbering formats",
     href: "/settings/sequences",
+    permission: "ADMIN:VIEW",
   },
   {
     category: "Settings",
@@ -187,6 +257,7 @@ export const QUICK_LINKS: SearchResultItem[] = [
     title: "Audit Log",
     subtitle: "Immutable field-level before/after audit trail",
     href: "/settings/audit-log",
+    permission: "ADMIN:VIEW",
   },
   {
     category: "Settings",
