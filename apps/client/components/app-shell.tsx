@@ -212,9 +212,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <span className="truncate text-[14px] font-semibold text-foreground">
                       {me?.tenantName ?? "Loading tenant…"}
                     </span>
-                    {me?.planName && (
-                      <StatusBadge label={me.planName} tone="primary" showDot={false} />
-                    )}
                   </div>
                   <div className="mt-0.5 flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
                     <span className="truncate">{me?.tenantSlug ?? "—"}</span>
@@ -281,9 +278,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <span className="truncate text-[14px] font-semibold text-foreground">
                   {me?.tenantName ?? "Loading tenant…"}
                 </span>
-                {me?.planName && (
-                  <StatusBadge label={me.planName} tone="primary" showDot={false} />
-                )}
               </div>
               <div className="mt-0.5 flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
                 <span className="truncate">{me?.tenantSlug ?? "—"}</span>

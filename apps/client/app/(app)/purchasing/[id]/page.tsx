@@ -228,7 +228,7 @@ export default function PurchaseOrderDetailPage() {
     <FeatureGate feature="PURCHASING" fallback="not-in-plan">
       <div className="space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
+          <div className="w-full min-w-0 lg:w-auto lg:flex-1">
             <Link
               href="/purchasing"
               className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)]"
@@ -236,23 +236,27 @@ export default function PurchaseOrderDetailPage() {
               <ArrowLeft className="h-3.5 w-3.5" />
               <span>Back to Purchase Orders</span>
             </Link>
-            <div className="mt-2 flex flex-wrap items-center gap-2.5">
-              <span className="rounded-[8px] border border-[var(--border-brand)] bg-[var(--brand-tint)] px-2.5 py-1 font-mono text-[14px] font-semibold text-[var(--brand-primary)]">
-                {po.reference}
-              </span>
-              <h1 className="text-[22px] font-semibold text-[var(--text-primary)]">{po.supplierName}</h1>
-              <StatusBadge label={po.status} tone={po.status === "COMPLETE" ? "success" : "primary"} />
+            <div className="mt-2 flex w-full items-center justify-between gap-2.5">
+              <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+                <span className="rounded-[8px] border border-[var(--border-brand)] bg-[var(--brand-tint)] px-2.5 py-1 font-mono text-[14px] font-semibold text-[var(--brand-primary)]">
+                  {po.reference}
+                </span>
+                <h1 className="text-[22px] font-semibold text-[var(--text-primary)]">{po.supplierName}</h1>
+              </div>
+              <div className="shrink-0">
+                <StatusBadge label={po.status} tone={po.status === "COMPLETE" ? "success" : "primary"} />
+              </div>
             </div>
             {po.description && <p className="mt-1 text-[13px] text-[var(--text-secondary)]">{po.description}</p>}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex w-full flex-row items-center gap-2 lg:w-auto lg:flex-wrap">
             <button
               type="button"
               onClick={handleOpenDocument}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[var(--border-subtle)] bg-white px-3 text-[13px] font-medium text-[var(--text-primary)]"
+              className="order-1 inline-flex h-9 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-[8px] border border-[var(--border-subtle)] bg-white px-2.5 text-[12px] font-medium text-[var(--text-primary)] sm:px-3 sm:text-[13px] lg:flex-initial"
             >
-              <FileText className="h-4 w-4 text-[var(--brand-primary)]" />
+              <FileText className="h-4 w-4 shrink-0 text-[var(--brand-primary)]" />
               <span>PO Document</span>
             </button>
 
@@ -261,9 +265,9 @@ export default function PurchaseOrderDetailPage() {
                 <button
                   type="button"
                   onClick={() => handleTransition("place")}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-[var(--brand-primary)] px-3.5 text-[13px] font-medium text-white hover:bg-[var(--brand-primary-hover)]"
+                  className="order-3 inline-flex h-9 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-[8px] bg-[var(--brand-primary)] px-2.5 text-[12px] font-medium text-white hover:bg-[var(--brand-primary-hover)] sm:px-3.5 sm:text-[13px] lg:order-2 lg:flex-initial"
                 >
-                  <Send className="h-4 w-4" />
+                  <Send className="h-4 w-4 shrink-0" />
                   <span>Place Order</span>
                 </button>
               )}
@@ -275,9 +279,9 @@ export default function PurchaseOrderDetailPage() {
                   type="button"
                   variant="outline"
                   onClick={() => setConfirmCancelOpen(true)}
-                  className="border-[var(--border-danger)] bg-[var(--status-danger-bg)]/40 text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]"
+                  className="order-2 flex-1 justify-center whitespace-nowrap border-[var(--border-danger)] bg-[var(--status-danger-bg)]/40 px-2.5 text-[12px] text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)] sm:px-3 sm:text-[13px] lg:order-3 lg:flex-initial"
                 >
-                  <XCircle className="h-4 w-4" />
+                  <XCircle className="h-4 w-4 shrink-0" />
                   <span>Cancel</span>
                 </Button>
               )}
@@ -285,21 +289,21 @@ export default function PurchaseOrderDetailPage() {
         </div>
 
         {/* Status Stepper */}
-        <div className="grid grid-cols-2 gap-2 rounded-[12px] border border-[var(--border-subtle)] bg-white p-3 sm:grid-cols-4">
+        <div className="grid grid-cols-4 gap-1.5 rounded-[12px] border border-[var(--border-subtle)] bg-white p-2 sm:gap-2 sm:p-3">
           {STATUS_STEPS.map((step, idx) => {
             const currentIdx = STATUS_STEPS.indexOf(po.status as (typeof STATUS_STEPS)[number]);
             const reached = currentIdx >= idx;
             return (
               <div
                 key={step}
-                className={`flex items-center gap-2 rounded-[8px] px-3 py-2 text-[12px] font-medium ${
+                className={`flex min-w-0 items-center justify-center gap-1 rounded-[8px] px-1.5 py-2 text-[10px] font-medium sm:justify-start sm:gap-2 sm:px-3 sm:text-[12px] ${
                   reached
                     ? "bg-[var(--brand-tint)] text-[var(--brand-primary)]"
                     : "bg-[var(--bg-canvas)] text-[var(--text-muted)]"
                 }`}
               >
-                <CheckCircle2 className="h-4 w-4 shrink-0" />
-                <span>{step}</span>
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+                <span className="truncate">{step}</span>
               </div>
             );
           })}
@@ -379,7 +383,7 @@ export default function PurchaseOrderDetailPage() {
 
               <button
                 type="submit"
-                className="inline-flex h-10 items-center gap-1 rounded-[8px] bg-[var(--brand-primary)] px-3.5 text-[13px] font-medium text-white sm:h-9"
+                className="ml-auto inline-flex h-10 items-center gap-1 rounded-[8px] bg-[var(--brand-primary)] px-3.5 text-[13px] font-medium text-white sm:h-9"
               >
                 <Plus className="h-4 w-4" />
                 <span>Add Line</span>

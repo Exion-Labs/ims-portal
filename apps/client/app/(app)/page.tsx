@@ -35,7 +35,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <StatusBadge label={`Plan · ${me?.planName ?? "Starter"}`} tone="primary" />
           <StatusBadge label={me?.subscriptionStatus ?? "ACTIVE"} tone="success" />
         </div>
       </div>
@@ -51,11 +50,6 @@ export default function DashboardPage() {
           label="Active Users"
           value={`${me?.usage?.MAX_USERS ?? 1} / ${me?.limits?.MAX_USERS ?? "—"}`}
           hint="Seat quota on current plan"
-        />
-        <StatTile
-          label="Enabled Features"
-          value={me?.enabledFeatures.length ?? 0}
-          hint="Plan features + active overrides"
         />
         <StatTile
           label="Currency & TZ"
