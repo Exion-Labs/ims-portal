@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext } from "react";
+import React, { createContext, useCallback, useContext, useMemo } from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { apiFetch, MeResponse } from "@ims/api-client";
 import { NotInPlan } from "@ims/ui";
@@ -43,13 +43,28 @@ export function EntitlementProvider({ children }: { children: React.ReactNode })
 
 export function useEntitlements() {
   const ctx = useContext(EntitlementContext);
-  const enabledFeatures = new Set(ctx.me?.enabledFeatures ?? []);
-  const permissions = new Set(ctx.me?.permissions ?? []);
+  const enabledFeatures = useMemo(
+    () => new Set(ctx.me?.enabledFeatures ?? []),
+    [ctx.me?.enabledFeatures]
+  );
+  const permissions = useMemo(
+    () => new Set(ctx.me?.permissions ?? []),
+    [ctx.me?.permissions]
+  );
+
+  const hasFeature = useCallback(
+    (featureKey: string) => enabledFeatures.has(featureKey),
+    [enabledFeatures]
+  );
+  const hasPermission = useCallback(
+    (perm: string) => permissions.has(perm),
+    [permissions]
+  );
 
   return {
     ...ctx,
-    hasFeature: (featureKey: string) => enabledFeatures.has(featureKey),
-    hasPermission: (perm: string) => permissions.has(perm),
+    hasFeature,
+    hasPermission,
   };
 }
 

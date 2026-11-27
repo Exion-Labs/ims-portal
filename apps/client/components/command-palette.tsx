@@ -13,7 +13,8 @@ import {
 } from "@ims/ui";
 import { CornerDownLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { QUICK_LINKS } from "@/lib/constants";
+import { isNavItemVisible, QUICK_LINKS } from "@/lib/constants";
+import { useEntitlements } from "@/lib/entitlements";
 
 export function CommandPalette({
   open,
@@ -23,8 +24,12 @@ export function CommandPalette({
   onOpenChange: (open: boolean) => void;
 }) {
   const router = useRouter();
+  const { hasFeature, hasPermission } = useEntitlements();
   const [query, setQuery] = useState("");
   const [remoteResults, setRemoteResults] = useState<SearchResultItem[]>([]);
+  const visibleQuickLinks = QUICK_LINKS.filter((item) =>
+    isNavItemVisible(item, hasFeature, hasPermission)
+  );
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -91,7 +96,7 @@ export function CommandPalette({
           </CommandGroup>
         )}
         <CommandGroup heading="Quick Links">
-          {QUICK_LINKS.map((item) => (
+          {visibleQuickLinks.map((item) => (
             <CommandItem
               key={item.id}
               value={`${item.category} ${item.title} ${item.subtitle}`}

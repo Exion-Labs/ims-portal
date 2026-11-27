@@ -21,6 +21,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   EmptyState,
   ErrorState,
   ImportWizard,
@@ -44,6 +48,7 @@ import {
   Coins,
   FileSpreadsheet,
   Globe,
+  MoreVertical,
   Plus,
   X,
 } from "lucide-react";
@@ -234,31 +239,27 @@ export default function CompaniesPage() {
     []
   );
 
+  const companyMenuItems = useMemo<ListToolbarMenuItem[]>(() => {
+    const items: ListToolbarMenuItem[] = [];
+    if (hasFeature("IMPORT_EXPORT")) {
+      items.push({
+        key: "import",
+        label: showImporter ? "Hide Importer" : "Import Supplier SKUs",
+        icon: <FileSpreadsheet className="h-4 w-4 text-[var(--brand-primary)]" />,
+        onClick: () => setShowImporter((v) => !v),
+      });
+    }
+    items.push({
+      key: "rates",
+      label: `Exchange Rates (${rates.length})`,
+      icon: <Coins className="h-4 w-4 text-[var(--brand-primary)]" />,
+      onClick: () => setShowRatesModal(true),
+    });
+    return items;
+  }, [hasFeature, showImporter, rates.length]);
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatTile
-          label="Total Companies"
-          value={companiesPage?.totalElements ?? 0}
-          hint="Suppliers, manufacturers & customers"
-        />
-        <StatTile
-          label="Tenant Base Currency"
-          value={me?.baseCurrency ?? "USD"}
-          hint="All price breaks convert at read/rollup time"
-          mono
-        />
-        <StatTile
-          label="Active Exchange Rates"
-          value={rates.length}
-          hint="USD pivot rate table"
-        />
-        <StatTile
-          label="Multi-Currency Entitlement"
-          value={hasFeature("MULTI_CURRENCY") ? "Enabled" : "Base Only"}
-          hint="Controls foreign currency POs & price breaks"
-        />
-      </div>
 
       {showImporter && (
         <ImportWizard
@@ -282,6 +283,34 @@ export default function CompaniesPage() {
           setPageIndex(0);
         }}
         searchPlaceholder="Search company name or code…"
+        hideActionsOnMobile
+        mobileTopAction={
+          companyMenuItems.length > 0 ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="More actions"
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-background hover:text-foreground"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                {companyMenuItems.map((item) => (
+                  <DropdownMenuItem
+                    key={item.key}
+                    disabled={item.disabled}
+                    onSelect={() => item.onClick?.()}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : undefined
+        }
         filters={
           <div className="no-scrollbar flex flex-nowrap items-center gap-1.5 overflow-x-auto">
             {[
@@ -310,24 +339,7 @@ export default function CompaniesPage() {
             })}
           </div>
         }
-        menuItems={(() => {
-          const items: ListToolbarMenuItem[] = [];
-          if (hasFeature("IMPORT_EXPORT")) {
-            items.push({
-              key: "import",
-              label: showImporter ? "Hide Importer" : "Import Supplier SKUs",
-              icon: <FileSpreadsheet className="h-4 w-4 text-[var(--brand-primary)]" />,
-              onClick: () => setShowImporter((v) => !v),
-            });
-          }
-          items.push({
-            key: "rates",
-            label: `Exchange Rates (${rates.length})`,
-            icon: <Coins className="h-4 w-4 text-[var(--brand-primary)]" />,
-            onClick: () => setShowRatesModal(true),
-          });
-          return items;
-        })()}
+        menuItems={companyMenuItems}
         primaryAction={
           hasPermission("COMPANY:CREATE")
             ? {
@@ -399,6 +411,19 @@ export default function CompaniesPage() {
             </Link>
           )}
         />
+      )}
+
+      {/* Mobile Floating New Company Button */}
+      {hasPermission("COMPANY:CREATE") && (
+        <button
+          type="button"
+          onClick={() => setShowCreateModal(true)}
+          aria-label="New Company"
+          title="New Company"
+          className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--brand-primary)] text-white shadow-lg transition-transform hover:bg-[var(--brand-primary-hover)] active:scale-95 lg:hidden"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
       )}
 
       {/* Dialog: Create Company */}

@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SETTINGS_NAV } from "@/lib/constants";
+import { isNavItemVisible, SETTINGS_NAV } from "@/lib/constants";
 import { useEntitlements } from "@/lib/entitlements";
 import { Card } from "@ims/ui";
 
@@ -13,7 +13,7 @@ export default function SettingsLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { hasFeature } = useEntitlements();
+  const { hasFeature, hasPermission } = useEntitlements();
 
   return (
     <div className="space-y-6">
@@ -30,7 +30,7 @@ export default function SettingsLayout({
         <aside className="w-full shrink-0 lg:w-56">
           <Card className="no-scrollbar flex flex-nowrap gap-1 overflow-x-auto p-1.5 lg:flex-col lg:space-y-1 lg:p-2">
             {SETTINGS_NAV.map((item) => {
-              if (item.feature && !hasFeature(item.feature)) {
+              if (!isNavItemVisible(item, hasFeature, hasPermission)) {
                 return null;
               }
               const Icon = item.icon;
