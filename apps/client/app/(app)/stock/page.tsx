@@ -195,6 +195,7 @@ function StockAndLocationsPageContent() {
       const params = new URLSearchParams();
       params.set("page", String(pageIndex));
       params.set("size", "25");
+      params.set("inWarehouseOnly", "true");
       if (selectedLocationId) {
         params.set("locationId", selectedLocationId);
         params.set("includeSublocations", String(includeSublocations));

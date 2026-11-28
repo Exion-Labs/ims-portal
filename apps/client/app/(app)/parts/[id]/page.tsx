@@ -249,7 +249,7 @@ export default function PartDetailPage() {
         apiFetch<NoteView[]>(`/api/v1/notes?entityType=Part&entityId=${partId}`),
         apiFetch<AttachmentView[]>(`/api/v1/attachments?entityType=Part&entityId=${partId}`),
         apiFetch<StockSummaryView>(`/api/v1/parts/${partId}/stock-summary`).catch(() => null),
-        apiFetch<PageResponse<StockItemView>>(`/api/v1/stock-items?partId=${partId}&size=100`).catch(() => ({
+        apiFetch<PageResponse<StockItemView>>(`/api/v1/stock-items?partId=${partId}&inWarehouseOnly=true&size=100`).catch(() => ({
           content: [],
           totalElements: 0,
           totalPages: 0,

@@ -44,6 +44,7 @@ import {
   toastApiError,
 } from "@ims/ui";
 import { FeatureGate, useEntitlements } from "@/lib/entitlements";
+import { SalesInvoiceDialog } from "@/components/sales-invoice-dialog";
 import { ArrowLeft, CheckCircle2, Package, Pencil, Plus, Printer, Send, Trash2, Truck, X, XCircle } from "lucide-react";
 
 const STATUS_TONE: Record<string, "neutral" | "primary" | "warning" | "success" | "danger"> = {
@@ -56,7 +57,7 @@ const STATUS_TONE: Record<string, "neutral" | "primary" | "warning" | "success" 
 export default function SalesOrderDetailPage() {
   const params = useParams<{ id: string }>();
   const soId = params.id;
-  const { hasPermission } = useEntitlements();
+  const { me, hasPermission } = useEntitlements();
 
   const [so, setSo] = useState<SalesOrderView | null>(null);
   const [salableParts, setSalableParts] = useState<PartView[]>([]);
@@ -71,11 +72,12 @@ export default function SalesOrderDetailPage() {
   const [lineQty, setLineQty] = useState("1");
   const [linePrice, setLinePrice] = useState("");
 
-  // Edit / Delete line
+  // Edit / Delete / Deallocate line
   const [editLine, setEditLine] = useState<SalesOrderLineView | null>(null);
   const [editLineQty, setEditLineQty] = useState("1");
   const [editLinePrice, setEditLinePrice] = useState("");
   const [deleteLineTarget, setDeleteLineTarget] = useState<SalesOrderLineView | null>(null);
+  const [deallocLine, setDeallocLine] = useState<SalesOrderLineView | null>(null);
 
   // Shipment create / complete modals
   const [showCreateShipment, setShowCreateShipment] = useState(false);
@@ -86,6 +88,7 @@ export default function SalesOrderDetailPage() {
     invoiceNumber: "",
     shipmentDate: new Date().toISOString().slice(0, 10),
   });
+  const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
 
   // Allocate stock
   const [allocLine, setAllocLine] = useState<SalesOrderLineView | null>(null);
@@ -146,9 +149,13 @@ export default function SalesOrderDetailPage() {
     setAllocQty(String(rem));
     try {
       const res = await apiFetch<PageResponse<StockItemView>>(
-        `/api/v1/stock-items?partId=${line.partId}&status=OK&size=100`
+        `/api/v1/stock-items?partId=${line.partId}&status=OK&inWarehouseOnly=true&size=100`
       );
-      setAvailableStock(res.content.filter((s) => !s.building && Number(s.quantity) > 0));
+      setAvailableStock(
+        res.content.filter(
+          (s) => !s.building && !s.customerId && !s.installedInId && Number(s.quantity) > 0
+        )
+      );
     } catch {
       setAvailableStock([]);
     }
@@ -184,35 +191,38 @@ export default function SalesOrderDetailPage() {
           </div>
 
           <div className="flex flex-wrap gap-2 print:hidden">
-            <Button type="button" variant="outline" size="sm" onClick={() => window.print()}>
-              <Printer className="w-4 h-4" /> Print / Packing List
+            <Button type="button" variant="outline" size="sm" onClick={() => setShowInvoiceDialog(true)}>
+              <Printer className="w-4 h-4" /> Print Bill / Invoice
             </Button>
             {canUpdate && isOpen && (
               <>
                 {so.status === "PENDING" && (
                   <button
-                    disabled={busy}
+                    disabled={busy || so.lines.length === 0}
+                    title={so.lines.length === 0 ? "Add at least one line item before issuing" : undefined}
                     onClick={() =>
                       runAction(
                         () => apiFetch(`/api/v1/sales-orders/${soId}/issue`, { method: "POST" }),
                         `Sales order ${so.reference} issued`
                       )
                     }
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Send className="w-4 h-4" /> Issue Order
                   </button>
                 )}
-                <button
-                  disabled={busy}
-                  onClick={() => {
-                    setShipmentForm({ carrier: "", trackingNumber: "", notes: "" });
-                    setShowCreateShipment(true);
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium hover:bg-muted"
-                >
-                  <Truck className="w-4 h-4" /> New Shipment
-                </button>
+                {so.status === "IN_PROGRESS" && (
+                  <button
+                    disabled={busy}
+                    onClick={() => {
+                      setShipmentForm({ carrier: "", trackingNumber: "", notes: "" });
+                      setShowCreateShipment(true);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium hover:bg-muted"
+                  >
+                    <Truck className="w-4 h-4" /> New Shipment
+                  </button>
+                )}
                 <Button
                   type="button"
                   variant="outline"
@@ -275,34 +285,48 @@ export default function SalesOrderDetailPage() {
                     <span>Shipped: {line.shipped}</span>
                   </div>
                   {canUpdate && isOpen && (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => openAllocate(line)}
-                        className="h-9 flex-1 rounded-md border text-xs font-medium hover:bg-muted"
-                      >
-                        Allocate Stock
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditLine(line);
-                          setEditLineQty(String(line.quantity));
-                          setEditLinePrice(line.salePrice != null ? String(line.salePrice) : "");
-                        }}
-                        className="inline-flex h-9 items-center justify-center rounded-md border px-2.5 text-xs hover:bg-muted"
-                        aria-label="Edit line"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                      {Number(line.allocated) === 0 && Number(line.shipped) === 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {so.status === "IN_PROGRESS" &&
+                        Number(line.allocated) + Number(line.shipped) < Number(line.quantity) && (
+                        <button
+                          onClick={() => openAllocate(line)}
+                          className="h-9 flex-1 rounded-md border text-xs font-medium hover:bg-muted"
+                        >
+                          Allocate Stock
+                        </button>
+                      )}
+                      {Number(line.allocated) > 0 && (
                         <button
                           type="button"
-                          onClick={() => setDeleteLineTarget(line)}
-                          className="inline-flex h-9 items-center justify-center rounded-md border border-destructive/30 px-2.5 text-xs text-destructive hover:bg-destructive/10"
-                          aria-label="Delete line"
+                          onClick={() => setDeallocLine(line)}
+                          className="h-9 flex-1 rounded-md border border-amber-300 bg-amber-50 text-xs font-medium text-amber-800 hover:bg-amber-100"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          Deallocate ({line.allocated})
                         </button>
+                      )}
+                      {Number(line.allocated) === 0 && Number(line.shipped) === 0 && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditLine(line);
+                              setEditLineQty(String(line.quantity));
+                              setEditLinePrice(line.salePrice != null ? String(line.salePrice) : "");
+                            }}
+                            className="inline-flex h-9 items-center justify-center rounded-md border px-2.5 text-xs hover:bg-muted"
+                            aria-label="Edit line"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDeleteLineTarget(line)}
+                            className="inline-flex h-9 items-center justify-center rounded-md border border-destructive/30 px-2.5 text-xs text-destructive hover:bg-destructive/10"
+                            aria-label="Delete line"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </>
                       )}
                     </div>
                   )}
@@ -354,33 +378,47 @@ export default function SalesOrderDetailPage() {
                     <td className="px-4 py-3 text-right">
                       {canUpdate && isOpen && (
                         <div className="inline-flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={() => openAllocate(line)}
-                            className="px-2.5 py-1 text-xs border rounded-md hover:bg-muted"
-                          >
-                            Allocate
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditLine(line);
-                              setEditLineQty(String(line.quantity));
-                              setEditLinePrice(line.salePrice != null ? String(line.salePrice) : "");
-                            }}
-                            title="Edit line"
-                            className="inline-flex h-7 w-7 items-center justify-center rounded-md border hover:bg-muted"
-                          >
-                            <Pencil className="h-3.5 w-3.5" />
-                          </button>
-                          {Number(line.allocated) === 0 && Number(line.shipped) === 0 && (
+                          {so.status === "IN_PROGRESS" &&
+                            Number(line.allocated) + Number(line.shipped) < Number(line.quantity) && (
+                            <button
+                              onClick={() => openAllocate(line)}
+                              className="px-2.5 py-1 text-xs border rounded-md hover:bg-muted"
+                            >
+                              Allocate
+                            </button>
+                          )}
+                          {Number(line.allocated) > 0 && (
                             <button
                               type="button"
-                              onClick={() => setDeleteLineTarget(line)}
-                              title="Delete line"
-                              className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-destructive/30 text-destructive hover:bg-destructive/10"
+                              onClick={() => setDeallocLine(line)}
+                              className="px-2.5 py-1 text-xs border border-amber-300 bg-amber-50 text-amber-800 rounded-md hover:bg-amber-100"
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
+                              Deallocate
                             </button>
+                          )}
+                          {Number(line.allocated) === 0 && Number(line.shipped) === 0 && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditLine(line);
+                                  setEditLineQty(String(line.quantity));
+                                  setEditLinePrice(line.salePrice != null ? String(line.salePrice) : "");
+                                }}
+                                title="Edit line"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-md border hover:bg-muted"
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeleteLineTarget(line)}
+                                title="Delete line"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-destructive/30 text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </>
                           )}
                         </div>
                       )}
@@ -401,38 +439,83 @@ export default function SalesOrderDetailPage() {
             {so.shipments.length === 0 ? (
               <div className="p-6 text-center text-sm text-muted-foreground">No shipments created yet.</div>
             ) : (
-              so.shipments.map((shp) => (
-                <div key={shp.id} className="p-4 flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <div className="font-mono font-semibold text-sm">{shp.reference}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {shp.carrier ? `Carrier: ${shp.carrier}` : "No carrier"}
-                      {shp.trackingNumber ? ` · Tracking: ${shp.trackingNumber}` : ""}
-                      {shp.invoiceNumber ? ` · Invoice: ${shp.invoiceNumber}` : ""}
-                      {shp.shipmentDate ? ` · Shipped: ${shp.shipmentDate}` : ""}
+              so.shipments.map((shp) => {
+                const packedItems = so.lines.flatMap((line) =>
+                  line.allocations
+                    .filter((a) => a.shipmentId === shp.id)
+                    .map((alloc) => ({
+                      allocId: alloc.id,
+                      partId: line.partId,
+                      partIpn: line.partIpn,
+                      partName: line.partName,
+                      partUnit: line.partUnit,
+                      quantity: alloc.quantity,
+                      serialNumber: alloc.serialNumber,
+                      batchCode: alloc.batchCode,
+                    }))
+                );
+                return (
+                  <div key={shp.id} className="p-4 space-y-2.5">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <div className="font-mono font-semibold text-sm">{shp.reference}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {shp.carrier ? `Carrier: ${shp.carrier}` : "No carrier"}
+                          {shp.trackingNumber ? ` · Tracking: ${shp.trackingNumber}` : ""}
+                          {shp.invoiceNumber ? ` · Invoice: ${shp.invoiceNumber}` : ""}
+                          {shp.shipmentDate ? ` · Shipped: ${shp.shipmentDate}` : ""}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <StatusBadge label={shp.shipped ? "SHIPPED" : "PENDING"} tone={shp.shipped ? "success" : "neutral"} />
+                        {canUpdate && !shp.shipped && isOpen && (
+                          <button
+                            disabled={busy || packedItems.length === 0}
+                            title={packedItems.length === 0 ? "Allocate at least one item to this shipment first" : undefined}
+                            onClick={() => {
+                              setCompleteForm({
+                                trackingNumber: shp.trackingNumber ?? "",
+                                invoiceNumber: shp.invoiceNumber ?? "",
+                                shipmentDate: shp.shipmentDate ?? new Date().toISOString().slice(0, 10),
+                              });
+                              setCompleteShipmentTarget(shp);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed print:hidden"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Complete Shipment
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <StatusBadge label={shp.shipped ? "SHIPPED" : "PENDING"} tone={shp.shipped ? "success" : "neutral"} />
-                    {canUpdate && !shp.shipped && isOpen && (
-                      <button
-                        disabled={busy}
-                        onClick={() => {
-                          setCompleteForm({
-                            trackingNumber: shp.trackingNumber ?? "",
-                            invoiceNumber: shp.invoiceNumber ?? "",
-                            shipmentDate: shp.shipmentDate ?? new Date().toISOString().slice(0, 10),
-                          });
-                          setCompleteShipmentTarget(shp);
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium print:hidden"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Complete Shipment
-                      </button>
+                    {packedItems.length === 0 ? (
+                      <div className="rounded-md bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                        No items allocated to this shipment yet.
+                      </div>
+                    ) : (
+                      <div className="rounded-md border bg-muted/20 divide-y text-xs">
+                        {packedItems.map((item) => (
+                          <div key={item.allocId} className="flex items-center justify-between gap-2 px-3 py-1.5">
+                            <div className="min-w-0 truncate">
+                              <Link href={`/parts/${item.partId}`} className="font-medium text-primary hover:underline">
+                                {item.partIpn ? `${item.partIpn} · ` : ""}
+                                {item.partName}
+                              </Link>
+                              {(item.serialNumber || item.batchCode) && (
+                                <span className="ml-2 font-mono text-muted-foreground">
+                                  {item.serialNumber ? `SN: ${item.serialNumber}` : `Lot: ${item.batchCode}`}
+                                </span>
+                              )}
+                            </div>
+                            <span className="shrink-0 font-mono font-semibold">
+                              {item.quantity} {item.partUnit ?? "pcs"}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
@@ -540,6 +623,62 @@ export default function SalesOrderDetailPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Dialog: Deallocate Stock */}
+        <Dialog open={deallocLine !== null} onOpenChange={(open) => !open && setDeallocLine(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Deallocate Stock · {deallocLine?.partIpn ?? deallocLine?.partName}</DialogTitle>
+            </DialogHeader>
+            {deallocLine && (
+              <div className="space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  Release reserved stock back to available inventory. Once all allocations are removed, you can edit or delete this line.
+                </p>
+                <div className="divide-y rounded-lg border">
+                  {deallocLine.allocations
+                    .filter((a) => !a.shipped)
+                    .map((alloc) => (
+                      <div key={alloc.id} className="flex items-center justify-between gap-3 p-3 text-sm">
+                        <div className="min-w-0">
+                          <div className="font-mono font-semibold">Qty: {alloc.quantity}</div>
+                          <div className="truncate text-xs text-muted-foreground">
+                            {alloc.serialNumber
+                              ? `SN: ${alloc.serialNumber}`
+                              : alloc.batchCode
+                                ? `Lot: ${alloc.batchCode}`
+                                : `Stock ID: ${alloc.stockItemId.slice(0, 8)}`}
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={busy}
+                          className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                          onClick={() =>
+                            runAction(async () => {
+                              await apiFetch(`/api/v1/sales-orders/${soId}/allocations/${alloc.id}`, {
+                                method: "DELETE",
+                              });
+                              setDeallocLine(null);
+                            }, "Stock deallocated")
+                          }
+                        >
+                          Deallocate
+                        </Button>
+                      </div>
+                    ))}
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setDeallocLine(null)}>
+                    Close
+                  </Button>
+                </DialogFooter>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Dialog: Create Shipment */}
         <Dialog open={showCreateShipment} onOpenChange={setShowCreateShipment}>
@@ -832,10 +971,14 @@ export default function SalesOrderDetailPage() {
                     type="number"
                     step="any"
                     min="0.0001"
+                    max={Math.max(0.0001, Number(allocLine.quantity) - Number(allocLine.shipped) - Number(allocLine.allocated))}
                     required
                     value={allocQty}
                     onChange={(e) => setAllocQty(e.target.value)}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Remaining to allocate: {Math.max(0, Number(allocLine.quantity) - Number(allocLine.shipped) - Number(allocLine.allocated))}
+                  </p>
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setAllocLine(null)}>
@@ -876,6 +1019,12 @@ export default function SalesOrderDetailPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        <SalesInvoiceDialog
+          open={showInvoiceDialog}
+          onOpenChange={setShowInvoiceDialog}
+          order={so}
+          sellerName={me?.tenantName ?? "IMS Store"}
+        />
       </div>
     </FeatureGate>
   );
